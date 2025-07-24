@@ -6,16 +6,37 @@
 //
 
 import SwiftUI
+import Firebase
 
 struct ContentView: View {
+    @StateObject private var firebaseManager = FirebaseManager.shared
+    @State private var showMainApp = false
+    @EnvironmentObject var darkModeManager: DarkModeManager
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Group {
+            if firebaseManager.isUserAuthenticated {
+                // User is logged in - show main Reddit app
+                Main()
+                    .onAppear {
+                        darkModeManager.applyTheme() // Restore user preference
+                    }
+            } else {
+                // User is not logged in - show authentication
+                NavigationView {
+                    LoginScreen()
+                }
+                .onAppear {
+                    // Force light mode when logged out
+                    DispatchQueue.main.async {
+                        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
+                        for window in windowScene.windows {
+                            window.overrideUserInterfaceStyle = .light
+                        }
+                    }
+                }
+            }
         }
-        .padding()
     }
 }
 

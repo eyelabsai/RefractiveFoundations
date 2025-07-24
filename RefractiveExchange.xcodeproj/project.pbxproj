@@ -6,6 +6,17 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		052463792E32A87400536306 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 052463782E32A87400536306 /* FirebaseAuth */; };
+		0524637B2E32A87400536306 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 0524637A2E32A87400536306 /* FirebaseDatabase */; };
+		0524637D2E32A87400536306 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 0524637C2E32A87400536306 /* FirebaseFirestore */; };
+		0524637F2E32A87400536306 /* FirebaseFirestoreCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 0524637E2E32A87400536306 /* FirebaseFirestoreCombine-Community */; };
+		052463812E32A87400536306 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 052463802E32A87400536306 /* FirebaseFunctions */; };
+		052463832E32A87400536306 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 052463822E32A87400536306 /* FirebaseStorage */; };
+		052463862E32AACA00536306 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 052463852E32AACA00536306 /* SDWebImageSwiftUI */; };
+		052463882E32AB5200536306 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 052463872E32AB5200536306 /* FirebaseAnalytics */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		054E900E2E3299D500B27166 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +63,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				052463862E32AACA00536306 /* SDWebImageSwiftUI in Frameworks */,
+				0524637B2E32A87400536306 /* FirebaseDatabase in Frameworks */,
+				052463882E32AB5200536306 /* FirebaseAnalytics in Frameworks */,
+				0524637F2E32A87400536306 /* FirebaseFirestoreCombine-Community in Frameworks */,
+				052463812E32A87400536306 /* FirebaseFunctions in Frameworks */,
+				052463792E32A87400536306 /* FirebaseAuth in Frameworks */,
+				0524637D2E32A87400536306 /* FirebaseFirestore in Frameworks */,
+				052463832E32A87400536306 /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +131,14 @@
 			);
 			name = RefractiveExchange;
 			packageProductDependencies = (
+				052463782E32A87400536306 /* FirebaseAuth */,
+				0524637A2E32A87400536306 /* FirebaseDatabase */,
+				0524637C2E32A87400536306 /* FirebaseFirestore */,
+				0524637E2E32A87400536306 /* FirebaseFirestoreCombine-Community */,
+				052463802E32A87400536306 /* FirebaseFunctions */,
+				052463822E32A87400536306 /* FirebaseStorage */,
+				052463852E32AACA00536306 /* SDWebImageSwiftUI */,
+				052463872E32AB5200536306 /* FirebaseAnalytics */,
 			);
 			productName = RefractiveExchange;
 			productReference = 054E8FFC2E3299D400B27166 /* RefractiveExchange.app */;
@@ -195,6 +222,10 @@
 			);
 			mainGroup = 054E8FF32E3299D400B27166;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				05D58CC72E32A65900D9CC4A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				052463842E32AABD00536306 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 054E8FFD2E3299D400B27166 /* Products */;
 			projectDirPath = "";
@@ -396,6 +427,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Refractive Exchange";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -410,7 +443,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.refractivefoundations.RefractiveExchange;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -435,6 +468,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Refractive Exchange";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -449,7 +484,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.refractivefoundations.RefractiveExchange;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -591,6 +626,68 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		052463842E32AABD00536306 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.3;
+			};
+		};
+		05D58CC72E32A65900D9CC4A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		052463782E32A87400536306 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 05D58CC72E32A65900D9CC4A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		0524637A2E32A87400536306 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 05D58CC72E32A65900D9CC4A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		0524637C2E32A87400536306 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 05D58CC72E32A65900D9CC4A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		0524637E2E32A87400536306 /* FirebaseFirestoreCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 05D58CC72E32A65900D9CC4A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseFirestoreCombine-Community";
+		};
+		052463802E32A87400536306 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 05D58CC72E32A65900D9CC4A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+		052463822E32A87400536306 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 05D58CC72E32A65900D9CC4A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		052463852E32AACA00536306 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 052463842E32AABD00536306 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+		052463872E32AB5200536306 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 05D58CC72E32A65900D9CC4A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 054E8FF42E3299D400B27166 /* Project object */;
 }
