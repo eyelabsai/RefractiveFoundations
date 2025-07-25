@@ -15,6 +15,7 @@ struct FeedView: View {
     @Binding var currentSubreddit: String
     @Binding var isSidebarVisible: Bool
     @Binding var navigationPath: NavigationPath
+    @State private var selectedUserProfile: UserProfile?
 
     
     var body: some View {
@@ -82,6 +83,9 @@ struct FeedView: View {
                                     },
                                     onPostTapped: {
                                         navigationPath.append(post)
+                                    },
+                                    onUsernameTapped: { username, userId in
+                                        selectedUserProfile = UserProfile(username: username, userId: userId)
                                     }
                                 )
                                 .background(Color(.systemBackground))
@@ -100,7 +104,21 @@ struct FeedView: View {
             .navigationDestination(for: FetchedPost.self) { post in
                 PostDetailView(post: post, data: data)
             }
+            .sheet(item: $selectedUserProfile) { userProfile in
+                PublicProfileView(
+                    username: userProfile.username,
+                    userId: userProfile.userId,
+                    data: data
+                )
+            }
         }
     }
 
+}
+
+// MARK: - User Profile Model
+struct UserProfile: Identifiable {
+    let id = UUID()
+    let username: String
+    let userId: String
 }

@@ -13,14 +13,16 @@ struct PostRow: View {
     @ObservedObject var viewModel: PostRowModel
     var onCommentTapped: (() -> Void)? = nil
     var onPostTapped: (() -> Void)? = nil
+    var onUsernameTapped: ((String, String) -> Void)? = nil
     @State private var isSaved = false
     
     let saveService = SaveService.shared
     
-    init(post: FetchedPost, onCommentTapped: (() -> Void)? = nil, onPostTapped: (() -> Void)? = nil) {
+    init(post: FetchedPost, onCommentTapped: (() -> Void)? = nil, onPostTapped: (() -> Void)? = nil, onUsernameTapped: ((String, String) -> Void)? = nil) {
         self.viewModel = PostRowModel(post: post)
         self.onCommentTapped = onCommentTapped
         self.onPostTapped = onPostTapped
+        self.onUsernameTapped = onUsernameTapped
     }
     
     
@@ -71,9 +73,14 @@ struct PostRow: View {
                     VStack(alignment: .leading, spacing: 6) {
                         // Author and metadata
                         HStack(spacing: 6) {
-                            Text("\(self.viewModel.post.author)")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.primary)
+                            Button(action: {
+                                onUsernameTapped?(self.viewModel.post.author, self.viewModel.post.uid)
+                            }) {
+                                Text("\(self.viewModel.post.author)")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.blue)
+                            }
+                            .buttonStyle(PlainButtonStyle())
                             
                             Text("•")
                                 .font(.system(size: 12))

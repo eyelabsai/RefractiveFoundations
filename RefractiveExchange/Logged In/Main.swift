@@ -62,18 +62,6 @@ struct Main: View {
                 .foregroundColor(.blue)
             
             Spacer()
-            
-            if currentTab != .account {
-                // Button to navigate to Account page
-                Button {
-                    withAnimation { currentTab = .account }
-                } label: {
-                    Image(systemName: "person.fill")
-                        .font(.body.bold())
-                        .imageScale(.large)
-                        .foregroundColor(.orange)
-                }
-            }
         }
         .padding(.horizontal)
     }

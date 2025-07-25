@@ -20,6 +20,7 @@ struct PostDetailView: View {
     @State var isLoading = false
     @State private var showErrorToast: Bool = false
     @State private var isSaved = false
+    @State private var selectedUserProfile: UserProfile?
     
     let saveService = SaveService.shared
     
@@ -69,6 +70,13 @@ struct PostDetailView: View {
         .onAppear {
             commentModel.fetchComments()
             checkIfPostIsSaved()
+        }
+        .sheet(item: $selectedUserProfile) { userProfile in
+            PublicProfileView(
+                username: userProfile.username,
+                userId: userProfile.userId,
+                data: data
+            )
         }
     }
     
@@ -277,10 +285,15 @@ struct PostDetailView: View {
             } else {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(commentModel.comments, id: \.timestamp) { comment in
-                        CommentRow(comment: comment)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .background(Color(.systemBackground))
+                        CommentRow(
+                            comment: comment,
+                            onUsernameTapped: { username, userId in
+                                selectedUserProfile = UserProfile(username: username, userId: userId)
+                            }
+                        )
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(Color(.systemBackground))
                         
                         Divider()
                             .padding(.leading, 16)

@@ -44,8 +44,9 @@ struct User: Codable, Identifiable {
     var exchangeUsername: String?
     var favoriteLenses: [String]?
     var savedPosts: [String]?
+    var dateJoined: Timestamp?
     
-    init(cases: [IOLCase] = [], credential: String = "", email: String = "", firstName: String = "", lastName: String = "", position: String = "", specialty: String = "", state: String = "", suffix: String = "", uid: String = "", avatarUrl: String = "", exchangeUsername: String = "", favoriteLenses: [String] = [], savedPosts: [String] = []) {
+    init(cases: [IOLCase] = [], credential: String = "", email: String = "", firstName: String = "", lastName: String = "", position: String = "", specialty: String = "", state: String = "", suffix: String = "", uid: String = "", avatarUrl: String = "", exchangeUsername: String = "", favoriteLenses: [String] = [], savedPosts: [String] = [], dateJoined: Timestamp? = nil) {
         self.cases = cases
         self.credential = credential
         self.email = email
@@ -60,6 +61,7 @@ struct User: Codable, Identifiable {
         self.exchangeUsername = exchangeUsername
         self.favoriteLenses = favoriteLenses
         self.savedPosts = savedPosts
+        self.dateJoined = dateJoined
     }
 }
 

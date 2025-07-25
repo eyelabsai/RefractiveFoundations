@@ -85,7 +85,8 @@ class FirebaseManager: ObservableObject {
                 avatarUrl: "",
                 exchangeUsername: username ?? "",
                 favoriteLenses: [],
-                savedPosts: []
+                savedPosts: [],
+                dateJoined: Timestamp(date: Date())
             )
             
             self?.saveUserData(user: userData) { result in
@@ -151,7 +152,8 @@ class FirebaseManager: ObservableObject {
                 avatarUrl: "",
                 exchangeUsername: "", // User can set this later
                 favoriteLenses: [],
-                savedPosts: []
+                savedPosts: [],
+                dateJoined: Timestamp(date: Date())
             )
             
             self.saveUserData(user: userData) { result in

@@ -1,6 +1,6 @@
 //
 //  ProfileView.swift
-//  RefractiveExchange
+//  RefractiveFoundations
 //
 //  Reddit-style profile view
 //
@@ -17,9 +17,10 @@ struct ProfileView: View {
     @State private var userComments: [Comment] = []
     @State private var savedPosts: [FetchedPost] = []
     @State private var isLoading = true
-    @State private var karma: Int = 0
+    @State private var memberSince = "2024"
+    @State private var yearsActive = 0 // Keep for backend anniversary tracking - will show as badges next to username when milestones are reached
     
-    let tabTitles = ["Posts", "Comments", "Saved"]
+    let tabTitles = ["Account", "Settings"]
     let service = PostService()
     let saveService = SaveService.shared
     
@@ -34,17 +35,13 @@ struct ProfileView: View {
                 
                 // Content
                 TabView(selection: $selectedTab) {
-                    // Posts Tab
-                    postsView
+                    // Account Tab
+                    accountTab
                         .tag(0)
                     
-                    // Comments Tab  
-                    commentsView
+                    // Settings Tab
+                    settingsTab
                         .tag(1)
-                    
-                    // Saved Tab
-                    savedView
-                        .tag(2)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }
@@ -122,21 +119,10 @@ struct ProfileView: View {
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
                         
-                        // Karma and join date
-                        HStack(spacing: 16) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "star.fill")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.orange)
-                                Text("\(karma) karma")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            Text("• Member since 2024")
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
-                        }
+                        // Member since
+                        Text("• Member since 2024")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
                         
                         // Specialty badge
                         Text(user.specialty)
@@ -394,7 +380,6 @@ struct ProfileView: View {
             print("✅ Loaded \(posts.count) user posts")
             DispatchQueue.main.async {
                 self.userPosts = posts
-                self.calculateKarma()
                 group.leave()
             }
         }
@@ -484,11 +469,7 @@ struct ProfileView: View {
             }
     }
     
-    private func calculateKarma() {
-        karma = userPosts.reduce(0) { total, post in
-            total + post.upvotes.count - (post.downvotes?.count ?? 0)
-        }
-    }
+
     
     // Helper function for time formatting
     private func timeAgoString(from date: Date) -> String {
@@ -508,4 +489,220 @@ struct ProfileView: View {
             return "\(days)d"
         }
     }
-} 
+    
+    // MARK: - Account Tab
+    private var accountTab: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Personal Information
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Personal Information")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 12) {
+                        InfoRow(title: "Full Name", value: "\(data.user?.firstName ?? "") \(data.user?.lastName ?? "")")
+                        InfoRow(title: "Username", value: "u/\(data.user?.exchangeUsername ?? "\(data.user?.firstName.lowercased() ?? "")\(data.user?.lastName.lowercased() ?? "")")")
+                        InfoRow(title: "Specialty", value: data.user?.specialty ?? "Not specified")
+                        InfoRow(title: "Email", value: data.user?.email ?? "Not available")
+                        InfoRow(title: "Member Since", value: memberSince)
+                        InfoRow(title: "Years Active", value: "\(yearsActive) year\(yearsActive != 1 ? "s" : "")")
+                    }
+                }
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                
+                // Statistics
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Activity Statistics")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 12) {
+                        InfoRow(title: "Posts Created", value: "\(userPosts.count)")
+                        InfoRow(title: "Comments Made", value: "\(userComments.count)")
+                        InfoRow(title: "Posts Saved", value: "\(savedPosts.count)")
+                    }
+                }
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                
+                // Quick Actions
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Quick Actions")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        Button(action: {
+                            // Navigate to edit profile
+                        }) {
+                            HStack {
+                                Image(systemName: "pencil")
+                                    .foregroundColor(.blue)
+                                Text("Edit Profile")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 12))
+                            }
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                        }
+                        
+                        Button(action: {
+                            // Navigate to saved posts
+                        }) {
+                            HStack {
+                                Image(systemName: "bookmark")
+                                    .foregroundColor(.orange)
+                                Text("View Saved Posts")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 12))
+                            }
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                        }
+                    }
+                }
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+            }
+            .padding(16)
+        }
+        .background(Color(.systemGroupedBackground))
+    }
+    
+
+    
+    // MARK: - Settings Tab
+    private var settingsTab: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Appearance
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Appearance")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        Button(action: {
+                            darkModeManager.toggleDarkMode()
+                        }) {
+                            HStack {
+                                Image(systemName: darkModeManager.isDarkMode ? "sun.max.fill" : "moon.fill")
+                                    .foregroundColor(darkModeManager.isDarkMode ? .yellow : .purple)
+                                Text(darkModeManager.isDarkMode ? "Light Mode" : "Dark Mode")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 12))
+                            }
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                        }
+                    }
+                }
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                
+                // Account Actions
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Account")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        Button(action: {
+                            // Change password
+                        }) {
+                            HStack {
+                                Image(systemName: "lock")
+                                    .foregroundColor(.blue)
+                                Text("Change Password")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 12))
+                            }
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                        }
+                        
+                        Button(action: {
+                            // Privacy settings
+                        }) {
+                            HStack {
+                                Image(systemName: "eye")
+                                    .foregroundColor(.green)
+                                Text("Privacy Settings")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 12))
+                            }
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                        }
+                        
+                        Button(action: {
+                            FirebaseManager.shared.signOut()
+                        }) {
+                            HStack {
+                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                    .foregroundColor(.red)
+                                Text("Sign Out")
+                                    .foregroundColor(.red)
+                                Spacer()
+                            }
+                            .padding(12)
+                            .background(Color.red.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                    }
+                }
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+            }
+            .padding(16)
+        }
+        .background(Color(.systemGroupedBackground))
+    }
+}
+
+// MARK: - Supporting Views
+struct InfoRow: View {
+    let title: String
+    let value: String
+    
+    var body: some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.secondary)
+            Spacer()
+            Text(value)
+                .font(.system(size: 14))
+                .foregroundColor(.primary)
+        }
+    }
+}
+
+ 

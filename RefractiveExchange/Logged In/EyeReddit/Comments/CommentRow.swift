@@ -12,10 +12,12 @@ struct CommentRow: View {
     
     @ObservedObject var viewModel: CommentRowModel
     @State private var showDeleteAlert = false
+    var onUsernameTapped: ((String, String) -> Void)? = nil
     let commentService = CommentService()
     
-    init(comment: Comment)  {
+    init(comment: Comment, onUsernameTapped: ((String, String) -> Void)? = nil)  {
         self.viewModel = CommentRowModel(comment: comment)
+        self.onUsernameTapped = onUsernameTapped
     }
         
     var body: some View {
@@ -24,9 +26,14 @@ struct CommentRow: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Comment header with author and time
                     HStack {
-                        Text(self.viewModel.comment.author)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.primary)
+                        Button(action: {
+                            onUsernameTapped?(self.viewModel.comment.author, self.viewModel.comment.safeUid)
+                        }) {
+                            Text(self.viewModel.comment.author)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.blue)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                         
                         Text("•")
                             .font(.system(size: 12))
