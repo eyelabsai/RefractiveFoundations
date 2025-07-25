@@ -1,6 +1,6 @@
 //
-//  RefractiveExchangeApp.swift
-//  RefractiveExchange
+//  RefractiveFoundationsApp.swift
+//  RefractiveFoundations
 //
 //  Created by Gurpal Virdi on 7/24/25.
 //
@@ -17,7 +17,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 }
 
 @main
-struct RefractiveExchangeApp: App {
+struct RefractiveFoundationsApp: App {
     // register app delegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject private var darkModeManager = DarkModeManager.shared

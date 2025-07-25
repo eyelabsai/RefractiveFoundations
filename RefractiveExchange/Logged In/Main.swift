@@ -57,7 +57,7 @@ struct Main: View {
             Spacer()
             
             // App Logo/Title
-            Text("RefractiveExchange")
+            Text("Refractive Foundations")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.blue)
             

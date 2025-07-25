@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  RefractiveExchange
+//  RefractiveFoundations
 //
 //  Created by Gurpal Virdi on 7/24/25.
 //
