@@ -184,7 +184,7 @@ struct PostDetailView: View {
                             .foregroundColor(viewModel.liked ? .orange : .gray)
                     }
                     
-                    Text("\(post.upvotes.count - (post.downvotes?.count ?? 0))")
+                    Text("\(viewModel.post.upvotes.count - (viewModel.post.downvotes?.count ?? 0))")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(viewModel.liked ? .orange : viewModel.disliked ? .purple : .primary)
                         .frame(minWidth: 30)

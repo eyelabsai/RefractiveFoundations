@@ -417,19 +417,8 @@ struct ProfileView: View {
     }
     
     private func loadUserComments(uid: String, completion: @escaping () -> Void) {
-        guard let currentUser = data.user else {
-            print("⚠️ No user data available for comments loading")
-            DispatchQueue.main.async {
-                completion()
-            }
-            return
-        }
-        
-        let authorName = currentUser.exchangeUsername?.isEmpty == false ? currentUser.exchangeUsername! : "\(currentUser.firstName) \(currentUser.lastName)"
-        print("🔍 Looking for comments by author: \(authorName)")
-        
         Firestore.firestore().collection("comments")
-            .whereField("author", isEqualTo: authorName)
+            .whereField("uid", isEqualTo: uid)
             .getDocuments { snapshot, error in
                 if let error = error {
                     print("❌ Error loading comments: \(error.localizedDescription)")
@@ -442,22 +431,18 @@ struct ProfileView: View {
                 if let documents = snapshot?.documents {
                     print("📥 Found \(documents.count) comments for user")
                     let comments = documents.compactMap { doc -> Comment? in
-                        let data = doc.data()
-                        guard let postId = data["postId"] as? String,
-                              let text = data["text"] as? String,
-                              let author = data["author"] as? String,
-                              let timestamp = data["timestamp"] as? Timestamp else {
-                            return nil
-                        }
-                        return Comment(postId: postId, text: text, author: author, timestamp: timestamp)
+                        try? doc.data(as: Comment.self)
                     }
                     
-                    DispatchQueue.main.async {
-                        // Sort comments by timestamp on the client side
-                        let sortedComments = comments.sorted { $0.timestamp.dateValue() > $1.timestamp.dateValue() }
-                        self.userComments = sortedComments
-                        print("✅ Loaded \(sortedComments.count) user comments")
-                        completion()
+                    // Filter out comments from deleted posts
+                    self.filterCommentsFromExistingPosts(comments: comments) { validComments in
+                        DispatchQueue.main.async {
+                            // Sort comments by timestamp on the client side
+                            let sortedComments = validComments.sorted { $0.timestamp.dateValue() > $1.timestamp.dateValue() }
+                            self.userComments = sortedComments
+                            print("✅ Loaded \(sortedComments.count) valid user comments (filtered from \(comments.count) total)")
+                            completion()
+                        }
                     }
                 } else {
                     print("⚠️ No comments found")
@@ -467,6 +452,31 @@ struct ProfileView: View {
                     }
                 }
             }
+    }
+    
+    private func filterCommentsFromExistingPosts(comments: [Comment], completion: @escaping ([Comment]) -> Void) {
+        let group = DispatchGroup()
+        var validComments: [Comment] = []
+        
+        for comment in comments {
+            group.enter()
+            
+            // Check if the post this comment references still exists
+            Firestore.firestore().collection("posts").document(comment.postId).getDocument { document, error in
+                if let document = document, document.exists {
+                    // Post exists, keep the comment
+                    validComments.append(comment)
+                } else {
+                    // Post doesn't exist (was deleted), skip this comment
+                    print("🗑️ Skipping comment \(comment.id ?? "unknown") - post \(comment.postId) no longer exists")
+                }
+                group.leave()
+            }
+        }
+        
+        group.notify(queue: .main) {
+            completion(validComments)
+        }
     }
     
 

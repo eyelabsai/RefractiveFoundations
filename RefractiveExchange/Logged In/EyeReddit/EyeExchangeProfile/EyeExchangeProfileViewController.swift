@@ -209,6 +209,7 @@ extension EyeExchangeProfileViewController: UITableViewDelegate, UITableViewData
         cell.moreActionButton.tag = indexPath.row
         cell.upvoteButton.tag = indexPath.row
         cell.commentButton.tag = indexPath.row
+        cell.upvoteButton.addTarget(self, action: #selector(upvoteButtonTapped(_:)), for: .touchUpInside)
         
         return cell
     }
@@ -234,15 +235,15 @@ extension EyeExchangeProfileViewController: UITableViewDelegate, UITableViewData
         let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
             guard let self = self, let index = self.selectedPostIndex, index >= 0, index < self.posts.count else { return }
             let postToDelete = self.posts[index]
-            Firestore.firestore().collection("posts").document(postToDelete.id!).delete { error in
-                if let error = error {
-                    print("Error removing document: \(error)")
-                } else {
+            self.service.deletePost(postToDelete) { success in
+                if success {
                     self.posts.remove(at: index)
                     self.selectedPostIndex = nil
                     DispatchQueue.main.async {
                         self.eyeExchangeProfileView.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
                     }
+                } else {
+                    print("Error deleting post")
                 }
             }
         }
@@ -252,6 +253,15 @@ extension EyeExchangeProfileViewController: UITableViewDelegate, UITableViewData
         alertController.addAction(cancelAction)
 
         present(alertController, animated: true)
+    }
+
+    @objc func upvoteButtonTapped(_ sender: UIButton) {
+        let index = sender.tag
+        let post = posts[index]
+        service.upvote(post) { [weak self] _ in
+            guard let self = self else { return }
+            self.fetchPosts() // Refresh posts to update upvote count
+        }
     }
 
     // MARK: - Utils

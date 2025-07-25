@@ -14,15 +14,17 @@ struct PostRow: View {
     var onCommentTapped: (() -> Void)? = nil
     var onPostTapped: (() -> Void)? = nil
     var onUsernameTapped: ((String, String) -> Void)? = nil
+    var onSubredditTapped: ((String) -> Void)? = nil
     @State private var isSaved = false
     
     let saveService = SaveService.shared
     
-    init(post: FetchedPost, onCommentTapped: (() -> Void)? = nil, onPostTapped: (() -> Void)? = nil, onUsernameTapped: ((String, String) -> Void)? = nil) {
+    init(post: FetchedPost, onCommentTapped: (() -> Void)? = nil, onPostTapped: (() -> Void)? = nil, onUsernameTapped: ((String, String) -> Void)? = nil, onSubredditTapped: ((String) -> Void)? = nil) {
         self.viewModel = PostRowModel(post: post)
         self.onCommentTapped = onCommentTapped
         self.onPostTapped = onPostTapped
         self.onUsernameTapped = onUsernameTapped
+        self.onSubredditTapped = onSubredditTapped
     }
     
     
@@ -74,6 +76,19 @@ struct PostRow: View {
                         // Author and metadata
                         HStack(spacing: 6) {
                             Button(action: {
+                                onSubredditTapped?(self.viewModel.post.subreddit)
+                            }) {
+                                Text(self.viewModel.post.subreddit)
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.blue)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+
+                            Text("•")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+
+                            Button(action: {
                                 onUsernameTapped?(self.viewModel.post.author, self.viewModel.post.uid)
                             }) {
                                 Text("\(self.viewModel.post.author)")
@@ -81,21 +96,16 @@ struct PostRow: View {
                                     .foregroundColor(.blue)
                             }
                             .buttonStyle(PlainButtonStyle())
-                            
+
                             Text("•")
                                 .font(.system(size: 12))
                                 .foregroundColor(.secondary)
-                            
+
                             Text(timeAgoString(from: self.viewModel.post.timestamp.dateValue()))
                                 .font(.system(size: 12))
                                 .foregroundColor(.secondary)
                         }
                         
-                        Text(self.viewModel.post.subreddit)
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.blue)
-                            .padding(.vertical, 2)
-
                         // Post content - Clickable
                         Button(action: {
                             onPostTapped?()

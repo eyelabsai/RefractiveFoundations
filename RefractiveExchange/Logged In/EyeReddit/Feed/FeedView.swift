@@ -11,7 +11,6 @@ struct FeedView: View {
     @ObservedObject var viewModel = FeedViewModel.shared
     @ObservedObject var data: GetData
     @EnvironmentObject var darkModeManager: DarkModeManager
-    @State var showNewPostView: Bool = false
     @Binding var currentSubreddit: String
     @Binding var isSidebarVisible: Bool
     @Binding var navigationPath: NavigationPath
@@ -86,6 +85,12 @@ struct FeedView: View {
                                     },
                                     onUsernameTapped: { username, userId in
                                         selectedUserProfile = UserProfile(username: username, userId: userId)
+                                    },
+                                    onSubredditTapped: { subreddit in
+                                        // Navigate to the specific subreddit
+                                        currentSubreddit = subreddit
+                                        viewModel.setSubreddit(subreddit: subreddit)
+                                        viewModel.refreshPosts()
                                     }
                                 )
                                 .background(Color(.systemBackground))
@@ -111,6 +116,7 @@ struct FeedView: View {
                     data: data
                 )
             }
+
         }
     }
 

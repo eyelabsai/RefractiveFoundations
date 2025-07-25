@@ -12,10 +12,22 @@ import FirebaseFirestore
 struct CreatePostView: View {
     
     @State private var title = ""
-    @State private var text = "body text (optinal)"
+    @State private var text = ""
     @State var subreddit = ""
     @State private var selectedSubredditIndex = 0
-    let subredditsWithoutAll = ["i/Anterior Segment, Cataract, & Cornea", "i/Glaucoma", "i/Retina", "i/Neuro-Opthamology", "i/Pediatric Opthamology", "i/Ocular Oncology", "i/Oculoplastic Surgery", "i/Uveitis", "i/Residents & Fellows", "i/Medical Students", "i/Company Representatives"]
+    // Curated list of refractive surgery-specific subreddits (without "i/All")
+    let subredditsWithoutAll = [
+        "i/IOLs",
+        "i/Surgical Techniques", 
+        "i/Complications",
+        "i/Refractive Surgery",
+        "i/Cataract Surgery",
+        "i/Corneal Surgery",
+        "i/Residents & Fellows"
+    ]
+    
+    // Original comprehensive list (commented out for now)
+    // let subredditsWithoutAll = ["i/Anterior Segment, Cataract, & Cornea", "i/Glaucoma", "i/Retina", "i/Neuro-Opthamology", "i/Pediatric Opthamology", "i/Ocular Oncology", "i/Oculoplastic Surgery", "i/Uveitis", "i/Residents & Fellows", "i/Medical Students", "i/Company Representatives"]
     @State private var showImagePicker = false
     @State var postImageData: Data?
     @State private var isLoading = false
@@ -28,6 +40,7 @@ struct CreatePostView: View {
     
     @State private var inputImage: UIImage?
     @State private var showErrorToast: Bool = false
+    @State private var showSuccessToast: Bool = false
 
     
     
@@ -63,7 +76,7 @@ struct CreatePostView: View {
                 VStack {
                     TextField("Title", text: $title)
                         .textFieldStyle(PlainTextFieldStyle())
-                        .font(.system(size: 30, weight: .bold))
+                        .font(.system(size: 22, weight: .bold))
                         .foregroundColor(.primary)
                         .padding(.horizontal, 15)
                         .background(Color(.systemBackground))
@@ -92,26 +105,46 @@ struct CreatePostView: View {
                         })
                     }
                     
-                    TextEditor(text: $text)
-                        .foregroundColor(self.text == "body text (optinal)" ? .gray : .primary)
-                        .font(.title3)
-                        .lineSpacing(5)
-                        .disableAutocorrection(true)
-                        .padding()
-                        .frame(minWidth: UIScreen.main.bounds.width, maxWidth: UIScreen.main.bounds.width, minHeight: 80, maxHeight: UIScreen.main.bounds.height / 2)
-                        .onTapGesture {
-                            // Clear placeholder text when user taps to start typing
-                            if self.text == "body text (optinal)" {
-                                self.text = ""
+                    if showSuccessToast {
+                        VStack {
+                            Spacer()
+                            HStack {
+                                Spacer()
+                                CustomToastView(text: "Post submitted successfully!",opacity: 0.2,textColor: .green)
+                                Spacer()
                             }
+                            Spacer()
                         }
-                        .onChange(of: text) { newValue in
-                            // If user starts typing something and it's not just the placeholder, keep it
-                            // If they delete everything, restore placeholder
-                            if newValue.isEmpty {
-                                self.text = "body text (optinal)"
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.clear)
+                        .onAppear(perform: {
+                            // Automatically hide after 2 seconds
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                withAnimation {
+                                    showSuccessToast = false
+                                }
                             }
+                        })
+                    }
+                    
+                    ZStack(alignment: .topLeading) {
+                        TextEditor(text: $text)
+                            .foregroundColor(.primary)
+                            .font(.title3)
+                            .lineSpacing(5)
+                            .disableAutocorrection(true)
+                            .padding()
+                            .frame(minWidth: UIScreen.main.bounds.width, maxWidth: UIScreen.main.bounds.width, minHeight: 80, maxHeight: UIScreen.main.bounds.height / 2)
+                        
+                        if text.isEmpty {
+                            Text("body text (optional)")
+                                .foregroundColor(.gray)
+                                .font(.title3)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 20)
+                                .allowsHitTesting(false)
                         }
+                    }
                     if let uiImage = inputImage {
                         let image = Image(uiImage: uiImage)
                         HStack {
@@ -207,13 +240,16 @@ struct CreatePostView: View {
     private func createPost() {
         guard !title.isEmpty else { return }
         
+        // Prevent multiple submissions
+        guard !isLoading else { return }
+        
         // Prepare image data if image is selected
         if let uiImage = inputImage {
             postImageData = uiImage.jpegData(compressionQuality: 0.7)
         }
         
         // Clean up text field
-        let finalText = text == "body text (optinal)" ? "" : text
+        let finalText = text
         
         isLoading = true
         
@@ -227,25 +263,37 @@ struct CreatePostView: View {
             postImageData: postImageData
         ) { success in
             DispatchQueue.main.async {
-                isLoading = false
+                self.isLoading = false
                 
                 if success {
                     // Post created successfully
                     print("✅ Post created successfully!")
                     
-                    // Refresh the feed
-                    feedViewModel.refreshPosts()
+                    // Clear form fields
+                    self.title = ""
+                    self.text = ""
+                    self.inputImage = nil
+                    self.postImageData = nil
+                    self.selectedSubredditIndex = 0
                     
-                    // Navigate back to feed
+                    // Show success feedback
                     withAnimation {
-                        tabBarIndex = 0
+                        self.showSuccessToast = true
                     }
-                    dismiss()
+                    
+                    // Refresh the feed
+                    self.feedViewModel.refreshPosts()
+                    
+                    // Navigate back to feed immediately
+                    withAnimation {
+                        self.tabBarIndex = 0
+                    }
+                    self.dismiss()
                 } else {
                     // Show error
                     print("❌ Failed to create post")
                     withAnimation {
-                        showErrorToast = true
+                        self.showErrorToast = true
                     }
                 }
             }

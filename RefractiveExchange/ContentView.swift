@@ -24,7 +24,7 @@ struct ContentView: View {
             } else {
                 // User is not logged in - show authentication
                 NavigationView {
-                    LoginScreen()
+                    LoginScreen(model: NotLoggedInViewModel())
                 }
                 .onAppear {
                     // Force light mode when logged out

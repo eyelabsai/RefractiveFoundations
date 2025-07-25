@@ -16,10 +16,19 @@ struct SignupScreen: View {
         ZStack {
             VStack(spacing: 20) {
                 
+                // App Icon
+                Image("144")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 100, height: 100)
+                    .cornerRadius(20)
+                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                    .padding(.top, 20)
+                
                 Text("Create Account")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .padding(.top, 40)
+                    .padding(.top, 10)
                 
                 VStack(spacing: 15) {
                     CustomTextField(text: $viewModel.firstName, title: "First Name")

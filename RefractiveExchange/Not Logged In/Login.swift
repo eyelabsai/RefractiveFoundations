@@ -9,15 +9,23 @@ import SwiftUI
 import Firebase
 
 struct LoginScreen: View {
-    @ObservedObject var model = NotLoggedInViewModel()
+    @ObservedObject var model: NotLoggedInViewModel
+    @State private var animateIcon: Bool = false
     var body: some View {
         ZStack {
-            VStack {
+            VStack(spacing: 30) {
+                Spacer()
                 
-                Image("logo")
+                // App Icon - nicely styled
+                Image("RF Icon")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: UIScreen.main.bounds.width * 0.8)
+                    .frame(width: 120, height: 120)
+                    .cornerRadius(24)
+                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+                    .scaleEffect(model.handle.loading ? 1.1 : 1.0)
+                    .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: model.handle.loading)
+                    .padding(.bottom, 40)
                 
                 CustomTextField(text: $model.user.email, title: "Email")
                 
@@ -82,10 +90,29 @@ struct LoginScreen: View {
             
             CustomAlert(handle: $model.handle)
                 .zIndex(1)
+           
+                // Subtle loading overlay
+                if model.handle.loading {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .zIndex(2)
+                    
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(1.5)
+                        
+                        Text("Signing in...")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                    .zIndex(3)
+                }
+            }
+            .navigationBarHidden(true)
         }
-        .navigationBarHidden(true)
     }
-}
+
 
 //Error popup
 struct ErrorView: View {

@@ -209,6 +209,38 @@ struct PostService  {
         }
         let db = Firestore.firestore()
         let postRef = db.collection("posts").document(postId)
+        
+        // First, delete all comments associated with this post
+        db.collection("comments").whereField("postId", isEqualTo: postId).getDocuments { commentSnapshot, commentError in
+            if let commentError = commentError {
+                print("❌ Error fetching comments for deletion: \(commentError.localizedDescription)")
+            } else if let commentDocs = commentSnapshot?.documents {
+                let commentGroup = DispatchGroup()
+                
+                for commentDoc in commentDocs {
+                    commentGroup.enter()
+                    commentDoc.reference.delete { error in
+                        if let error = error {
+                            print("❌ Error deleting comment \(commentDoc.documentID): \(error.localizedDescription)")
+                        } else {
+                            print("🗑️ Comment \(commentDoc.documentID) deleted")
+                        }
+                        commentGroup.leave()
+                    }
+                }
+                
+                commentGroup.notify(queue: .main) {
+                    // Now delete the post
+                    self.deletePostDocument(postRef: postRef, post: post, completion: completion)
+                }
+            } else {
+                // No comments to delete, proceed with post deletion
+                self.deletePostDocument(postRef: postRef, post: post, completion: completion)
+            }
+        }
+    }
+    
+    private func deletePostDocument(postRef: DocumentReference, post: FetchedPost, completion: @escaping (Bool) -> Void) {
         // If post has an image, delete it from Storage
         if let imageURL = post.imageURL, !imageURL.isEmpty {
             let storage = Storage.storage()

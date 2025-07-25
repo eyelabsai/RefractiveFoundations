@@ -16,10 +16,16 @@ struct PublicProfileView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel = PublicProfileViewModel()
     @State private var selectedTab = 0
+    @State private var showingChatView = false
+    @State private var otherUser: User?
+    @State private var existingConversationId: String = ""
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 0) {
+                // Header with dismiss button
+                headerWithDismiss
+                
                 // Profile Header
                 profileHeader
                 
@@ -42,8 +48,16 @@ struct PublicProfileView: View {
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden(false)
+            .navigationBarHidden(true)
+            .navigationDestination(isPresented: $showingChatView) {
+                if let otherUser = otherUser {
+                    ChatView(
+                        conversationId: existingConversationId, // Use existing conversation ID if found, empty string for new
+                        otherUser: otherUser,
+                        displayName: otherUser.exchangeUsername?.isEmpty == false ? otherUser.exchangeUsername! : "\(otherUser.firstName) \(otherUser.lastName)"
+                    )
+                }
+            }
         }
         .onAppear {
             print("🔍 PublicProfileView appeared for user: \(username) with ID: \(userId)")
@@ -51,6 +65,41 @@ struct PublicProfileView: View {
             viewModel.loadUserPosts(userId: userId)
             viewModel.loadUserComments(userId: userId)
         }
+    }
+    
+    // MARK: - Header with Dismiss
+    private var headerWithDismiss: some View {
+        HStack {
+            Button("Done") {
+                dismiss()
+            }
+            .font(.system(size: 16, weight: .medium))
+            .foregroundColor(.blue)
+            
+            Spacer()
+            
+            Text("Profile")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+            // Invisible button for balance
+            Button("Done") {
+                // Empty action
+            }
+            .font(.system(size: 16, weight: .medium))
+            .foregroundColor(.clear)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color(.systemBackground))
+        .overlay(
+            Rectangle()
+                .frame(height: 0.5)
+                .foregroundColor(Color(.separator))
+            , alignment: .bottom
+        )
     }
     
     // MARK: - Profile Header
@@ -85,12 +134,38 @@ struct PublicProfileView: View {
                 }
                 
                 Spacer()
+                
+                // Message button
+                messageButton
             }
             .padding(.horizontal, 16)
             
             Divider()
         }
         .background(Color(.systemBackground))
+    }
+    
+    // MARK: - Message Button
+    private var messageButton: some View {
+        Button(action: {
+            startDirectMessage()
+        }) {
+            HStack(spacing: 6) {
+                Image(systemName: "message.fill")
+                    .font(.system(size: 14, weight: .medium))
+                
+                Text("Message")
+                    .font(.system(size: 14, weight: .medium))
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+            .foregroundColor(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color.blue)
+            .cornerRadius(20)
+            .fixedSize(horizontal: true, vertical: false)
+        }
     }
     
     // MARK: - Tab Selector
@@ -329,6 +404,92 @@ struct PublicProfileView: View {
             .padding(16)
         }
         .background(Color(.systemGroupedBackground))
+    }
+    
+    // MARK: - Helper Methods
+    private func startDirectMessage() {
+        // First check for existing conversation with this user
+        checkForExistingConversation { conversationId in
+            DispatchQueue.main.async {
+                self.existingConversationId = conversationId ?? ""
+                
+                // Get user data and show chat
+                if let userData = self.getUserFromViewModelData() {
+                    self.otherUser = userData
+                    self.showingChatView = true
+                } else {
+                    self.fetchUserForDirectMessage()
+                }
+            }
+        }
+    }
+    
+    private func getUserFromViewModelData() -> User? {
+        // If we have access to user data through other means, use it
+        // For now, we'll fetch it fresh to ensure we have the latest data
+        return nil
+    }
+    
+    private func checkForExistingConversation(completion: @escaping (String?) -> Void) {
+        guard let currentUserId = FirebaseManager.shared.currentUser?.uid else {
+            print("❌ No current user found")
+            completion(nil)
+            return
+        }
+        
+        print("🔍 Checking for existing conversation between \(currentUserId) and \(userId)")
+        
+        Firestore.firestore().collection("conversations")
+            .whereField("participants", arrayContains: currentUserId)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("❌ Error checking for existing conversation: \(error.localizedDescription)")
+                    completion(nil)
+                    return
+                }
+                
+                // Check if any conversation contains both users (will restore if deleted)
+                let existingConversation = snapshot?.documents.first { document in
+                    let data = document.data()
+                    guard let participants = data["participants"] as? [String] else { return false }
+                    return participants.contains(self.userId) && participants.contains(currentUserId)
+                }
+                
+                if let existing = existingConversation {
+                    print("✅ Found existing active conversation: \(existing.documentID)")
+                    completion(existing.documentID)
+                } else {
+                    print("💭 No existing active conversation found - will create new one")
+                    completion(nil)
+                }
+            }
+    }
+    
+    private func fetchUserForDirectMessage() {
+        print("🔍 Fetching user data for DM: \(userId)")
+        
+        Firestore.firestore().collection("users").document(userId).getDocument { document, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Error fetching user for DM: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let document = document, document.exists else {
+                    print("⚠️ User document not found for DM")
+                    return
+                }
+                
+                do {
+                    let user = try document.data(as: User.self)
+                    self.otherUser = user
+                    self.showingChatView = true
+                    print("✅ User data fetched for DM: \(user.firstName) \(user.lastName)")
+                } catch {
+                    print("❌ Error decoding user for DM: \(error)")
+                }
+            }
+        }
     }
 }
 

@@ -103,4 +103,17 @@ struct SideMenuView: View {
     
 }
 
-let subreddits = ["i/All", "i/Anterior Segment, Cataract, & Cornea", "i/Glaucoma", "i/Retina", "i/Neuro-Opthamology", "i/Pediatric Opthamology", "i/Ocular Oncology", "i/Oculoplastic Surgery", "i/Uveitis", "i/Residents & Fellows", "i/Medical Students", "i/Company Representatives"]
+// Curated list of refractive surgery-specific subreddits
+let subreddits = [
+    "i/All",
+    "i/IOLs",
+    "i/Surgical Techniques", 
+    "i/Complications",
+    "i/Refractive Surgery",
+    "i/Cataract Surgery",
+    "i/Corneal Surgery",
+    "i/Residents & Fellows"
+]
+
+// Original comprehensive list (commented out for now)
+// let subreddits = ["i/All", "i/Anterior Segment, Cataract, & Cornea", "i/Glaucoma", "i/Retina", "i/Neuro-Opthamology", "i/Pediatric Opthamology", "i/Ocular Oncology", "i/Oculoplastic Surgery", "i/Uveitis", "i/Residents & Fellows", "i/Medical Students", "i/Company Representatives"]
