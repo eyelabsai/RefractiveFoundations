@@ -21,6 +21,7 @@ struct ProfileView: View {
     @State private var yearsActive = 0 // Keep for backend anniversary tracking - will show as badges next to username when milestones are reached
     @State private var showingSettings = false
     @State private var showingEditProfile = false
+    @State private var showingDeleteAccountAlert = false
     
     let tabTitles = ["Posts", "Comments", "Saved"]
     let service = PostService()
@@ -77,6 +78,14 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $showingEditProfile) {
                 EditProfileView(data: data)
+            }
+            .alert("Delete Account", isPresented: $showingDeleteAccountAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete My Account", role: .destructive) {
+                    deleteAccount()
+                }
+            } message: {
+                Text("Are you sure? Deleting your account will permanently erase all saved data and cannot be undone.")
             }
         }
     }
@@ -645,7 +654,89 @@ struct ProfileView: View {
         formatter.unitsStyle = .abbreviated
         return formatter.localizedString(for: date, relativeTo: Date())
     }
-
+    
+    private func deleteAccount() {
+        guard let user = Auth.auth().currentUser else { return }
+        
+        // Show loading state
+        isLoading = true
+        
+        // First, delete user data from Firestore
+        let uid = user.uid
+        let db = Firestore.firestore()
+        
+        // Delete user's posts
+        db.collection("posts").whereField("uid", isEqualTo: uid).getDocuments { snapshot, error in
+            if let documents = snapshot?.documents {
+                for document in documents {
+                    document.reference.delete()
+                }
+            }
+            
+            // Delete user's comments
+            db.collection("comments").whereField("uid", isEqualTo: uid).getDocuments { snapshot, error in
+                if let documents = snapshot?.documents {
+                    for document in documents {
+                        document.reference.delete()
+                    }
+                }
+                
+                // Delete user's saved posts
+                db.collection("savedPosts").whereField("uid", isEqualTo: uid).getDocuments { snapshot, error in
+                    if let documents = snapshot?.documents {
+                        for document in documents {
+                            document.reference.delete()
+                        }
+                    }
+                    
+                    // Delete user's conversations
+                    db.collection("conversations").whereField("participants", arrayContains: uid).getDocuments { snapshot, error in
+                        if let documents = snapshot?.documents {
+                            for document in documents {
+                                document.reference.delete()
+                            }
+                        }
+                        
+                        // Delete user's direct messages
+                        db.collection("directMessages").whereField("senderId", isEqualTo: uid).getDocuments { snapshot, error in
+                            if let documents = snapshot?.documents {
+                                for document in documents {
+                                    document.reference.delete()
+                                }
+                            }
+                            
+                            // Finally, delete the user document itself
+                            db.collection("users").document(uid).delete { error in
+                                DispatchQueue.main.async {
+                                    if let error = error {
+                                        print("❌ Error deleting user document: \(error)")
+                                        self.isLoading = false
+                                        return
+                                    }
+                                    
+                                    // Now delete the Firebase Auth account
+                                    user.delete { error in
+                                        DispatchQueue.main.async {
+                                            self.isLoading = false
+                                            if let error = error {
+                                                print("❌ Error deleting Firebase Auth account: \(error)")
+                                                // Show error alert
+                                                return
+                                            }
+                                            
+                                            // Account deletion successful
+                                            print("✅ Account deleted successfully")
+                                            // The app will automatically redirect to login since user is no longer authenticated
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 // MARK: - Settings View
@@ -655,6 +746,7 @@ struct SettingsView: View {
     @EnvironmentObject var darkModeManager: DarkModeManager
     @State private var memberSince = ""
     @State private var yearsActive = 0
+    @State private var showingDeleteAccountAlert = false
     
     var body: some View {
         NavigationStack {
@@ -763,6 +855,27 @@ struct SettingsView: View {
                                 }
                                 .padding(.vertical, 4)
                             }
+                            
+                            Divider()
+                            
+                            // Delete Account Button
+                            Button(action: {
+                                showingDeleteAccountAlert = true
+                            }) {
+                                HStack {
+                                    Image(systemName: "trash")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.red)
+                                        .frame(width: 24)
+                                    
+                                    Text("Delete My Account")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.red)
+                                    
+                                    Spacer()
+                                }
+                                .padding(.vertical, 4)
+                            }
                         }
                     }
                     .padding(16)
@@ -786,6 +899,14 @@ struct SettingsView: View {
             }
             .onAppear {
                 loadSettingsData()
+            }
+            .alert("Delete Account", isPresented: $showingDeleteAccountAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete My Account", role: .destructive) {
+                    deleteAccountFromSettings()
+                }
+            } message: {
+                Text("Are you sure? Deleting your account will permanently erase all saved data and cannot be undone.")
             }
         }
     }
@@ -818,6 +939,84 @@ struct SettingsView: View {
                     } catch {
                         print("❌ Error decoding user data: \(error)")
                         self.memberSince = "Unknown"
+                    }
+                }
+            }
+        }
+    }
+    
+    private func deleteAccountFromSettings() {
+        guard let user = Auth.auth().currentUser else { return }
+        
+        // First, delete user data from Firestore
+        let uid = user.uid
+        let db = Firestore.firestore()
+        
+        // Delete user's posts
+        db.collection("posts").whereField("uid", isEqualTo: uid).getDocuments { snapshot, error in
+            if let documents = snapshot?.documents {
+                for document in documents {
+                    document.reference.delete()
+                }
+            }
+            
+            // Delete user's comments
+            db.collection("comments").whereField("uid", isEqualTo: uid).getDocuments { snapshot, error in
+                if let documents = snapshot?.documents {
+                    for document in documents {
+                        document.reference.delete()
+                    }
+                }
+                
+                // Delete user's saved posts
+                db.collection("savedPosts").whereField("uid", isEqualTo: uid).getDocuments { snapshot, error in
+                    if let documents = snapshot?.documents {
+                        for document in documents {
+                            document.reference.delete()
+                        }
+                    }
+                    
+                    // Delete user's conversations
+                    db.collection("conversations").whereField("participants", arrayContains: uid).getDocuments { snapshot, error in
+                        if let documents = snapshot?.documents {
+                            for document in documents {
+                                document.reference.delete()
+                            }
+                        }
+                        
+                        // Delete user's direct messages
+                        db.collection("directMessages").whereField("senderId", isEqualTo: uid).getDocuments { snapshot, error in
+                            if let documents = snapshot?.documents {
+                                for document in documents {
+                                    document.reference.delete()
+                                }
+                            }
+                            
+                            // Finally, delete the user document itself
+                            db.collection("users").document(uid).delete { error in
+                                DispatchQueue.main.async {
+                                    if let error = error {
+                                        print("❌ Error deleting user document: \(error)")
+                                        return
+                                    }
+                                    
+                                    // Now delete the Firebase Auth account
+                                    user.delete { error in
+                                        DispatchQueue.main.async {
+                                            if let error = error {
+                                                print("❌ Error deleting Firebase Auth account: \(error)")
+                                                return
+                                            }
+                                            
+                                            // Account deletion successful
+                                            print("✅ Account deleted successfully")
+                                            // Dismiss settings and the app will redirect to login
+                                            dismiss()
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1056,6 +1255,84 @@ struct EditProfileView: View {
                     // Dismiss after showing success
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         self.dismiss()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func deleteAccountFromSettings() {
+        guard let user = Auth.auth().currentUser else { return }
+        
+        // First, delete user data from Firestore
+        let uid = user.uid
+        let db = Firestore.firestore()
+        
+        // Delete user's posts
+        db.collection("posts").whereField("uid", isEqualTo: uid).getDocuments { snapshot, error in
+            if let documents = snapshot?.documents {
+                for document in documents {
+                    document.reference.delete()
+                }
+            }
+            
+            // Delete user's comments
+            db.collection("comments").whereField("uid", isEqualTo: uid).getDocuments { snapshot, error in
+                if let documents = snapshot?.documents {
+                    for document in documents {
+                        document.reference.delete()
+                    }
+                }
+                
+                // Delete user's saved posts
+                db.collection("savedPosts").whereField("uid", isEqualTo: uid).getDocuments { snapshot, error in
+                    if let documents = snapshot?.documents {
+                        for document in documents {
+                            document.reference.delete()
+                        }
+                    }
+                    
+                    // Delete user's conversations
+                    db.collection("conversations").whereField("participants", arrayContains: uid).getDocuments { snapshot, error in
+                        if let documents = snapshot?.documents {
+                            for document in documents {
+                                document.reference.delete()
+                            }
+                        }
+                        
+                        // Delete user's direct messages
+                        db.collection("directMessages").whereField("senderId", isEqualTo: uid).getDocuments { snapshot, error in
+                            if let documents = snapshot?.documents {
+                                for document in documents {
+                                    document.reference.delete()
+                                }
+                            }
+                            
+                            // Finally, delete the user document itself
+                            db.collection("users").document(uid).delete { error in
+                                DispatchQueue.main.async {
+                                    if let error = error {
+                                        print("❌ Error deleting user document: \(error)")
+                                        return
+                                    }
+                                    
+                                    // Now delete the Firebase Auth account
+                                    user.delete { error in
+                                        DispatchQueue.main.async {
+                                            if let error = error {
+                                                print("❌ Error deleting Firebase Auth account: \(error)")
+                                                return
+                                            }
+                                            
+                                            // Account deletion successful
+                                            print("✅ Account deleted successfully")
+                                            // Dismiss settings and the app will redirect to login
+                                            dismiss()
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

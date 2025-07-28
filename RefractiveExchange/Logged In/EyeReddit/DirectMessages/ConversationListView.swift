@@ -50,6 +50,7 @@ struct ConversationListView: View {
                 NewMessageView(dmService: dmService)
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle()) // Force single column layout
         .onAppear {
             startListening()
         }
@@ -341,6 +342,7 @@ struct NewMessageView: View {
                 }
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle()) // Force single column layout
     }
     
     private func selectedUserView(_ user: User) -> some View {

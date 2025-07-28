@@ -26,6 +26,7 @@ struct ContentView: View {
                 NavigationView {
                     LoginScreen(model: NotLoggedInViewModel())
                 }
+                .navigationViewStyle(StackNavigationViewStyle()) // Force single column layout
                 .onAppear {
                     // Force light mode when logged out
                     DispatchQueue.main.async {
