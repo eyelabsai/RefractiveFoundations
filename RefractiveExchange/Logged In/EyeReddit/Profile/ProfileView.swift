@@ -17,10 +17,12 @@ struct ProfileView: View {
     @State private var userComments: [Comment] = []
     @State private var savedPosts: [FetchedPost] = []
     @State private var isLoading = true
-    @State private var memberSince = "2024"
+    @State private var memberSince = ""
     @State private var yearsActive = 0 // Keep for backend anniversary tracking - will show as badges next to username when milestones are reached
+    @State private var showingSettings = false
+    @State private var showingEditProfile = false
     
-    let tabTitles = ["Account", "Settings"]
+    let tabTitles = ["Posts", "Comments", "Saved"]
     let service = PostService()
     let saveService = SaveService.shared
     
@@ -35,13 +37,17 @@ struct ProfileView: View {
                 
                 // Content
                 TabView(selection: $selectedTab) {
-                    // Account Tab
-                    accountTab
+                    // Posts Tab
+                    postsTab
                         .tag(0)
                     
-                    // Settings Tab
-                    settingsTab
+                    // Comments Tab
+                    commentsTab
                         .tag(1)
+                    
+                    // Saved Tab
+                    savedTab
+                        .tag(2)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }
@@ -66,12 +72,54 @@ struct ProfileView: View {
                     loadUserData()
                 }
             }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView(data: data)
+            }
+            .sheet(isPresented: $showingEditProfile) {
+                EditProfileView(data: data)
+            }
         }
     }
     
     // MARK: - Profile Header
     private var profileHeader: some View {
         VStack(spacing: 16) {
+            // Top row with discreet buttons
+            HStack {
+                Spacer()
+                
+                HStack(spacing: 16) {
+                    // Dark mode toggle
+                    Button(action: {
+                        darkModeManager.toggleDarkMode()
+                    }) {
+                        Image(systemName: darkModeManager.isDarkMode ? "sun.max.fill" : "moon.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(darkModeManager.isDarkMode ? .orange : .purple)
+                    }
+                    
+                    // Settings button
+                    Button(action: {
+                        showingSettings = true
+                    }) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(.blue)
+                    }
+                    
+                    // Sign out button
+                    Button(action: {
+                        FirebaseManager.shared.signOut()
+                    }) {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .font(.system(size: 16))
+                            .foregroundColor(.red)
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            
             HStack(spacing: 16) {
                 // Avatar
                 if let user = data.user, let avatarUrlString = user.avatarUrl, let url = URL(string: avatarUrlString) {
@@ -120,7 +168,7 @@ struct ProfileView: View {
                             .foregroundColor(.secondary)
                         
                         // Member since
-                        Text("• Member since 2024")
+                        Text("• Member since \(memberSince)")
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                         
@@ -137,48 +185,18 @@ struct ProfileView: View {
                 
                 Spacer()
                 
-                VStack(spacing: 8) {
-                    // Dark Mode Toggle
-                    Button(action: {
-                        darkModeManager.toggleDarkMode()
-                    }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: darkModeManager.isDarkMode ? "sun.max.fill" : "moon.fill")
-                                .font(.system(size: 14))
-                            Text(darkModeManager.isDarkMode ? "Light Mode" : "Dark Mode")
-                                .font(.system(size: 12, weight: .medium))
-                        }
-                        .foregroundColor(darkModeManager.isDarkMode ? .yellow : .purple)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(darkModeManager.isDarkMode ? Color.purple.opacity(0.1) : Color.yellow.opacity(0.1))
-                        .cornerRadius(16)
-                    }
-                    
-                    // Edit button
-                    Button("Edit") {
-                        // TODO: Navigate to edit profile
-                    }
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.blue)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.blue, lineWidth: 1)
-                    )
-                    
-                    // Sign Out button
-                    Button("Sign Out") {
-                        FirebaseManager.shared.signOut()
-                    }
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.red)
-                    .cornerRadius(16)
+                // Edit button
+                Button("Edit") {
+                    showingEditProfile = true
                 }
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.blue)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.blue, lineWidth: 1)
+                )
             }
             .padding(.horizontal, 20)
             
@@ -224,23 +242,61 @@ struct ProfileView: View {
         )
     }
     
-    // MARK: - Posts View
-    private var postsView: some View {
+    // MARK: - Tab Views
+    private var postsTab: some View {
         ScrollView {
-            LazyVStack(spacing: 2) {
+            LazyVStack(spacing: 0) {
                 if isLoading {
-                    loadingView
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .scaleEffect(1.2)
+                        
+                        Text("Loading posts...")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 48)
                 } else if userPosts.isEmpty {
-                    emptyState(message: "No posts yet", icon: "doc.text")
+                    VStack(spacing: 16) {
+                        Image(systemName: "doc.text")
+                            .font(.system(size: 48))
+                            .foregroundColor(.gray.opacity(0.5))
+                        
+                        Text("No posts yet")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary)
+                        
+                        Text("Your posts will appear here once you start sharing.")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 48)
                 } else {
                     ForEach(userPosts) { post in
                         NavigationLink {
                             PostDetailView(post: post, data: data)
                         } label: {
-                            PostRow(post: post)
-                                .background(Color(.systemBackground))
+                            PostRow(
+                                post: post,
+                                onCommentTapped: {
+                                    // Navigate to post detail
+                                },
+                                onPostTapped: {
+                                    // Navigate to post detail
+                                },
+                                onUsernameTapped: { username, userId in
+                                    // Navigate to user profile
+                                }
+                            )
+                            .background(Color(.systemBackground))
                         }
                         .buttonStyle(PlainButtonStyle())
+                        
+                        Divider()
+                            .padding(.leading, 16)
                     }
                 }
             }
@@ -248,42 +304,110 @@ struct ProfileView: View {
         .background(Color(.systemGroupedBackground))
     }
     
-    // MARK: - Comments View
-    private var commentsView: some View {
+    private var commentsTab: some View {
         ScrollView {
-            LazyVStack(spacing: 8) {
+            LazyVStack(spacing: 0) {
                 if isLoading {
-                    loadingView
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .scaleEffect(1.2)
+                        
+                        Text("Loading comments...")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 48)
                 } else if userComments.isEmpty {
-                    emptyState(message: "No comments yet", icon: "bubble.left")
+                    VStack(spacing: 16) {
+                        Image(systemName: "bubble.left")
+                            .font(.system(size: 48))
+                            .foregroundColor(.gray.opacity(0.5))
+                        
+                        Text("No comments yet")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary)
+                        
+                        Text("Your comments will appear here once you start engaging.")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 48)
                 } else {
                     ForEach(userComments, id: \.timestamp) { comment in
-                        commentCard(comment)
+                        CommentRow(
+                            comment: comment,
+                            onUsernameTapped: { username, userId in
+                                // Navigate to user profile
+                            }
+                        )
+                        .background(Color(.systemBackground))
+                        
+                        Divider()
+                            .padding(.leading, 16)
                     }
                 }
             }
-            .padding(.horizontal, 16)
         }
         .background(Color(.systemGroupedBackground))
     }
     
-    // MARK: - Saved View
-    private var savedView: some View {
+    private var savedTab: some View {
         ScrollView {
-            LazyVStack(spacing: 2) {
+            LazyVStack(spacing: 0) {
                 if isLoading {
-                    loadingView
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .scaleEffect(1.2)
+                        
+                        Text("Loading saved posts...")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 48)
                 } else if savedPosts.isEmpty {
-                    emptyState(message: "No saved posts", icon: "bookmark")
+                    VStack(spacing: 16) {
+                        Image(systemName: "bookmark")
+                            .font(.system(size: 48))
+                            .foregroundColor(.gray.opacity(0.5))
+                        
+                        Text("No saved posts")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary)
+                        
+                        Text("Save posts to view them here later.")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 48)
                 } else {
                     ForEach(savedPosts) { post in
                         NavigationLink {
                             PostDetailView(post: post, data: data)
                         } label: {
-                            PostRow(post: post)
-                                .background(Color(.systemBackground))
+                            PostRow(
+                                post: post,
+                                onCommentTapped: {
+                                    // Navigate to post detail
+                                },
+                                onPostTapped: {
+                                    // Navigate to post detail
+                                },
+                                onUsernameTapped: { username, userId in
+                                    // Navigate to user profile
+                                }
+                            )
+                            .background(Color(.systemBackground))
                         }
                         .buttonStyle(PlainButtonStyle())
+                        
+                        Divider()
+                            .padding(.leading, 16)
                     }
                 }
             }
@@ -371,7 +495,40 @@ struct ProfileView: View {
         
         print("🔄 Loading profile data for user: \(uid)")
         isLoading = true
+        
+        // Set current year as default
+        let currentYear = Calendar.current.component(.year, from: Date())
+        memberSince = "\(currentYear)"
+        
         let group = DispatchGroup()
+        
+        // Load user creation date
+        group.enter()
+        Firestore.firestore().collection("users").document(uid).getDocument { document, error in
+            DispatchQueue.main.async {
+                if let document = document, document.exists {
+                    do {
+                        let user = try document.data(as: User.self)
+                        
+                        if let dateJoined = user.dateJoined {
+                            let date = dateJoined.dateValue()
+                            let formatter = DateFormatter()
+                            formatter.dateStyle = .medium
+                            self.memberSince = formatter.string(from: date)
+                            
+                            // Calculate years active
+                            let currentYear = Calendar.current.component(.year, from: Date())
+                            let joinYear = Calendar.current.component(.year, from: date)
+                            self.yearsActive = max(0, currentYear - joinYear)
+                        }
+                    } catch {
+                        print("❌ Error decoding user data: \(error)")
+                        self.memberSince = "Unknown"
+                    }
+                }
+                group.leave()
+            }
+        }
         
         // Load user posts
         group.enter()
@@ -483,217 +640,426 @@ struct ProfileView: View {
     
     // Helper function for time formatting
     private func timeAgoString(from date: Date) -> String {
-        let now = Date()
-        let timeInterval = now.timeIntervalSince(date)
-        
-        if timeInterval < 60 {
-            return "now"
-        } else if timeInterval < 3600 {
-            let minutes = Int(timeInterval / 60)
-            return "\(minutes)m"
-        } else if timeInterval < 86400 {
-            let hours = Int(timeInterval / 3600)
-            return "\(hours)h"
-        } else {
-            let days = Int(timeInterval / 86400)
-            return "\(days)d"
-        }
+        let interval = Date().timeIntervalSince(date)
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: date, relativeTo: Date())
     }
-    
-    // MARK: - Account Tab
-    private var accountTab: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // Personal Information
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Personal Information")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.primary)
-                    
-                    VStack(spacing: 12) {
-                        InfoRow(title: "Full Name", value: "\(data.user?.firstName ?? "") \(data.user?.lastName ?? "")")
-                        InfoRow(title: "Username", value: "u/\(data.user?.exchangeUsername ?? "\(data.user?.firstName.lowercased() ?? "")\(data.user?.lastName.lowercased() ?? "")")")
-                        InfoRow(title: "Specialty", value: data.user?.specialty ?? "Not specified")
-                        InfoRow(title: "Email", value: data.user?.email ?? "Not available")
-                        InfoRow(title: "Member Since", value: memberSince)
-                        InfoRow(title: "Years Active", value: "\(yearsActive) year\(yearsActive != 1 ? "s" : "")")
-                    }
-                }
-                .padding(16)
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
-                
-                // Statistics
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Activity Statistics")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.primary)
-                    
-                    VStack(spacing: 12) {
-                        InfoRow(title: "Posts Created", value: "\(userPosts.count)")
-                        InfoRow(title: "Comments Made", value: "\(userComments.count)")
-                        InfoRow(title: "Posts Saved", value: "\(savedPosts.count)")
-                    }
-                }
-                .padding(16)
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
-                
-                // Quick Actions
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Quick Actions")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.primary)
-                    
-                    VStack(spacing: 8) {
-                        Button(action: {
-                            // Navigate to edit profile
-                        }) {
-                            HStack {
-                                Image(systemName: "pencil")
-                                    .foregroundColor(.blue)
-                                Text("Edit Profile")
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.system(size: 12))
-                            }
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                        }
-                        
-                        Button(action: {
-                            // Navigate to saved posts
-                        }) {
-                            HStack {
-                                Image(systemName: "bookmark")
-                                    .foregroundColor(.orange)
-                                Text("View Saved Posts")
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.system(size: 12))
-                            }
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                        }
-                    }
-                }
-                .padding(16)
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
-            }
-            .padding(16)
-        }
-        .background(Color(.systemGroupedBackground))
-    }
-    
 
+}
+
+// MARK: - Settings View
+struct SettingsView: View {
+    @ObservedObject var data: GetData
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var darkModeManager: DarkModeManager
+    @State private var memberSince = ""
+    @State private var yearsActive = 0
     
-    // MARK: - Settings Tab
-    private var settingsTab: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // Appearance
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Appearance")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.primary)
-                    
-                    VStack(spacing: 8) {
-                        Button(action: {
-                            darkModeManager.toggleDarkMode()
-                        }) {
-                            HStack {
-                                Image(systemName: darkModeManager.isDarkMode ? "sun.max.fill" : "moon.fill")
-                                    .foregroundColor(darkModeManager.isDarkMode ? .yellow : .purple)
-                                Text(darkModeManager.isDarkMode ? "Light Mode" : "Dark Mode")
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.system(size: 12))
-                            }
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Personal Information
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Personal Information")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.primary)
+                        
+                        VStack(spacing: 12) {
+                            InfoRow(title: "Full Name", value: "\(data.user?.firstName ?? "") \(data.user?.lastName ?? "")")
+                            InfoRow(title: "Username", value: "u/\(data.user?.exchangeUsername ?? "\(data.user?.firstName.lowercased() ?? "")\(data.user?.lastName.lowercased() ?? "")")")
+                            InfoRow(title: "Specialty", value: data.user?.specialty ?? "Not specified")
+                            InfoRow(title: "Email", value: data.user?.email ?? "Not available")
+                            InfoRow(title: "Member Since", value: memberSince)
+                            InfoRow(title: "Years Active", value: "\(yearsActive) year\(yearsActive != 1 ? "s" : "")")
                         }
                     }
-                }
-                .padding(16)
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
-                
-                // Account Actions
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Account")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.primary)
+                    .padding(16)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
                     
-                    VStack(spacing: 8) {
-                        Button(action: {
-                            // Change password
-                        }) {
-                            HStack {
-                                Image(systemName: "lock")
-                                    .foregroundColor(.blue)
-                                Text("Change Password")
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.system(size: 12))
-                            }
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                        }
+                    // App Settings
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("App Settings")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.primary)
                         
-                        Button(action: {
-                            // Privacy settings
-                        }) {
+                        VStack(spacing: 12) {
+                            // Dark Mode Toggle
                             HStack {
-                                Image(systemName: "eye")
-                                    .foregroundColor(.green)
-                                Text("Privacy Settings")
-                                    .foregroundColor(.primary)
+                                HStack(spacing: 12) {
+                                    Image(systemName: darkModeManager.isDarkMode ? "moon.fill" : "sun.max.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(darkModeManager.isDarkMode ? .purple : .orange)
+                                        .frame(width: 24)
+                                    
+                                    Text("Dark Mode")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.primary)
+                                }
+                                
                                 Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.system(size: 12))
+                                
+                                Toggle("", isOn: Binding(
+                                    get: { darkModeManager.isDarkMode },
+                                    set: { _ in darkModeManager.toggleDarkMode() }
+                                ))
+                                .toggleStyle(SwitchToggleStyle())
                             }
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                        }
-                        
-                        Button(action: {
-                            FirebaseManager.shared.signOut()
-                        }) {
-                            HStack {
-                                Image(systemName: "rectangle.portrait.and.arrow.right")
-                                    .foregroundColor(.red)
-                                Text("Sign Out")
-                                    .foregroundColor(.red)
-                                Spacer()
-                            }
-                            .padding(12)
-                            .background(Color.red.opacity(0.1))
-                            .cornerRadius(8)
                         }
                     }
+                    .padding(16)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
+                    
+                    // Account Actions
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Account")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.primary)
+                        
+                        VStack(spacing: 12) {
+                            // Edit Profile Button
+                            Button(action: {
+                                // TODO: Navigate to edit profile
+                            }) {
+                                HStack {
+                                    Image(systemName: "pencil")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.blue)
+                                        .frame(width: 24)
+                                    
+                                    Text("Edit Profile")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.blue)
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.vertical, 4)
+                            }
+                            
+                            Divider()
+                            
+                            // Sign Out Button
+                            Button(action: {
+                                FirebaseManager.shared.signOut()
+                            }) {
+                                HStack {
+                                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.red)
+                                        .frame(width: 24)
+                                    
+                                    Text("Sign Out")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.red)
+                                    
+                                    Spacer()
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
                 }
-                .padding(16)
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 20)
             }
-            .padding(16)
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .foregroundColor(.blue)
+                }
+            }
+            .onAppear {
+                loadSettingsData()
+            }
         }
-        .background(Color(.systemGroupedBackground))
+    }
+    
+    private func loadSettingsData() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        // Set current year as default
+        let currentYear = Calendar.current.component(.year, from: Date())
+        memberSince = "\(currentYear)"
+        
+        // Load user creation date
+        Firestore.firestore().collection("users").document(uid).getDocument { document, error in
+            DispatchQueue.main.async {
+                if let document = document, document.exists {
+                    do {
+                        let user = try document.data(as: User.self)
+                        
+                        if let dateJoined = user.dateJoined {
+                            let date = dateJoined.dateValue()
+                            let formatter = DateFormatter()
+                            formatter.dateStyle = .medium
+                            self.memberSince = formatter.string(from: date)
+                            
+                            // Calculate years active
+                            let currentYear = Calendar.current.component(.year, from: Date())
+                            let joinYear = Calendar.current.component(.year, from: date)
+                            self.yearsActive = max(0, currentYear - joinYear)
+                        }
+                    } catch {
+                        print("❌ Error decoding user data: \(error)")
+                        self.memberSince = "Unknown"
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Edit Profile View
+struct EditProfileView: View {
+    @ObservedObject var data: GetData
+    @Environment(\.dismiss) var dismiss
+    
+    @State private var firstName = ""
+    @State private var lastName = ""
+    @State private var selectedSpecialty = "General Ophthalmology"
+    @State private var isLoading = false
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    
+    let specialties = [
+        "General Ophthalmology",
+        "Anterior Segment, Cataract, & Cornea",
+        "Glaucoma", 
+        "Retina",
+        "Neuro-Ophthalmology",
+        "Pediatric Ophthalmology",
+        "Ocular Oncology",
+        "Oculoplastic Surgery",
+        "Uveitis",
+        "Resident/Fellow",
+        "Medical Student",
+        "Other"
+    ]
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    // Profile Photo Section
+                    VStack(spacing: 16) {
+                        Circle()
+                            .fill(Color.blue.opacity(0.2))
+                            .overlay(
+                                Image(systemName: "person.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.system(size: 32))
+                            )
+                            .frame(width: 100, height: 100)
+                        
+                        Button("Change Photo") {
+                            // TODO: Implement photo picker
+                        }
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.blue)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 20)
+                    
+                    // Personal Information
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Personal Information")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.primary)
+                        
+                        VStack(spacing: 16) {
+                            // First Name
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("First Name")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                
+                                TextField("Enter first name", text: $firstName)
+                                    .font(.system(size: 16))
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                    )
+                            }
+                            
+                            // Last Name
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Last Name")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                
+                                TextField("Enter last name", text: $lastName)
+                                    .font(.system(size: 16))
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                    )
+                            }
+                            
+                            // Username (Read-only)
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Username")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                
+                                HStack {
+                                    if let user = data.user {
+                                        let username = user.exchangeUsername?.isEmpty == false ? user.exchangeUsername! : "\(user.firstName.lowercased())\(user.lastName.lowercased())"
+                                        Text("u/\(username)")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer()
+                                    Text("Cannot be changed")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                        .italic()
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(Color(.systemGray5))
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                )
+                            }
+                            
+                            // Specialty
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Specialty")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                
+                                Menu {
+                                    ForEach(specialties, id: \.self) { specialty in
+                                        Button(specialty) {
+                                            selectedSpecialty = specialty
+                                        }
+                                    }
+                                } label: {
+                                    HStack {
+                                        Text(selectedSpecialty)
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.down")
+                                            .font(.system(size: 12, weight: .medium))
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 20)
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Edit Profile")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .foregroundColor(.blue)
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        saveProfile()
+                    }
+                    .foregroundColor(.blue)
+                    .disabled(firstName.isEmpty || lastName.isEmpty || isLoading)
+                }
+            }
+            .onAppear {
+                loadCurrentData()
+            }
+            .alert("Profile Update", isPresented: $showAlert) {
+                Button("OK") { }
+            } message: {
+                Text(alertMessage)
+            }
+        }
+    }
+    
+    private func loadCurrentData() {
+        if let user = data.user {
+            firstName = user.firstName
+            lastName = user.lastName
+            selectedSpecialty = user.specialty
+        }
+    }
+    
+    private func saveProfile() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard !firstName.isEmpty && !lastName.isEmpty else { return }
+        
+        isLoading = true
+        
+        let updatedData: [String: Any] = [
+            "firstName": firstName,
+            "lastName": lastName,
+            "specialty": selectedSpecialty
+        ]
+        
+        Firestore.firestore().collection("users").document(uid).updateData(updatedData) { error in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                if let error = error {
+                    self.alertMessage = "Failed to update profile: \(error.localizedDescription)"
+                    self.showAlert = true
+                } else {
+                    // Update local data
+                    self.data.fetchUser()
+                    self.alertMessage = "Profile updated successfully!"
+                    self.showAlert = true
+                    
+                    // Dismiss after showing success
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        self.dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -705,13 +1071,16 @@ struct InfoRow: View {
     var body: some View {
         HStack {
             Text(title)
-                .font(.system(size: 14, weight: .medium))
+                .font(.system(size: 14))
                 .foregroundColor(.secondary)
-            Spacer()
+                .frame(width: 100, alignment: .leading)
+            
             Text(value)
                 .font(.system(size: 14))
                 .foregroundColor(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .padding(.vertical, 2)
     }
 }
 

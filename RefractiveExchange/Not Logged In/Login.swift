@@ -13,19 +13,22 @@ struct LoginScreen: View {
     @State private var animateIcon: Bool = false
     var body: some View {
         ZStack {
-            VStack(spacing: 30) {
+            VStack(spacing: 20) {
                 Spacer()
                 
-                // App Icon - nicely styled
-                Image("RF Icon")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 120, height: 120)
-                    .cornerRadius(24)
-                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
-                    .scaleEffect(model.handle.loading ? 1.1 : 1.0)
-                    .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: model.handle.loading)
-                    .padding(.bottom, 40)
+                // App Icon - prominently displayed
+                VStack {
+                    // App Icon - even larger and more prominent
+                    Image("RF Icon")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 160, height: 160)
+                        .clipShape(RoundedRectangle(cornerRadius: 28))
+                        .shadow(color: .black.opacity(0.2), radius: 14, x: 0, y: 7)
+                        .scaleEffect(model.handle.loading ? 1.05 : 1.0)
+                        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: model.handle.loading)
+                }
+                .padding(.vertical, 40)
                 
                 CustomTextField(text: $model.user.email, title: "Email")
                 
