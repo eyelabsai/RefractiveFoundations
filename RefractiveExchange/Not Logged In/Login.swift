@@ -14,22 +14,21 @@ struct LoginScreen: View {
     var body: some View {
         ZStack {
             ScrollView {
-                VStack(spacing: 20) {
-                    Spacer(minLength: 60)
+                VStack(spacing: 16) {
+                    Spacer(minLength: 30)
                     
-                    // App Icon - prominently displayed
+                    // App Logo - prominently displayed and large
                     VStack {
-                        // App Icon - even larger and more prominent
                         Image("RF Icon")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 160, height: 160)
-                            .clipShape(RoundedRectangle(cornerRadius: 28))
-                            .shadow(color: .black.opacity(0.2), radius: 14, x: 0, y: 7)
+                            .frame(width: 240, height: 240)
+                            .clipShape(RoundedRectangle(cornerRadius: 36))
+                            .shadow(color: .black.opacity(0.15), radius: 18, x: 0, y: 9)
                             .scaleEffect(model.handle.loading ? 1.05 : 1.0)
                             .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: model.handle.loading)
                     }
-                    .padding(.vertical, 40)
+                    .padding(.vertical, 20)
                 
                 VStack(spacing: 20) {
                     CustomTextField(text: $model.user.email, title: "Email")
@@ -42,7 +41,7 @@ struct LoginScreen: View {
                 }
                 .padding(.horizontal, 20)
                 
-                VStack(spacing: 20) {
+                VStack(spacing: 16) {
                     HStack {
                         Button {
                             withAnimation {
@@ -72,7 +71,7 @@ struct LoginScreen: View {
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 20)
+                .padding(.top, 16)
                 
                 HStack(spacing: 5) {
                     Spacer()
@@ -92,9 +91,9 @@ struct LoginScreen: View {
                 }
                 .frame(maxWidth: 400)
                 .padding(.horizontal, 20)
-                .padding(.top, 30)
+                .padding(.top, 20)
                 
-                    Spacer(minLength: 60)
+                    Spacer(minLength: 30)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, max(25, (UIScreen.main.bounds.width - 500) / 2))

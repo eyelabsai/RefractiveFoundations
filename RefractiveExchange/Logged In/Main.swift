@@ -55,7 +55,7 @@ struct Main: View {
         HStack {
             // Home button always visible - takes you to main feed
             Button {
-                withAnimation { 
+                withAnimation {
                     // Clear any navigation stacks first
                     if !navigationPath.isEmpty {
                         navigationPath.removeLast(navigationPath.count)
@@ -72,11 +72,6 @@ struct Main: View {
             
             Spacer()
             
-            // App Logo/Title
-            Text("Refractive Foundations")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(.blue)
-            
             Spacer()
             
             // DM button (Instagram-style message)
@@ -92,6 +87,18 @@ struct Main: View {
             .padding(.trailing, 5)
         }
         .padding(.horizontal)
+        .frame(height: 44) // Fixed height to prevent layout shifts
+        .overlay(
+            // App Logo - overlaid in center without affecting layout, clickable link
+            Link(destination: URL(string: "https://refractivefoundations.com/")!) {
+                Image("RF Icon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 95, height: 95)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+            }
+        )
     }
     
     var bottomTabBar: some View {

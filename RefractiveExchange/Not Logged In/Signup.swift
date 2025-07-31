@@ -76,15 +76,15 @@ struct SignupScreen: View {
                         .foregroundColor(.secondary)
                 }
                 
-                // App Icon - larger size
+                // App Logo - prominently displayed and large
                 Image("RF Icon")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 110, height: 110)
-                    .clipShape(RoundedRectangle(cornerRadius: 22))
-                    .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
-                    .padding(.top, 40)
-                    .padding(.bottom, 30)
+                    .frame(width: 180, height: 180)
+                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                    .shadow(color: .black.opacity(0.12), radius: 14, x: 0, y: 7)
+                    .padding(.top, 20)
+                    .padding(.bottom, 20)
                 
                 // Dynamic content based on step
                 if viewModel.currentStep == 0 {
