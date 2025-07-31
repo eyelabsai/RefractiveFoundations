@@ -161,8 +161,8 @@ struct ProfileView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Username
                     if let user = data.user {
-                        if let username = user.exchangeUsername, !username.isEmpty {
-                            Text("u/\(username)")
+                                                 if !user.exchangeUsername.isEmpty {
+                              Text("u/\(user.exchangeUsername)")
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.primary)
                         } else {
@@ -1126,7 +1126,7 @@ struct EditProfileView: View {
                                 
                                 HStack {
                                     if let user = data.user {
-                                        let username = user.exchangeUsername?.isEmpty == false ? user.exchangeUsername! : "\(user.firstName.lowercased())\(user.lastName.lowercased())"
+                                        let username = !user.exchangeUsername.isEmpty ? user.exchangeUsername : "\(user.firstName.lowercased())\(user.lastName.lowercased())"
                                         Text("u/\(username)")
                                             .font(.system(size: 16))
                                             .foregroundColor(.secondary)

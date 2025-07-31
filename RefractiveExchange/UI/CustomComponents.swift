@@ -45,11 +45,14 @@ struct CustomTextField: View {
             if isPassword {
                 SecureField("", text: $text)
                     .textFieldStyle(CustomTextFieldStyle())
+                    .textContentType(.password)
             } else {
                 TextField("", text: $text)
                     .textFieldStyle(CustomTextFieldStyle())
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
+                    .textContentType(title.lowercased().contains("email") ? .emailAddress : .none)
+                    .keyboardType(title.lowercased().contains("email") ? .emailAddress : .default)
             }
         }
     }

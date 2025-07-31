@@ -47,7 +47,7 @@ class EyeExchangeProfileEditViewController: UIViewController, UITableViewDelegat
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.row == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "UsernameCell", for: indexPath) as! UsernameTableViewCell
-            cell.configure(with: user!.exchangeUsername?.isEmpty == false ? user!.exchangeUsername! : "Click to create one")
+            cell.configure(with: !user!.exchangeUsername.isEmpty ? user!.exchangeUsername : "Click to create one")
 
             return cell
         } else {

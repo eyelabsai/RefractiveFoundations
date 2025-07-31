@@ -54,7 +54,7 @@ struct PublicProfileView: View {
                     ChatView(
                         conversationId: existingConversationId, // Use existing conversation ID if found, empty string for new
                         otherUser: otherUser,
-                        displayName: otherUser.exchangeUsername?.isEmpty == false ? otherUser.exchangeUsername! : "\(otherUser.firstName) \(otherUser.lastName)"
+                        displayName: !otherUser.exchangeUsername.isEmpty ? otherUser.exchangeUsername : "\(otherUser.firstName) \(otherUser.lastName)"
                     )
                 }
             }
@@ -642,8 +642,8 @@ class PublicProfileViewModel: ObservableObject {
                     let avatarUrl: String?
                     
                     if let user = user {
-                        if let username = user.exchangeUsername, !username.isEmpty {
-                            authorName = username
+                                                 if !user.exchangeUsername.isEmpty {
+                              authorName = user.exchangeUsername
                         } else {
                             authorName = "\(user.firstName) \(user.lastName)"
                         }

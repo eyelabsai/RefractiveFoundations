@@ -102,8 +102,8 @@ struct PostService  {
                     
                     if let user = user {
                         // User found - use their details
-                        if let username = user.exchangeUsername, !username.isEmpty {
-                            authorName = username
+                                                 if !user.exchangeUsername.isEmpty {
+                              authorName = user.exchangeUsername
                         } else {
                             authorName = "\(user.firstName) \(user.lastName)"
                         }

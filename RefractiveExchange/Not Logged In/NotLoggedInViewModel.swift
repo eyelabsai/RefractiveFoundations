@@ -18,22 +18,38 @@ class NotLoggedInViewModel: ObservableObject {
     @Published var handle = AlertHandler()
     
     func loginUser() {
-        guard !user.email.isEmpty, !password.isEmpty else {
+        // Trim whitespace and validate input
+        let trimmedEmail = user.email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedEmail.isEmpty, !trimmedPassword.isEmpty else {
             handle.presentAlert(msg: "Please fill in all fields")
+            return
+        }
+        
+        guard trimmedEmail.contains("@") && trimmedEmail.contains(".") else {
+            handle.presentAlert(msg: "Please enter a valid email address")
+            return
+        }
+        
+        guard trimmedPassword.count >= 6 else {
+            handle.presentAlert(msg: "Password must be at least 6 characters")
             return
         }
         
         handle.setLoading(true)
         
-        FirebaseManager.shared.signIn(email: user.email, password: password) { [weak self] result in
+        FirebaseManager.shared.signIn(email: trimmedEmail, password: trimmedPassword) { [weak self] result in
             DispatchQueue.main.async {
                 self?.handle.setLoading(false)
                 
                 switch result {
                 case .success:
                     // Login successful - Firebase manager will handle state updates
+                    print("✅ Login successful")
                     break
                 case .failure(let error):
+                    print("❌ Login failed: \(error.localizedDescription)")
                     self?.handle.presentAlert(msg: error.localizedDescription)
                 }
             }
@@ -41,14 +57,21 @@ class NotLoggedInViewModel: ObservableObject {
     }
     
     func sendResetEmail() {
-        guard !user.email.isEmpty else {
+        let trimmedEmail = user.email.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedEmail.isEmpty else {
             handle.presentAlert(msg: "Please enter your email address")
+            return
+        }
+        
+        guard trimmedEmail.contains("@") && trimmedEmail.contains(".") else {
+            handle.presentAlert(msg: "Please enter a valid email address")
             return
         }
         
         handle.setLoading(true)
         
-        FirebaseManager.shared.sendPasswordReset(email: user.email) { [weak self] result in
+        FirebaseManager.shared.sendPasswordReset(email: trimmedEmail) { [weak self] result in
             DispatchQueue.main.async {
                 self?.handle.setLoading(false)
                 

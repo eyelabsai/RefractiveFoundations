@@ -213,6 +213,7 @@ struct Step1View: View {
         }
     }
 
+
 struct Step2View: View {
     @ObservedObject var viewModel: SignupViewModel
     
@@ -254,7 +255,7 @@ class SignupViewModel: ObservableObject {
     let specialties = [
         "General Ophthalmology",
         "Anterior Segment, Cataract, & Cornea",
-        "Glaucoma",
+        "Glaucoma", 
         "Retina",
         "Neuro-Ophthalmology",
         "Pediatric Ophthalmology",
@@ -267,17 +268,17 @@ class SignupViewModel: ObservableObject {
     ]
     
     var isStep1Valid: Bool {
-        return !firstName.isEmpty &&
-               !lastName.isEmpty &&
-               !email.isEmpty &&
-               email.contains("@") &&
+        return !firstName.isEmpty && 
+               !lastName.isEmpty && 
+               !email.isEmpty && 
+               email.contains("@") && 
                email.contains(".")
     }
     
     var isStep2Valid: Bool {
-        return !username.isEmpty &&
-               !password.isEmpty &&
-               password.count >= 6 &&
+        return !username.isEmpty && 
+               !password.isEmpty && 
+               password.count >= 6 && 
                password == confirmPassword
     }
     
@@ -294,44 +295,86 @@ class SignupViewModel: ObservableObject {
     }
     
     func createAccount() {
+        print("🚀 Starting account creation process...")
+        
         // Final validation
         guard isStep1Valid && isStep2Valid else {
+            print("❌ Validation failed - Step 1 valid: \(isStep1Valid), Step 2 valid: \(isStep2Valid)")
             handle.presentAlert(msg: "Please fill in all required fields correctly")
             return
         }
         
+        // Additional email validation
+        guard email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines).contains("@") &&
+              email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines).contains(".") else {
+            handle.presentAlert(msg: "Please enter a valid email address")
+            return
+        }
+        
+        // Username validation
+        guard !username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            handle.presentAlert(msg: "Please enter a username")
+            return
+        }
+        
+        // Trim all inputs
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let trimmedUsername = username.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedFirstName = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedLastName = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        print("📝 Account details - Email: \(trimmedEmail), Username: \(trimmedUsername), Name: \(trimmedFirstName) \(trimmedLastName)")
+        
         handle.setLoading(true)
         
         // Check if username is already taken
+        print("🔍 Checking if username '\(trimmedUsername)' is available...")
         let usersRef = Firestore.firestore().collection("users")
-        usersRef.whereField("exchangeUsername", isEqualTo: username).getDocuments { [weak self] snapshot, error in
-            if let error = error {
-                self?.handle.setLoading(false)
-                self?.handle.presentAlert(msg: "Error checking username: \(error.localizedDescription)")
-                return
-            }
-            if let docs = snapshot?.documents, !docs.isEmpty {
-                self?.handle.setLoading(false)
-                self?.handle.presentAlert(msg: "Username is already taken. Please choose another.")
-                return
-            }
-            // Username is unique, proceed with signup
-            FirebaseManager.shared.signUp(
-                email: self?.email ?? "",
-                password: self?.password ?? "",
-                firstName: self?.firstName ?? "",
-                lastName: self?.lastName ?? "",
-                specialty: self?.selectedSpecialty ?? "",
-                username: self?.username ?? ""
-            ) { result in
-                DispatchQueue.main.async {
+        usersRef.whereField("exchangeUsername", isEqualTo: trimmedUsername).getDocuments { [weak self] snapshot, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Error checking username availability: \(error.localizedDescription)")
                     self?.handle.setLoading(false)
-                    switch result {
-                    case .success:
-                        // Account created successfully - Firebase manager will handle state updates
-                        break
-                    case .failure(let error):
-                        self?.handle.presentAlert(msg: error.localizedDescription)
+                    
+                    // Check if it's a network error
+                    if error.localizedDescription.contains("network") || error.localizedDescription.contains("connection") {
+                        self?.handle.presentAlert(msg: "Network error. Please check your internet connection and try again.")
+                    } else {
+                        self?.handle.presentAlert(msg: "Error checking username: \(error.localizedDescription)")
+                    }
+                    return
+                }
+                
+                if let docs = snapshot?.documents, !docs.isEmpty {
+                    print("❌ Username '\(trimmedUsername)' is already taken")
+                    self?.handle.setLoading(false)
+                    self?.handle.presentAlert(msg: "Username is already taken. Please choose another.")
+                    return
+                }
+                
+                print("✅ Username '\(trimmedUsername)' is available")
+                
+                // Username is unique, proceed with signup
+                print("🔐 Proceeding with Firebase Auth signup...")
+                FirebaseManager.shared.signUp(
+                    email: trimmedEmail,
+                    password: self?.password ?? "",
+                    firstName: trimmedFirstName,
+                    lastName: trimmedLastName,
+                    specialty: self?.selectedSpecialty ?? "",
+                    username: trimmedUsername
+                ) { result in
+                    DispatchQueue.main.async {
+                        self?.handle.setLoading(false)
+                        switch result {
+                        case .success:
+                            print("🎉 Account created successfully!")
+                            // Account created successfully - Firebase manager will handle state updates
+                            break
+                        case .failure(let error):
+                            print("❌ Account creation failed: \(error.localizedDescription)")
+                            self?.handle.presentAlert(msg: error.localizedDescription)
+                        }
                     }
                 }
             }

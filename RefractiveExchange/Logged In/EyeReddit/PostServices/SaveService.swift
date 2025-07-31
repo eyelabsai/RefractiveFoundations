@@ -128,8 +128,8 @@ class SaveService: ObservableObject {
                                 if let userDoc = userDoc, userDoc.exists {
                                     do {
                                         let user = try userDoc.data(as: User.self)
-                                        if let username = user.exchangeUsername, !username.isEmpty {
-                                            authorName = username
+                                                                                 if !user.exchangeUsername.isEmpty {
+                                              authorName = user.exchangeUsername
                                         } else {
                                             authorName = "\(user.firstName) \(user.lastName)"
                                         }

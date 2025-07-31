@@ -41,12 +41,12 @@ struct User: Codable, Identifiable {
     var suffix: String
     var uid: String
     var avatarUrl: String?
-    var exchangeUsername: String?
+    var exchangeUsername: String
     var favoriteLenses: [String]?
     var savedPosts: [String]?
     var dateJoined: Timestamp?
     
-    init(cases: [IOLCase] = [], credential: String = "", email: String = "", firstName: String = "", lastName: String = "", position: String = "", specialty: String = "", state: String = "", suffix: String = "", uid: String = "", avatarUrl: String = "", exchangeUsername: String = "", favoriteLenses: [String] = [], savedPosts: [String] = [], dateJoined: Timestamp? = nil) {
+    init(cases: [IOLCase] = [], credential: String = "", email: String = "", firstName: String = "", lastName: String = "", position: String = "", specialty: String = "", state: String = "", suffix: String = "", uid: String = "", avatarUrl: String? = nil, exchangeUsername: String = "", favoriteLenses: [String]? = nil, savedPosts: [String]? = nil, dateJoined: Timestamp? = nil) {
         self.cases = cases
         self.credential = credential
         self.email = email

@@ -31,46 +31,70 @@ class FirebaseManager: ObservableObject {
     }
     
     func signIn(email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        print("🔐 Attempting sign in with email: \(email)")
+        
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] result, error in
             if let error = error as NSError? {
+                print("❌ Sign in failed with error code \(error.code): \(error.localizedDescription)")
                 let message: String
                 switch AuthErrorCode(rawValue: error.code) {
                 case .wrongPassword:
                     message = "Incorrect password."
                 case .userNotFound:
                     message = "No account found with this email."
+                case .invalidEmail:
+                    message = "Invalid email address."
+                case .userDisabled:
+                    message = "This account has been disabled."
+                case .networkError:
+                    message = "Network error. Please check your internet connection."
                 default:
                     message = error.localizedDescription
                 }
                 completion(.failure(NSError(domain: "FirebaseManager", code: error.code, userInfo: [NSLocalizedDescriptionKey: message])))
             } else {
+                print("✅ Sign in successful")
                 completion(.success(()))
             }
         }
     }
     
     func signUp(email: String, password: String, firstName: String, lastName: String, specialty: String, username: String?, completion: @escaping (Result<Void, Error>) -> Void) {
+        print("🔐 Attempting to create user account with email: \(email)")
+        
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
             if let error = error as NSError? {
+                print("❌ Firebase Auth signup failed with error code \(error.code): \(error.localizedDescription)")
                 let message: String
                 switch AuthErrorCode(rawValue: error.code) {
                 case .emailAlreadyInUse:
                     message = "Email already in use. Please use a different email."
+                case .weakPassword:
+                    message = "Password is too weak. Please use a stronger password."
+                case .invalidEmail:
+                    message = "Invalid email address format."
+                case .networkError:
+                    message = "Network error. Please check your internet connection and try again."
+                case .tooManyRequests:
+                    message = "Too many attempts. Please wait and try again later."
                 default:
-                    message = error.localizedDescription
+                    message = "Account creation failed: \(error.localizedDescription)"
                 }
                 completion(.failure(NSError(domain: "FirebaseManager", code: error.code, userInfo: [NSLocalizedDescriptionKey: message])))
                 return
             }
             
             guard let user = result?.user else {
-                completion(.failure(NSError(domain: "FirebaseManager", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to create user"])))
+                print("❌ Failed to get user from authentication result")
+                completion(.failure(NSError(domain: "FirebaseManager", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to create user account"])))
                 return
             }
             
+            print("✅ Firebase Auth account created successfully for UID: \(user.uid)")
+            
             // Create user document in Firestore
             print("🔥 Creating user document for UID: \(user.uid)")
-            print("📝 User data: \(firstName) \(lastName), email: \(email), specialty: \(specialty)")
+            print("📝 User data: \(firstName) \(lastName), email: \(email), specialty: \(specialty), username: \(username ?? "none")")
             
             let userData = User(
                 credential: "",
@@ -82,7 +106,7 @@ class FirebaseManager: ObservableObject {
                 state: "",
                 suffix: "",
                 uid: user.uid,
-                avatarUrl: "",
+                avatarUrl: nil,
                 exchangeUsername: username ?? "",
                 favoriteLenses: [],
                 savedPosts: [],
@@ -90,7 +114,14 @@ class FirebaseManager: ObservableObject {
             )
             
             self?.saveUserData(user: userData) { result in
-                completion(result)
+                switch result {
+                case .success:
+                    print("✅ User account and document created successfully")
+                    completion(.success(()))
+                case .failure(let error):
+                    print("❌ Failed to save user document: \(error)")
+                    completion(.failure(error))
+                }
             }
         }
     }
@@ -149,7 +180,7 @@ class FirebaseManager: ObservableObject {
                 state: "",
                 suffix: "",
                 uid: uid,
-                avatarUrl: "",
+                avatarUrl: nil,
                 exchangeUsername: "", // User can set this later
                 favoriteLenses: [],
                 savedPosts: [],

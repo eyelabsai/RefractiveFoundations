@@ -89,8 +89,8 @@ struct ConversationPreview: Identifiable {
         
         // Display name logic
         if let otherUser = otherUser {
-            if let username = otherUser.exchangeUsername, !username.isEmpty {
-                self.displayName = username
+            if !otherUser.exchangeUsername.isEmpty {
+                self.displayName = otherUser.exchangeUsername
             } else {
                 self.displayName = "\(otherUser.firstName) \(otherUser.lastName)".trimmingCharacters(in: .whitespaces)
             }

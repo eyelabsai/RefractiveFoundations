@@ -86,8 +86,8 @@ class EyeExchangeProfileViewController: UIViewController {
         }
         let fullName = [user.firstName, user.lastName].compactMap { $0 }.joined(separator: " ")
             
-        if let exchangeUsername = user.exchangeUsername, !exchangeUsername.isEmpty {
-            eyeExchangeProfileView.usernameLabel.attributedText = createAttributedText(primaryText: exchangeUsername, secondaryText: fullName)
+        if !user.exchangeUsername.isEmpty {
+            eyeExchangeProfileView.usernameLabel.attributedText = createAttributedText(primaryText: user.exchangeUsername, secondaryText: fullName)
         } else {
             eyeExchangeProfileView.usernameLabel.text = fullName
             eyeExchangeProfileView.usernameLabel.textColor = .black

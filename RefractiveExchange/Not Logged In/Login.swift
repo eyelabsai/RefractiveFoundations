@@ -13,57 +13,66 @@ struct LoginScreen: View {
     @State private var animateIcon: Bool = false
     var body: some View {
         ZStack {
-            VStack(spacing: 20) {
-                Spacer()
-                
-                // App Icon - prominently displayed
-                VStack {
-                    // App Icon - even larger and more prominent
-                    Image("RF Icon")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 160, height: 160)
-                        .clipShape(RoundedRectangle(cornerRadius: 28))
-                        .shadow(color: .black.opacity(0.2), radius: 14, x: 0, y: 7)
-                        .scaleEffect(model.handle.loading ? 1.05 : 1.0)
-                        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: model.handle.loading)
-                }
-                .padding(.vertical, 40)
-                
-                CustomTextField(text: $model.user.email, title: "Email")
-                
-                if !model.resetPassword {
-                    CustomTextField(text: $model.password, title: "Password", isPassword: true)
-                        .padding(.top, 25)
-                }
-                
-                HStack {
-                    Button {
-                        withAnimation {
-                            if model.resetPassword {
-                                model.resetButtonText = "Log in"
-                            } else {
-                                model.resetButtonText = "Reset Password"
-                            }
-                            model.resetPassword.toggle()
-                        }
-                    } label: {
-                        Text(model.resetPassword ? "Cancel" : "Forgot Password?")
-                            .foregroundColor(.black)
-                            .poppinsMedium(16)
-                    }
-                    Spacer()
-                }
-                .padding(.top, 20)
-                
-                CustomButton(loading: $model.handle.loading, title: $model.resetButtonText, width: .constant(UIScreen.main.bounds.width - 50), color: .black, transpositionMode: false) {
+            ScrollView {
+                VStack(spacing: 20) {
+                    Spacer(minLength: 60)
                     
-                    if model.resetPassword {
-                        model.sendResetEmail()
-                    } else {                            model.loginUser()
+                    // App Icon - prominently displayed
+                    VStack {
+                        // App Icon - even larger and more prominent
+                        Image("RF Icon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 160, height: 160)
+                            .clipShape(RoundedRectangle(cornerRadius: 28))
+                            .shadow(color: .black.opacity(0.2), radius: 14, x: 0, y: 7)
+                            .scaleEffect(model.handle.loading ? 1.05 : 1.0)
+                            .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: model.handle.loading)
+                    }
+                    .padding(.vertical, 40)
+                
+                VStack(spacing: 20) {
+                    CustomTextField(text: $model.user.email, title: "Email")
+                        .frame(maxWidth: 400)
+                    
+                    if !model.resetPassword {
+                        CustomTextField(text: $model.password, title: "Password", isPassword: true)
+                            .frame(maxWidth: 400)
                     }
                 }
-                .padding(.top, 25)
+                .padding(.horizontal, 20)
+                
+                VStack(spacing: 20) {
+                    HStack {
+                        Button {
+                            withAnimation {
+                                if model.resetPassword {
+                                    model.resetButtonText = "Log in"
+                                } else {
+                                    model.resetButtonText = "Reset Password"
+                                }
+                                model.resetPassword.toggle()
+                            }
+                        } label: {
+                            Text(model.resetPassword ? "Cancel" : "Forgot Password?")
+                                .foregroundColor(.black)
+                                .poppinsMedium(16)
+                        }
+                        Spacer()
+                    }
+                    .frame(maxWidth: 400)
+                    
+                    CustomButton(loading: $model.handle.loading, title: $model.resetButtonText, width: .constant(min(UIScreen.main.bounds.width - 50, 400)), color: .black, transpositionMode: false) {
+                        
+                        if model.resetPassword {
+                            model.sendResetEmail()
+                        } else {
+                            model.loginUser()
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
                 
                 HStack(spacing: 5) {
                     Spacer()
@@ -81,14 +90,15 @@ struct LoginScreen: View {
                     }
                     Spacer()
                 }
+                .frame(maxWidth: 400)
+                .padding(.horizontal, 20)
                 .padding(.top, 30)
                 
-                Spacer()
-                
-                /*CustomSecondaryLogo()
-                 .padding(.bottom, 17) */
+                    Spacer(minLength: 60)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, max(25, (UIScreen.main.bounds.width - 500) / 2))
             }
-            .padding(.horizontal, 25)
             .zIndex(0)
             
             CustomAlert(handle: $model.handle)
