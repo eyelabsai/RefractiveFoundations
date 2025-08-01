@@ -79,6 +79,7 @@ struct SignupScreen: View {
                 // App Logo - prominently displayed and large
                 Image("RF Icon")
                     .resizable()
+                    .renderingMode(.original)
                     .scaledToFit()
                     .frame(width: 180, height: 180)
                     .clipShape(RoundedRectangle(cornerRadius: 30))

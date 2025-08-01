@@ -93,10 +93,9 @@ struct Main: View {
             Link(destination: URL(string: "https://refractivefoundations.com/")!) {
                 Image("RF Icon")
                     .resizable()
-                    .renderingMode(.template)
+                    .renderingMode(.original)
                     .scaledToFit()
                     .frame(width: 95, height: 95)
-                    .foregroundColor(.primary)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
             }
