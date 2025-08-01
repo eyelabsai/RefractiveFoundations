@@ -74,6 +74,88 @@ struct CustomTextFieldStyle: TextFieldStyle {
     }
 }
 
+// Custom Autocomplete TextField Component
+struct CustomAutocompleteField: View {
+    @Binding var text: String
+    let title: String
+    let suggestions: [String]
+    @State private var showSuggestions = false
+    @State private var filteredSuggestions: [String] = []
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.gray)
+            
+            ZStack(alignment: .topLeading) {
+                TextField("", text: $text)
+                    .textFieldStyle(CustomTextFieldStyle())
+                    .autocapitalization(.words)
+                    .disableAutocorrection(true)
+                    .onChange(of: text) { newValue in
+                        filterSuggestions()
+                    }
+                    .onTapGesture {
+                        showSuggestions = true
+                    }
+                
+                if showSuggestions && !filteredSuggestions.isEmpty {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(filteredSuggestions.prefix(5), id: \.self) { suggestion in
+                            Button(action: {
+                                text = suggestion
+                                showSuggestions = false
+                            }) {
+                                HStack {
+                                    Text(suggestion)
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.primary)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 12)
+                                    Spacer()
+                                }
+                                .background(Color(.systemBackground))
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            
+                            if suggestion != filteredSuggestions.prefix(5).last {
+                                Divider()
+                                    .padding(.leading, 16)
+                            }
+                        }
+                    }
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color(.systemGray4), lineWidth: 1)
+                    )
+                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    .offset(y: 50)
+                    .zIndex(1)
+                }
+            }
+        }
+        .onTapGesture {
+            // Hide suggestions when tapping outside
+            if showSuggestions {
+                showSuggestions = false
+            }
+        }
+    }
+    
+    private func filterSuggestions() {
+        if text.isEmpty {
+            filteredSuggestions = []
+        } else {
+            filteredSuggestions = suggestions.filter { suggestion in
+                suggestion.lowercased().contains(text.lowercased())
+            }
+        }
+    }
+}
+
 // Custom Tab Bar Component
 struct CustomTabBar: View {
     @Binding var selected: Int

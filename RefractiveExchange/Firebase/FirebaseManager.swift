@@ -59,7 +59,7 @@ class FirebaseManager: ObservableObject {
         }
     }
     
-    func signUp(email: String, password: String, firstName: String, lastName: String, specialty: String, username: String?, completion: @escaping (Result<Void, Error>) -> Void) {
+    func signUp(email: String, password: String, firstName: String, lastName: String, specialty: String, username: String?, practiceLocation: String?, practiceName: String?, completion: @escaping (Result<Void, Error>) -> Void) {
         print("🔐 Attempting to create user account with email: \(email)")
         
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
@@ -110,7 +110,9 @@ class FirebaseManager: ObservableObject {
                 exchangeUsername: username ?? "",
                 favoriteLenses: [],
                 savedPosts: [],
-                dateJoined: Timestamp(date: Date())
+                dateJoined: Timestamp(date: Date()),
+                practiceLocation: practiceLocation,
+                practiceName: practiceName
             )
             
             self?.saveUserData(user: userData) { result in

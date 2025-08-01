@@ -7,6 +7,13 @@
 
 import SwiftUI
 
+// MARK: - User Profile Model
+struct UserProfile: Identifiable {
+    let id = UUID()
+    let username: String
+    let userId: String
+}
+
 struct FeedView: View {
     @ObservedObject var viewModel = FeedViewModel.shared
     @ObservedObject var data: GetData
@@ -15,6 +22,7 @@ struct FeedView: View {
     @Binding var isSidebarVisible: Bool
     @Binding var navigationPath: NavigationPath
     @State private var selectedUserProfile: UserProfile?
+    @State private var showingSearch = false
 
     
     var body: some View {
@@ -54,7 +62,7 @@ struct FeedView: View {
                             
                             // Search button (Reddit has this)
                             Button(action: {
-                                // Search functionality
+                                showingSearch = true
                             }) {
                                 Image(systemName: "magnifyingglass")
                                     .font(.system(size: 18, weight: .medium))
@@ -73,7 +81,7 @@ struct FeedView: View {
                     )
                     
                     ScrollView{
-                        LazyVStack(alignment: .leading, spacing: 2){
+                        LazyVStack(alignment: .leading, spacing: 0){
                             ForEach(viewModel.posts) { post in
                                 PostRow(
                                     post: post,
@@ -93,12 +101,12 @@ struct FeedView: View {
                                         viewModel.refreshPosts()
                                     }
                                 )
-                                .background(Color(.systemBackground))
                             }
                         }
                         .background(Color(.systemGroupedBackground))
                     }
                     .refreshable {
+                        print("🔄 Manual refresh triggered")
                         viewModel.refreshPosts()
                     }
                 }
@@ -116,15 +124,10 @@ struct FeedView: View {
                     data: data
                 )
             }
-
+            .fullScreenCover(isPresented: $showingSearch) {
+                SearchView(data: data)
+                    .environmentObject(darkModeManager)
+            }
         }
     }
-
-}
-
-// MARK: - User Profile Model
-struct UserProfile: Identifiable {
-    let id = UUID()
-    let username: String
-    let userId: String
 }

@@ -29,6 +29,8 @@ struct CreatePostView: View {
     // Original comprehensive list (commented out for now)
     // let subredditsWithoutAll = ["i/Anterior Segment, Cataract, & Cornea", "i/Glaucoma", "i/Retina", "i/Neuro-Opthamology", "i/Pediatric Opthamology", "i/Ocular Oncology", "i/Oculoplastic Surgery", "i/Uveitis", "i/Residents & Fellows", "i/Medical Students", "i/Company Representatives"]
     @State private var showImagePicker = false
+    @State private var showImageOptions = false
+    @State private var imageSourceType: UIImagePickerController.SourceType = .photoLibrary
     @State var postImageData: Data?
     @State private var isLoading = false
     @ObservedObject var data: GetData
@@ -57,6 +59,7 @@ struct CreatePostView: View {
                         dismiss()
                     }
                 Spacer()
+                
                 Button("Post") {
                     createPost()
                 }
@@ -70,7 +73,8 @@ struct CreatePostView: View {
 
             }
             .padding(.horizontal, 15)
-            .padding(.vertical, 7)
+            .padding(.vertical, 10)
+            .background(Color(.systemBackground))
             
             ScrollView(.vertical, showsIndicators: false) {
                 VStack {
@@ -203,22 +207,70 @@ struct CreatePostView: View {
             
             HStack {
                 Button {
-                    showImagePicker.toggle()
+                    showImageOptions.toggle()
                 } label: {
-                    Image(systemName: "photo")
-                        .foregroundColor(.primary)
-                        .frame(width: 44, height: 44)
-                        .background(Color(.systemGray5))
-                        .clipShape(Circle())
+                    HStack(spacing: 8) {
+                        Image(systemName: "photo")
+                            .foregroundColor(.primary)
+                        Text("Add Photo")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.primary)
+                    }
+                    .frame(height: 44)
+                    .padding(.horizontal, 16)
+                    .background(Color(.systemGray5))
+                    .clipShape(RoundedRectangle(cornerRadius: 22))
                 }
                 Spacer()
             }
             .padding(.leading, 20)
 
+            // Image preview section
+            if let inputImage = inputImage {
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Selected Image")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Button("Remove") {
+                            self.inputImage = nil
+                            self.postImageData = nil
+                        }
+                        .foregroundColor(.red)
+                        .font(.caption)
+                    }
+                    
+                    Image(uiImage: inputImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxWidth: .infinity, maxHeight: 200)
+                        .clipped()
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+            }
             
         }
         .sheet(isPresented: $showImagePicker) {
-            ImagePicker(inputImage: self.$inputImage)
+            ImagePicker(inputImage: self.$inputImage, sourceType: imageSourceType)
+        }
+        .actionSheet(isPresented: $showImageOptions) {
+            ActionSheet(
+                title: Text("Select Image Source"),
+                buttons: [
+                    .default(Text("Camera")) {
+                        imageSourceType = .camera
+                        showImagePicker = true
+                    },
+                    .default(Text("Photo Library")) {
+                        imageSourceType = .photoLibrary
+                        showImagePicker = true
+                    },
+                    .cancel()
+                ]
+            )
         }
         .overlay {
             if isLoading    {
@@ -245,7 +297,12 @@ struct CreatePostView: View {
         
         // Prepare image data if image is selected
         if let uiImage = inputImage {
-            postImageData = uiImage.jpegData(compressionQuality: 0.7)
+            // Resize image for better performance and storage efficiency
+            if let resizedImage = resizeImage(image: uiImage, targetSize: CGSize(width: 800, height: 800)) {
+                postImageData = resizedImage.jpegData(compressionQuality: 0.7)
+            } else {
+                postImageData = uiImage.jpegData(compressionQuality: 0.7)
+            }
         }
         
         // Clean up text field
@@ -298,6 +355,48 @@ struct CreatePostView: View {
                 }
             }
         }
+    }
+    
+    // MARK: - Helper Functions
+    private func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage? {
+        let size = image.size
+        
+        // Safety checks to prevent NaN values
+        guard size.width > 0 && size.height > 0 && 
+              targetSize.width > 0 && targetSize.height > 0 &&
+              size.width.isFinite && size.height.isFinite &&
+              targetSize.width.isFinite && targetSize.height.isFinite else {
+            print("⚠️ Invalid image dimensions detected")
+            return image
+        }
+        
+        let widthRatio  = targetSize.width  / size.width
+        let heightRatio = targetSize.height / size.height
+        let ratio = min(widthRatio, heightRatio)
+        
+        // Additional safety check for ratio
+        guard ratio > 0 && ratio.isFinite else {
+            print("⚠️ Invalid ratio calculated")
+            return image
+        }
+        
+        let newSize = CGSize(width: size.width * ratio, height: size.height * ratio)
+        
+        // Final safety check for new size
+        guard newSize.width > 0 && newSize.height > 0 &&
+              newSize.width.isFinite && newSize.height.isFinite else {
+            print("⚠️ Invalid new size calculated")
+            return image
+        }
+        
+        let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
+        
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+        image.draw(in: rect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
     }
 }
 

@@ -358,7 +358,7 @@ struct NewMessageView: View {
                     .frame(width: 40, height: 40)
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(!user.exchangeUsername.isEmpty ? user.exchangeUsername : "\(user.firstName) \(user.lastName)")
+                    Text("\(user.firstName) \(user.lastName)")
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.primary)
                     
@@ -390,7 +390,7 @@ struct NewMessageView: View {
                 ForEach(searchResults) { user in
                     Button(action: {
                         selectedUser = user
-                        searchText = !user.exchangeUsername.isEmpty ? user.exchangeUsername : "\(user.firstName) \(user.lastName)"
+                        searchText = "\(user.firstName) \(user.lastName)"
                         isSearching = false
                     }) {
                         HStack {
@@ -404,7 +404,7 @@ struct NewMessageView: View {
                                 .frame(width: 40, height: 40)
                             
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(!user.exchangeUsername.isEmpty ? user.exchangeUsername : "\(user.firstName) \(user.lastName)")
+                                Text("\(user.firstName) \(user.lastName)")
                                     .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(.primary)
                                 
@@ -476,10 +476,9 @@ struct NewMessageView: View {
                             try? document.data(as: User.self)
                         }.filter { user in
                             let searchLower = searchText.lowercased()
-                            let username = user.exchangeUsername.lowercased()
                             let fullName = "\(user.firstName) \(user.lastName)".lowercased()
                             
-                            return username.contains(searchLower) || fullName.contains(searchLower)
+                            return fullName.contains(searchLower)
                         }
                         
                         searchResults = users

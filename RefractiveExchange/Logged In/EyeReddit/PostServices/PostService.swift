@@ -102,13 +102,20 @@ struct PostService  {
                     
                     if let user = user {
                         // User found - use their details
-                                                 if !user.exchangeUsername.isEmpty {
-                              authorName = user.exchangeUsername
+                        let firstName = user.firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let lastName = user.lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        
+                        // Always prioritize first and last name combination
+                        if !firstName.isEmpty || !lastName.isEmpty {
+                            authorName = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespacesAndNewlines)
                         } else {
-                            authorName = "\(user.firstName) \(user.lastName)"
+                            // Only use username if both names are completely empty
+                            authorName = !user.exchangeUsername.isEmpty ? user.exchangeUsername : "Unknown User"
                         }
+                        
                         avatarUrl = user.avatarUrl
-                        print("✅ Set author name: \(authorName) for post: \(storedPost.title)")
+                        print("✅ Set author name: '\(authorName)' for post: '\(storedPost.title)'")
+                        print("🔍 User data: firstName='\(firstName)', lastName='\(lastName)', exchangeUsername='\(user.exchangeUsername)'")
                     } else {
                         // User not found - use fallback but also try to create the user document
                         authorName = "Unknown User"

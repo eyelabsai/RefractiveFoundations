@@ -55,7 +55,7 @@ struct Main: View {
         HStack {
             // Home button always visible - takes you to main feed
             Button {
-                withAnimation {
+                withAnimation { 
                     // Clear any navigation stacks first
                     if !navigationPath.isEmpty {
                         navigationPath.removeLast(navigationPath.count)
@@ -93,8 +93,10 @@ struct Main: View {
             Link(destination: URL(string: "https://refractivefoundations.com/")!) {
                 Image("RF Icon")
                     .resizable()
+                    .renderingMode(.template)
                     .scaledToFit()
                     .frame(width: 95, height: 95)
+                    .foregroundColor(.primary)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
             }

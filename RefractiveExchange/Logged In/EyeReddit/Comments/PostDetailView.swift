@@ -368,7 +368,11 @@ struct PostDetailView: View {
         isLoading = true
         Task {
             do {
-                let authorName = (data.user != nil && !data.user!.exchangeUsername.isEmpty) ? data.user!.exchangeUsername : "\(data.user?.firstName ?? "Anonymous") \(data.user?.lastName ?? "User")"
+                let firstName = data.user?.firstName.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                let lastName = data.user?.lastName.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                let authorName = (!firstName.isEmpty || !lastName.isEmpty) ? 
+                    "\(firstName) \(lastName)".trimmingCharacters(in: .whitespacesAndNewlines) :
+                    (!(data.user?.exchangeUsername.isEmpty ?? true) ? data.user!.exchangeUsername : "Anonymous User")
                 let comment = Comment(postId: post.id!, text: trimmedCommentText, author: authorName, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], uid: Auth.auth().currentUser?.uid ?? "")
                 try await uploadFirebase(comment)
                 

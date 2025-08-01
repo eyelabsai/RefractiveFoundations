@@ -26,6 +26,10 @@ class FeedViewModel: ObservableObject   {
     
     func refreshPosts() {
         print("🔄 Refreshing posts...")
+        // Clear existing posts to force fresh fetch
+        self.posts = []
+        self.allPosts = []
+        
         service.fetchPosts { posts in
             print("📥 Fetched \(posts.count) posts from Firebase")
             DispatchQueue.main.async {

@@ -54,7 +54,7 @@ struct PublicProfileView: View {
                     ChatView(
                         conversationId: existingConversationId, // Use existing conversation ID if found, empty string for new
                         otherUser: otherUser,
-                        displayName: !otherUser.exchangeUsername.isEmpty ? otherUser.exchangeUsername : "\(otherUser.firstName) \(otherUser.lastName)"
+                        displayName: "\(otherUser.firstName) \(otherUser.lastName)"
                     )
                 }
             }
@@ -64,6 +64,11 @@ struct PublicProfileView: View {
             viewModel.loadUserProfile(userId: userId)
             viewModel.loadUserPosts(userId: userId)
             viewModel.loadUserComments(userId: userId)
+        }
+        .onChange(of: viewModel.user) { user in
+            if let user = user {
+                otherUser = user
+            }
         }
     }
     
@@ -118,9 +123,15 @@ struct PublicProfileView: View {
                     .frame(width: 80, height: 80)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("u/\(username)")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.primary)
+                    if let user = viewModel.user {
+                        Text("\(user.firstName) \(user.lastName)")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.primary)
+                    } else {
+                        Text("Loading...")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.primary)
+                    }
                     
                     if viewModel.isLoadingProfile {
                         Text("Loading...")
@@ -202,7 +213,7 @@ struct PublicProfileView: View {
     // MARK: - Posts Tab
     private var postsTab: some View {
         ScrollView {
-            LazyVStack(spacing: 0) {
+            LazyVStack(spacing: 8) {
                 if viewModel.isLoadingPosts {
                     VStack(spacing: 16) {
                         ProgressView()
@@ -247,10 +258,6 @@ struct PublicProfileView: View {
                                 // In a more complex app, you might want to push to a new view
                             }
                         )
-                        .background(Color(.systemBackground))
-                        
-                        Divider()
-                            .padding(.leading, 16)
                     }
                 }
             }
@@ -325,13 +332,19 @@ struct PublicProfileView: View {
                     
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
-                            Text("Username:")
+                            Text("Name:")
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.secondary)
                             Spacer()
-                            Text("u/\(username)")
-                                .font(.system(size: 14))
-                                .foregroundColor(.primary)
+                            if let user = viewModel.user {
+                                Text("\(user.firstName) \(user.lastName)")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.primary)
+                            } else {
+                                Text("Loading...")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                            }
                         }
                         
                         HStack {
@@ -345,6 +358,30 @@ struct PublicProfileView: View {
                                     .foregroundColor(.secondary)
                             } else {
                                 Text(viewModel.memberSince)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                        
+                        if let user = viewModel.user, let practiceLocation = user.practiceLocation, !practiceLocation.isEmpty {
+                            HStack {
+                                Text("Practice Location:")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(practiceLocation)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                        
+                        if let user = viewModel.user, let practiceName = user.practiceName, !practiceName.isEmpty {
+                            HStack {
+                                Text("Practice Name:")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(practiceName)
                                     .font(.system(size: 14))
                                     .foregroundColor(.primary)
                             }
@@ -501,6 +538,7 @@ class PublicProfileViewModel: ObservableObject {
     @Published var isLoadingProfile = true
     @Published var isLoadingPosts = true
     @Published var isLoadingComments = true
+    @Published var user: User?
     
     func loadUserProfile(userId: String) {
         isLoadingProfile = true
@@ -522,6 +560,7 @@ class PublicProfileViewModel: ObservableObject {
                     do {
                         let user = try document.data(as: User.self)
                         print("✅ User decoded successfully: \(user.firstName) \(user.lastName)")
+                        self?.user = user
                         
                         if let dateJoined = user.dateJoined {
                             let date = dateJoined.dateValue()
@@ -642,10 +681,15 @@ class PublicProfileViewModel: ObservableObject {
                     let avatarUrl: String?
                     
                     if let user = user {
-                                                 if !user.exchangeUsername.isEmpty {
-                              authorName = user.exchangeUsername
+                        let firstName = user.firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let lastName = user.lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        
+                        // Always prioritize first and last name combination
+                        if !firstName.isEmpty || !lastName.isEmpty {
+                            authorName = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespacesAndNewlines)
                         } else {
-                            authorName = "\(user.firstName) \(user.lastName)"
+                            // Only use username if both names are completely empty
+                            authorName = !user.exchangeUsername.isEmpty ? user.exchangeUsername : "Unknown User"
                         }
                         avatarUrl = user.avatarUrl
                     } else {

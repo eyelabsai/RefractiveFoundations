@@ -128,10 +128,15 @@ class SaveService: ObservableObject {
                                 if let userDoc = userDoc, userDoc.exists {
                                     do {
                                         let user = try userDoc.data(as: User.self)
-                                                                                 if !user.exchangeUsername.isEmpty {
-                                              authorName = user.exchangeUsername
+                                        let firstName = user.firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+                                        let lastName = user.lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+                                        
+                                        // Always prioritize first and last name combination
+                                        if !firstName.isEmpty || !lastName.isEmpty {
+                                            authorName = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespacesAndNewlines)
                                         } else {
-                                            authorName = "\(user.firstName) \(user.lastName)"
+                                            // Only use username if both names are completely empty
+                                            authorName = !user.exchangeUsername.isEmpty ? user.exchangeUsername : "Unknown User"
                                         }
                                         avatarUrl = user.avatarUrl
                                     } catch {

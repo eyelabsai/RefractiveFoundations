@@ -176,6 +176,10 @@ struct Step1View: View {
                 
                 CustomTextField(text: $viewModel.email, title: "Email")
                 
+                CustomTextField(text: $viewModel.practiceLocation, title: "Practice Location (City)")
+                
+                CustomTextField(text: $viewModel.practiceName, title: "Practice Name")
+                
                 // Subspecialty picker
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Subspecialty")
@@ -247,24 +251,19 @@ class SignupViewModel: ObservableObject {
     @Published var lastName = ""
     @Published var email = ""
     @Published var username = ""
-    @Published var selectedSpecialty = "General Ophthalmology"
+    @Published var selectedSpecialty = "Resident"
+    @Published var practiceLocation = ""
+    @Published var practiceName = ""
     @Published var password = ""
     @Published var confirmPassword = ""
     @Published var handle = AlertHandler()
     
     let specialties = [
-        "General Ophthalmology",
-        "Anterior Segment, Cataract, & Cornea",
-        "Glaucoma", 
-        "Retina",
-        "Neuro-Ophthalmology",
-        "Pediatric Ophthalmology",
-        "Ocular Oncology",
-        "Oculoplastic Surgery",
-        "Uveitis",
-        "Resident/Fellow",
-        "Medical Student",
-        "Other"
+        "Resident",
+        "Fellow",
+        "Refractive Surgeon",
+        "Optometrist/APP",
+        "Industry"
     ]
     
     var isStep1Valid: Bool {
@@ -272,7 +271,9 @@ class SignupViewModel: ObservableObject {
                !lastName.isEmpty && 
                !email.isEmpty && 
                email.contains("@") && 
-               email.contains(".")
+               email.contains(".") &&
+               !practiceLocation.isEmpty &&
+               !practiceName.isEmpty
     }
     
     var isStep2Valid: Bool {
@@ -362,7 +363,9 @@ class SignupViewModel: ObservableObject {
                     firstName: trimmedFirstName,
                     lastName: trimmedLastName,
                     specialty: self?.selectedSpecialty ?? "",
-                    username: trimmedUsername
+                    username: trimmedUsername,
+                    practiceLocation: self?.practiceLocation.trimmingCharacters(in: .whitespacesAndNewlines),
+                    practiceName: self?.practiceName.trimmingCharacters(in: .whitespacesAndNewlines)
                 ) { result in
                     DispatchQueue.main.async {
                         self?.handle.setLoading(false)

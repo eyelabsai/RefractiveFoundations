@@ -23,7 +23,7 @@ struct ProfileView: View {
     @State private var showingEditProfile = false
     @State private var showingDeleteAccountAlert = false
     
-    let tabTitles = ["Posts", "Comments", "Saved"]
+    let tabTitles = ["Posts", "Comments", "Saved", "About"]
     let service = PostService()
     let saveService = SaveService.shared
     
@@ -49,6 +49,10 @@ struct ProfileView: View {
                     // Saved Tab
                     savedTab
                         .tag(2)
+                    
+                    // About Tab
+                    aboutTab
+                        .tag(3)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }
@@ -159,22 +163,11 @@ struct ProfileView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    // Username
+                    // Name
                     if let user = data.user {
-                                                 if !user.exchangeUsername.isEmpty {
-                              Text("u/\(user.exchangeUsername)")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.primary)
-                        } else {
-                            Text("u/\(user.firstName.lowercased())\(user.lastName.lowercased())")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.primary)
-                        }
-                        
-                        // Real name
                         Text("\(user.firstName) \(user.lastName)")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.primary)
                         
                         // Member since
                         Text("• Member since \(memberSince)")
@@ -211,9 +204,11 @@ struct ProfileView: View {
             
             // Stats Row
             HStack(spacing: 0) {
+                Spacer()
                 statItem(title: "Posts", count: userPosts.count)
                 statItem(title: "Comments", count: userComments.count)
                 statItem(title: "Saved", count: savedPosts.count)
+                Spacer()
             }
             .padding(.horizontal, 20)
         }
@@ -254,7 +249,7 @@ struct ProfileView: View {
     // MARK: - Tab Views
     private var postsTab: some View {
         ScrollView {
-            LazyVStack(spacing: 0) {
+            LazyVStack(spacing: 8) {
                 if isLoading {
                     VStack(spacing: 16) {
                         ProgressView()
@@ -300,12 +295,8 @@ struct ProfileView: View {
                                     // Navigate to user profile
                                 }
                             )
-                            .background(Color(.systemBackground))
                         }
                         .buttonStyle(PlainButtonStyle())
-                        
-                        Divider()
-                            .padding(.leading, 16)
                     }
                 }
             }
@@ -365,7 +356,7 @@ struct ProfileView: View {
     
     private var savedTab: some View {
         ScrollView {
-            LazyVStack(spacing: 0) {
+            LazyVStack(spacing: 8) {
                 if isLoading {
                     VStack(spacing: 16) {
                         ProgressView()
@@ -411,12 +402,8 @@ struct ProfileView: View {
                                     // Navigate to user profile
                                 }
                             )
-                            .background(Color(.systemBackground))
                         }
                         .buttonStyle(PlainButtonStyle())
-                        
-                        Divider()
-                            .padding(.leading, 16)
                     }
                 }
             }
@@ -424,12 +411,210 @@ struct ProfileView: View {
         .background(Color(.systemGroupedBackground))
     }
     
+    private var aboutTab: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                // User Information
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Personal Information")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Full Name:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(data.user?.firstName ?? "") \(data.user?.lastName ?? "")")
+                                .font(.system(size: 14))
+                                .foregroundColor(.primary)
+                        }
+                        
+                        HStack {
+                            Text("Specialty:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(data.user?.specialty ?? "Not specified")
+                                .font(.system(size: 14))
+                                .foregroundColor(.primary)
+                        }
+                        
+                        HStack {
+                            Text("Practice Location:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(data.user?.practiceLocation ?? "Not specified")
+                                .font(.system(size: 14))
+                                .foregroundColor(.primary)
+                        }
+                        
+                        HStack {
+                            Text("Practice Name:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(data.user?.practiceName ?? "Not specified")
+                                .font(.system(size: 14))
+                                .foregroundColor(.primary)
+                        }
+                        
+                        HStack {
+                            Text("Email:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(data.user?.email ?? "Not available")
+                                .font(.system(size: 14))
+                                .foregroundColor(.primary)
+                        }
+                        
+                        HStack {
+                            Text("Member Since:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(memberSince)
+                                .font(.system(size: 14))
+                                .foregroundColor(.primary)
+                        }
+                        
+                        HStack {
+                            Text("Years Active:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(yearsActive) year\(yearsActive != 1 ? "s" : "")")
+                                .font(.system(size: 14))
+                                .foregroundColor(.primary)
+                        }
+                    }
+                }
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                
+                // Activity Stats
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Activity")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Posts:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(userPosts.count)")
+                                .font(.system(size: 14))
+                                .foregroundColor(.primary)
+                        }
+                        
+                        HStack {
+                            Text("Comments:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(userComments.count)")
+                                .font(.system(size: 14))
+                                .foregroundColor(.primary)
+                        }
+                        
+                        HStack {
+                            Text("Saved Posts:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(savedPosts.count)")
+                                .font(.system(size: 14))
+                                .foregroundColor(.primary)
+                        }
+                    }
+                }
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                
+                // Account Management
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Account")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        Button(action: {
+                            showingEditProfile = true
+                        }) {
+                            HStack {
+                                Image(systemName: "person.crop.circle")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.blue)
+                                    .frame(width: 24)
+                                
+                                Text("Edit Profile")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.primary)
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 12)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        Divider()
+                        
+                        Button(action: {
+                            showingSettings = true
+                        }) {
+                            HStack {
+                                Image(systemName: "gear")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.blue)
+                                    .frame(width: 24)
+                                
+                                Text("Settings")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.primary)
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 12)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+            }
+            .padding(16)
+        }
+        .background(Color(.systemGroupedBackground))
+    }
+    
     // MARK: - Helper Views
-    private func statItem(title: String, count: Int) -> some View {
+    private func statItem(title: String, count: Int?) -> some View {
         VStack(spacing: 4) {
-            Text("\(count)")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(.primary)
+            if let count = count {
+                Text("\(count)")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.primary)
+            } else {
+                Text("ℹ︎")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.blue)
+            }
             
             Text(title)
                 .font(.system(size: 12))
@@ -760,7 +945,7 @@ struct SettingsView: View {
                         
                         VStack(spacing: 12) {
                             InfoRow(title: "Full Name", value: "\(data.user?.firstName ?? "") \(data.user?.lastName ?? "")")
-                            InfoRow(title: "Username", value: "u/\(data.user?.exchangeUsername ?? "\(data.user?.firstName.lowercased() ?? "")\(data.user?.lastName.lowercased() ?? "")")")
+                            InfoRow(title: "Display Name", value: "\(data.user?.firstName ?? "") \(data.user?.lastName ?? "")")
                             InfoRow(title: "Specialty", value: data.user?.specialty ?? "Not specified")
                             InfoRow(title: "Email", value: data.user?.email ?? "Not available")
                             InfoRow(title: "Member Since", value: memberSince)
@@ -1031,24 +1216,19 @@ struct EditProfileView: View {
     
     @State private var firstName = ""
     @State private var lastName = ""
-    @State private var selectedSpecialty = "General Ophthalmology"
+    @State private var selectedSpecialty = "Resident"
+    @State private var practiceLocation = ""
+    @State private var practiceName = ""
     @State private var isLoading = false
     @State private var showAlert = false
     @State private var alertMessage = ""
     
     let specialties = [
-        "General Ophthalmology",
-        "Anterior Segment, Cataract, & Cornea",
-        "Glaucoma", 
-        "Retina",
-        "Neuro-Ophthalmology",
-        "Pediatric Ophthalmology",
-        "Ocular Oncology",
-        "Oculoplastic Surgery",
-        "Uveitis",
-        "Resident/Fellow",
-        "Medical Student",
-        "Other"
+        "Resident",
+        "Fellow",
+        "Refractive Surgeon",
+        "Optometrist/APP",
+        "Industry"
     ]
     
     var body: some View {
@@ -1118,21 +1298,20 @@ struct EditProfileView: View {
                                     )
                             }
                             
-                            // Username (Read-only)
+                            // Display Name (Read-only)
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Username")
+                                Text("Display Name")
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundColor(.secondary)
                                 
                                 HStack {
                                     if let user = data.user {
-                                        let username = !user.exchangeUsername.isEmpty ? user.exchangeUsername : "\(user.firstName.lowercased())\(user.lastName.lowercased())"
-                                        Text("u/\(username)")
+                                        Text("\(user.firstName) \(user.lastName)")
                                             .font(.system(size: 16))
                                             .foregroundColor(.secondary)
                                     }
                                     Spacer()
-                                    Text("Cannot be changed")
+                                    Text("Based on your name")
                                         .font(.system(size: 12))
                                         .foregroundColor(.secondary)
                                         .italic()
@@ -1179,6 +1358,42 @@ struct EditProfileView: View {
                                     )
                                 }
                             }
+                            
+                            // Practice Location
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Practice Location")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                
+                                TextField("Enter your practice location (city)", text: $practiceLocation)
+                                    .font(.system(size: 16))
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                    )
+                            }
+                            
+                            // Practice Name
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Practice Name")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                
+                                TextField("Enter your practice name", text: $practiceName)
+                                    .font(.system(size: 16))
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                    )
+                            }
                         }
                     }
                     .padding(16)
@@ -1224,6 +1439,8 @@ struct EditProfileView: View {
             firstName = user.firstName
             lastName = user.lastName
             selectedSpecialty = user.specialty
+            practiceLocation = user.practiceLocation ?? ""
+            practiceName = user.practiceName ?? ""
         }
     }
     
@@ -1236,7 +1453,9 @@ struct EditProfileView: View {
         let updatedData: [String: Any] = [
             "firstName": firstName,
             "lastName": lastName,
-            "specialty": selectedSpecialty
+            "specialty": selectedSpecialty,
+            "practiceLocation": practiceLocation,
+            "practiceName": practiceName
         ]
         
         Firestore.firestore().collection("users").document(uid).updateData(updatedData) { error in

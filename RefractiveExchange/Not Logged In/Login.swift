@@ -21,8 +21,10 @@ struct LoginScreen: View {
                     VStack {
                         Image("RF Icon")
                             .resizable()
+                            .renderingMode(.template)
                             .scaledToFit()
                             .frame(width: 240, height: 240)
+                            .foregroundColor(.primary)
                             .clipShape(RoundedRectangle(cornerRadius: 36))
                             .shadow(color: .black.opacity(0.15), radius: 18, x: 0, y: 9)
                             .scaleEffect(model.handle.loading ? 1.05 : 1.0)

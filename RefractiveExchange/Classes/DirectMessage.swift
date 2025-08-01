@@ -89,11 +89,7 @@ struct ConversationPreview: Identifiable {
         
         // Display name logic
         if let otherUser = otherUser {
-            if !otherUser.exchangeUsername.isEmpty {
-                self.displayName = otherUser.exchangeUsername
-            } else {
-                self.displayName = "\(otherUser.firstName) \(otherUser.lastName)".trimmingCharacters(in: .whitespaces)
-            }
+            self.displayName = "\(otherUser.firstName) \(otherUser.lastName)".trimmingCharacters(in: .whitespaces)
             self.displayAvatar = otherUser.avatarUrl
         } else {
             self.displayName = "Unknown User"

@@ -40,115 +40,146 @@ struct PostRow: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if !self.viewModel.post.author.isEmpty {
-                HStack(alignment: .top, spacing: 12) {
-                    // Avatar with fallback
-                    if let avatarUrlString = self.viewModel.post.avatarUrl, let url = URL(string: avatarUrlString) {
-                        AsyncImage(url: url) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        } placeholder: {
-                            Circle()
-                                .fill(Color.gray.opacity(0.3))
-                                .overlay(
-                                    Image(systemName: "person.fill")
-                                        .foregroundColor(.white)
-                                        .font(.system(size: 16))
-                                )
-                        }
-                        .frame(width: 40, height: 40)
-                        .clipShape(Circle())
-                    } else {
-                        // Fallback avatar
-                        Circle()
-                            .fill(Color.blue.opacity(0.2))
-                            .overlay(
-                                Image(systemName: "person.fill")
-                                    .foregroundColor(.blue)
-                                    .font(.system(size: 16))
-                            )
-                            .frame(width: 40, height: 40)
-                    }
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        // Author and metadata
-                        HStack(spacing: 6) {
-                            Button(action: {
-                                onSubredditTapped?(self.viewModel.post.subreddit)
-                            }) {
-                                Text(self.viewModel.post.subreddit)
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.blue)
+        VStack(spacing: 0) {
+            Button(action: {
+                onPostTapped?()
+            }) {
+                VStack(alignment: .leading, spacing: 8) {
+                    if !self.viewModel.post.author.isEmpty {
+                        HStack(alignment: .top, spacing: 12) {
+                            // Avatar with fallback
+                            if let avatarUrlString = self.viewModel.post.avatarUrl, let url = URL(string: avatarUrlString) {
+                                AsyncImage(url: url) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                } placeholder: {
+                                    Circle()
+                                        .fill(Color.gray.opacity(0.3))
+                                        .overlay(
+                                            Image(systemName: "person.fill")
+                                                .foregroundColor(.white)
+                                                .font(.system(size: 16))
+                                        )
+                                }
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                            } else {
+                                // Fallback avatar
+                                Circle()
+                                    .fill(Color.blue.opacity(0.2))
+                                    .overlay(
+                                        Image(systemName: "person.fill")
+                                            .foregroundColor(.blue)
+                                            .font(.system(size: 16))
+                                    )
+                                    .frame(width: 40, height: 40)
                             }
-                            .buttonStyle(PlainButtonStyle())
 
-                            Text("•")
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
+                            VStack(alignment: .leading, spacing: 6) {
+                                // Author and metadata
+                                HStack(spacing: 6) {
+                                    Button(action: {
+                                        onSubredditTapped?(self.viewModel.post.subreddit)
+                                    }) {
+                                        Text(self.viewModel.post.subreddit)
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundColor(.blue)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
 
-                            Button(action: {
-                                onUsernameTapped?(self.viewModel.post.author, self.viewModel.post.uid)
-                            }) {
-                                Text("\(self.viewModel.post.author)")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(.blue)
-                            }
-                            .buttonStyle(PlainButtonStyle())
+                                    Text("•")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
 
-                            Text("•")
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
+                                    Button(action: {
+                                        onUsernameTapped?(self.viewModel.post.author, self.viewModel.post.uid)
+                                    }) {
+                                        Text("\(self.viewModel.post.author)")
+                                            .font(.system(size: 13, weight: .medium))
+                                            .foregroundColor(.blue)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
 
-                            Text(timeAgoString(from: self.viewModel.post.timestamp.dateValue()))
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        // Post content - Clickable
-                        Button(action: {
-                            onPostTapped?()
-                        }) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(self.viewModel.post.title)
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.primary)
-                                    .multilineTextAlignment(.leading)
-                                    .fixedSize(horizontal: false, vertical: true)
+                                    Text("•")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+
+                                    Text(timeAgoString(from: self.viewModel.post.timestamp.dateValue()))
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
                                 
-                                if !truncatedText.isEmpty {
-                                    Text(truncatedText)
-                                        .font(.system(size: 14))
+                                // Post content
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(self.viewModel.post.title)
+                                        .font(.system(size: 16, weight: .semibold))
                                         .foregroundColor(.primary)
                                         .multilineTextAlignment(.leading)
                                         .fixedSize(horizontal: false, vertical: true)
+                                    
+                                    if !truncatedText.isEmpty {
+                                        Text(truncatedText)
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.primary)
+                                            .multilineTextAlignment(.leading)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
                                 }
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .buttonStyle(PlainButtonStyle())
+
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    if let urlString = viewModel.post.imageURL, let url = URL(string: urlString) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(minHeight: 150, maxHeight: 400)
+                            case .failure(_):
+                                // Error state with retry option
+                                VStack(spacing: 8) {
+                                    Image(systemName: "photo.badge.exclamationmark")
+                                        .font(.system(size: 24))
+                                        .foregroundColor(.gray)
+                                    Text("Failed to load image")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
+                                .frame(maxWidth: .infinity, minHeight: 120)
+                                .background(Color(.systemGray6))
+                            case .empty:
+                                // Loading state
+                                VStack(spacing: 8) {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                    Text("Loading image...")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
+                                .frame(maxWidth: .infinity, minHeight: 120)
+                                .background(Color(.systemGray6))
+                            @unknown default:
+                                EmptyView()
+                            }
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
+                    }
                 }
-
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color(.systemBackground))
+                .contentShape(Rectangle())
             }
+            .buttonStyle(PlainButtonStyle())
             
-            if let urlString = viewModel.post.imageURL, let url = URL(string: urlString) {
-                AsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    ProgressView()
-                }
-                .frame(maxWidth: .infinity, maxHeight: 200)
-                .clipped()
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            }
-
-
-            
-            // Action buttons - Reddit style
+            // Action buttons - Reddit style (outside the main post button)
             HStack(spacing: 24) {
                 // Vote section with Reddit-style layout
                 HStack(spacing: 8) {
@@ -228,15 +259,15 @@ struct PostRow: View {
                     .padding(.vertical, 6)
                 }
             }
-            .padding(.vertical, 8)
-
-            Divider()
-                .padding(.horizontal, -16)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color(.systemBackground))
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
         .background(Color(.systemBackground))
-        .contentShape(Rectangle())
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 4)
         .onAppear {
             checkIfPostIsSaved()
         }

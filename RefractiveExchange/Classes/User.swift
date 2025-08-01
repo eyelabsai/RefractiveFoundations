@@ -28,7 +28,7 @@ struct IOLCase: Codable, Identifiable {
     }
 }
 
-struct User: Codable, Identifiable {
+struct User: Codable, Identifiable, Equatable {
     @DocumentID var id: String?
     var cases: [IOLCase]?
     var credential: String
@@ -45,8 +45,10 @@ struct User: Codable, Identifiable {
     var favoriteLenses: [String]?
     var savedPosts: [String]?
     var dateJoined: Timestamp?
+    var practiceLocation: String?
+    var practiceName: String?
     
-    init(cases: [IOLCase] = [], credential: String = "", email: String = "", firstName: String = "", lastName: String = "", position: String = "", specialty: String = "", state: String = "", suffix: String = "", uid: String = "", avatarUrl: String? = nil, exchangeUsername: String = "", favoriteLenses: [String]? = nil, savedPosts: [String]? = nil, dateJoined: Timestamp? = nil) {
+    init(cases: [IOLCase] = [], credential: String = "", email: String = "", firstName: String = "", lastName: String = "", position: String = "", specialty: String = "", state: String = "", suffix: String = "", uid: String = "", avatarUrl: String? = nil, exchangeUsername: String = "", favoriteLenses: [String]? = nil, savedPosts: [String]? = nil, dateJoined: Timestamp? = nil, practiceLocation: String? = nil, practiceName: String? = nil) {
         self.cases = cases
         self.credential = credential
         self.email = email
@@ -62,6 +64,13 @@ struct User: Codable, Identifiable {
         self.favoriteLenses = favoriteLenses
         self.savedPosts = savedPosts
         self.dateJoined = dateJoined
+        self.practiceLocation = practiceLocation
+        self.practiceName = practiceName
+    }
+    
+    // Equatable conformance
+    static func == (lhs: User, rhs: User) -> Bool {
+        return lhs.uid == rhs.uid
     }
 }
 
