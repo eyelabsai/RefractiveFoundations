@@ -113,17 +113,26 @@ struct SignupScreen: View {
                         .disabled(!viewModel.isStep1Valid)
                         .opacity(viewModel.isStep1Valid ? 1.0 : 0.6)
                     } else {
-                        CustomButton(
-                            loading: $viewModel.handle.loading,
-                            title: .constant("Create Account"),
-                            width: .constant(UIScreen.main.bounds.width - 48),
-                            color: .blue,
-                            action: {
-                                viewModel.createAccount()
+                        VStack(spacing: 8) {
+                            CustomButton(
+                                loading: $viewModel.handle.loading,
+                                title: .constant("Create Account"),
+                                width: .constant(UIScreen.main.bounds.width - 48),
+                                color: .blue,
+                                action: {
+                                    viewModel.createAccount()
+                                }
+                            )
+                            .disabled(!viewModel.isStep2Valid || viewModel.handle.loading)
+                            .opacity((viewModel.isStep2Valid && !viewModel.handle.loading) ? 1.0 : 0.6)
+                            
+                            if viewModel.handle.loading {
+                                Text("Checking availability...")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                                    .animation(.easeInOut(duration: 0.3), value: viewModel.handle.loading)
                             }
-                        )
-                        .disabled(!viewModel.isStep2Valid)
-                        .opacity(viewModel.isStep2Valid ? 1.0 : 0.6)
+                        }
                         
                         Button("Back") {
                             withAnimation(.easeInOut(duration: 0.3)) {
@@ -175,7 +184,66 @@ struct Step1View: View {
                     CustomTextField(text: $viewModel.lastName, title: "Last Name")
                 }
                 
-                CustomTextField(text: $viewModel.email, title: "Email")
+                // Email field with live validation
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Email")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.gray)
+                    
+                    TextField("", text: $viewModel.email)
+                        .textFieldStyle(CustomTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .keyboardType(.emailAddress)
+                        .textContentType(.emailAddress)
+                        .onChange(of: viewModel.email) { newValue in
+                            viewModel.checkEmailAvailability(newValue)
+                        }
+                    
+                    // Live email validation message
+                    if !viewModel.email.isEmpty && viewModel.email.contains("@") && viewModel.email.contains(".") {
+                        if viewModel.isCheckingEmail {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Checking availability...")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.horizontal, 4)
+                        } else if viewModel.isEmailTaken {
+                            HStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.system(size: 12))
+                                Text("Email is already registered")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.red)
+                            }
+                            .padding(.horizontal, 4)
+                        } else if viewModel.isEmailAvailable {
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                    .font(.system(size: 12))
+                                Text("Email is available")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.green)
+                            }
+                            .padding(.horizontal, 4)
+                        }
+                    } else if !viewModel.email.isEmpty && (!viewModel.email.contains("@") || !viewModel.email.contains(".")) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                                .font(.system(size: 12))
+                            Text("Please enter a valid email address")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.orange)
+                        }
+                        .padding(.horizontal, 4)
+                    }
+                }
                 
                 CustomTextField(text: $viewModel.practiceLocation, title: "Practice Location (City)")
                 
@@ -197,7 +265,7 @@ struct Step1View: View {
                         HStack {
                             Text(viewModel.selectedSpecialty)
                                 .font(.system(size: 16, weight: .regular))
-                                .foregroundColor(.primary)
+                                .foregroundColor(viewModel.selectedSpecialty == "Choose one" ? .secondary : .primary)
                             Spacer()
                             Image(systemName: "chevron.down")
                                 .font(.system(size: 12, weight: .medium))
@@ -235,11 +303,107 @@ struct Step2View: View {
             }
             
             VStack(spacing: 20) {
-                CustomTextField(text: $viewModel.username, title: "Username")
+                // Username field with live validation
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Username")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.gray)
+                    
+                    TextField("", text: $viewModel.username)
+                        .textFieldStyle(CustomTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .onChange(of: viewModel.username) { newValue in
+                            viewModel.checkUsernameAvailability(newValue)
+                        }
+                    
+                    // Live username validation message
+                    if !viewModel.username.isEmpty {
+                        if viewModel.isCheckingUsername {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Checking availability...")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.horizontal, 4)
+                        } else if viewModel.isUsernameTaken {
+                            HStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.system(size: 12))
+                                Text("Username is already taken")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.red)
+                            }
+                            .padding(.horizontal, 4)
+                        } else if viewModel.isUsernameAvailable {
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                    .font(.system(size: 12))
+                                Text("Username is available")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.green)
+                            }
+                            .padding(.horizontal, 4)
+                        }
+                    }
+                }
                 
                 CustomTextField(text: $viewModel.password, title: "Password", isPassword: true)
                 
-                CustomTextField(text: $viewModel.confirmPassword, title: "Confirm Password", isPassword: true)
+                // Custom confirm password field with validation styling
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Confirm Password")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.gray)
+                    
+                    SecureField("", text: $viewModel.confirmPassword)
+                        .textFieldStyle(CustomTextFieldStyle())
+                        .textContentType(.password)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(
+                                    !viewModel.confirmPassword.isEmpty ? 
+                                        (viewModel.passwordsMatch ? Color.green : Color.red) : 
+                                        Color(.systemGray4),
+                                    lineWidth: 1.5
+                                )
+                        )
+                }
+                
+                // Password match validation message
+                if !viewModel.confirmPassword.isEmpty {
+                    if viewModel.passwordsMatch {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                                .font(.system(size: 14))
+                            
+                            Text("Passwords match")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.green)
+                        }
+                        .padding(.horizontal, 4)
+                        .transition(.opacity.combined(with: .scale))
+                        .animation(.easeInOut(duration: 0.2), value: viewModel.passwordsMatch)
+                    } else {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.red)
+                                .font(.system(size: 14))
+                            
+                            Text("Passwords don't match")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.red)
+                        }
+                        .padding(.horizontal, 4)
+                        .transition(.opacity.combined(with: .scale))
+                        .animation(.easeInOut(duration: 0.2), value: viewModel.passwordsMatch)
+                    }
+                }
             }
             .padding(.horizontal, 24)
         }
@@ -252,12 +416,22 @@ class SignupViewModel: ObservableObject {
     @Published var lastName = ""
     @Published var email = ""
     @Published var username = ""
-    @Published var selectedSpecialty = "Resident"
+    @Published var selectedSpecialty = "Choose one"
     @Published var practiceLocation = ""
     @Published var practiceName = ""
     @Published var password = ""
     @Published var confirmPassword = ""
     @Published var handle = AlertHandler()
+    
+    // Username validation states
+    @Published var isCheckingUsername = false
+    @Published var isUsernameTaken = false
+    @Published var isUsernameAvailable = false
+    
+    // Email validation states
+    @Published var isCheckingEmail = false
+    @Published var isEmailTaken = false
+    @Published var isEmailAvailable = false
     
     let specialties = [
         "Resident",
@@ -274,14 +448,141 @@ class SignupViewModel: ObservableObject {
                email.contains("@") && 
                email.contains(".") &&
                !practiceLocation.isEmpty &&
-               !practiceName.isEmpty
+               !practiceName.isEmpty &&
+               !isEmailTaken &&
+               selectedSpecialty != "Choose one"
     }
     
     var isStep2Valid: Bool {
         return !username.isEmpty && 
                !password.isEmpty && 
                password.count >= 6 && 
-               password == confirmPassword
+               passwordsMatch &&
+               !isUsernameTaken
+    }
+    
+    var passwordsMatch: Bool {
+        return password == confirmPassword
+    }
+    
+    // Debounced username availability check
+    private var usernameCheckTimer: Timer?
+    
+    // Debounced email availability check
+    private var emailCheckTimer: Timer?
+    
+    func checkEmailAvailability(_ email: String) {
+        // Reset states
+        isCheckingEmail = false
+        isEmailTaken = false
+        isEmailAvailable = false
+        
+        // Cancel previous timer
+        emailCheckTimer?.invalidate()
+        
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        
+        // Don't check if email is empty or invalid format
+        guard !trimmedEmail.isEmpty && trimmedEmail.contains("@") && trimmedEmail.contains(".") else { return }
+        
+        // Set checking state
+        isCheckingEmail = true
+        
+        // Debounce the check to avoid too many requests
+        emailCheckTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+            self?.performEmailCheck(trimmedEmail)
+        }
+    }
+    
+    private func performEmailCheck(_ email: String) {
+        guard !email.isEmpty else {
+            DispatchQueue.main.async {
+                self.isCheckingEmail = false
+            }
+            return
+        }
+        
+        print("🔍 Live checking email: '\(email)'")
+        
+        Firestore.firestore().collection("users")
+            .whereField("email", isEqualTo: email)
+            .getDocuments { [weak self] snapshot, error in
+                DispatchQueue.main.async {
+                    self?.isCheckingEmail = false
+                    
+                    if let error = error {
+                        print("❌ Error checking email: \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    if let docs = snapshot?.documents, !docs.isEmpty {
+                        print("❌ Email '\(email)' is taken")
+                        self?.isEmailTaken = true
+                        self?.isEmailAvailable = false
+                    } else {
+                        print("✅ Email '\(email)' is available")
+                        self?.isEmailTaken = false
+                        self?.isEmailAvailable = true
+                    }
+                }
+            }
+    }
+    
+    func checkUsernameAvailability(_ username: String) {
+        // Reset states
+        isCheckingUsername = false
+        isUsernameTaken = false
+        isUsernameAvailable = false
+        
+        // Cancel previous timer
+        usernameCheckTimer?.invalidate()
+        
+        // Don't check if username is too short
+        guard username.count >= 3 else { return }
+        
+        // Set checking state
+        isCheckingUsername = true
+        
+        // Debounce the check to avoid too many requests
+        usernameCheckTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+            self?.performUsernameCheck(username)
+        }
+    }
+    
+    private func performUsernameCheck(_ username: String) {
+        let trimmedUsername = username.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedUsername.isEmpty else {
+            DispatchQueue.main.async {
+                self.isCheckingUsername = false
+            }
+            return
+        }
+        
+        print("🔍 Live checking username: '\(trimmedUsername)'")
+        
+        Firestore.firestore().collection("users")
+            .whereField("exchangeUsername", isEqualTo: trimmedUsername)
+            .getDocuments { [weak self] snapshot, error in
+                DispatchQueue.main.async {
+                    self?.isCheckingUsername = false
+                    
+                    if let error = error {
+                        print("❌ Error checking username: \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    if let docs = snapshot?.documents, !docs.isEmpty {
+                        print("❌ Username '\(trimmedUsername)' is taken")
+                        self?.isUsernameTaken = true
+                        self?.isUsernameAvailable = false
+                    } else {
+                        print("✅ Username '\(trimmedUsername)' is available")
+                        self?.isUsernameTaken = false
+                        self?.isUsernameAvailable = true
+                    }
+                }
+            }
     }
     
     func nextStep() {
@@ -350,13 +651,13 @@ class SignupViewModel: ObservableObject {
                 if let docs = snapshot?.documents, !docs.isEmpty {
                     print("❌ Username '\(trimmedUsername)' is already taken")
                     self?.handle.setLoading(false)
-                    self?.handle.presentAlert(msg: "Username is already taken. Please choose another.")
+                    self?.handle.presentAlert(msg: "Username '\(trimmedUsername)' is already taken. Please choose a different username.")
                     return
                 }
                 
                 print("✅ Username '\(trimmedUsername)' is available")
                 
-                // Username is unique, proceed with signup
+                // Username is unique, proceed with signup (email already validated in real-time)
                 print("🔐 Proceeding with Firebase Auth signup...")
                 FirebaseManager.shared.signUp(
                     email: trimmedEmail,

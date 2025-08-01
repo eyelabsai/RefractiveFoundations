@@ -127,6 +127,19 @@ struct PublicProfileView: View {
                         Text("\(user.firstName) \(user.lastName)")
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.primary)
+                        
+                        // Practice information
+                        if let practiceLocation = user.practiceLocation, !practiceLocation.isEmpty {
+                            Text(practiceLocation)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.blue)
+                        }
+                        
+                        if let practiceName = user.practiceName, !practiceName.isEmpty {
+                            Text(practiceName)
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        }
                     } else {
                         Text("Loading...")
                             .font(.system(size: 20, weight: .bold))
@@ -324,6 +337,8 @@ struct PublicProfileView: View {
     private var aboutTab: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+
+                
                 // User info
                 VStack(alignment: .leading, spacing: 12) {
                     Text("User Information")
@@ -363,25 +378,47 @@ struct PublicProfileView: View {
                             }
                         }
                         
-                        if let user = viewModel.user, let practiceLocation = user.practiceLocation, !practiceLocation.isEmpty {
-                            HStack {
-                                Text("Practice Location:")
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.secondary)
-                                Spacer()
+                        HStack {
+                            Text("Practice Location:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            if let user = viewModel.user, let practiceLocation = user.practiceLocation, !practiceLocation.isEmpty {
                                 Text(practiceLocation)
                                     .font(.system(size: 14))
                                     .foregroundColor(.primary)
+                            } else {
+                                Text("Not specified")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                                    .italic()
                             }
                         }
                         
-                        if let user = viewModel.user, let practiceName = user.practiceName, !practiceName.isEmpty {
+                        HStack {
+                            Text("Practice Name:")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            if let user = viewModel.user, let practiceName = user.practiceName, !practiceName.isEmpty {
+                                Text(practiceName)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.primary)
+                            } else {
+                                Text("Not specified")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                                    .italic()
+                            }
+                        }
+                        
+                        if let user = viewModel.user {
                             HStack {
-                                Text("Practice Name:")
+                                Text("Specialty:")
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundColor(.secondary)
                                 Spacer()
-                                Text(practiceName)
+                                Text(user.specialty)
                                     .font(.system(size: 14))
                                     .foregroundColor(.primary)
                             }
