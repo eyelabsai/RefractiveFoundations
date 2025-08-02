@@ -175,13 +175,7 @@ struct ProfileView: View {
                             .foregroundColor(.secondary)
                         
                         // Specialty badge
-                        Text(user.specialty)
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.blue)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
-                            .background(Color.blue.opacity(0.1))
-                            .cornerRadius(8)
+                        FlairView(flair: user.specialty)
                     }
                 }
                 

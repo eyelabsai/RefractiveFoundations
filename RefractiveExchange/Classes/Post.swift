@@ -16,7 +16,7 @@ struct StoredPost: Codable, Identifiable  {
     var upvotes: [String]
     var downvotes: [String]?
     let subreddit: String
-    let imageURL: String?
+    let imageURLs: [String]? // Changed from imageURL: String? to support multiple images
     var didLike: Bool = false
     var didDislike: Bool = false
     var uid: String
@@ -30,12 +30,13 @@ struct FetchedPost: Codable, Identifiable, Hashable  {
     var upvotes: [String]
     var downvotes: [String]?
     let subreddit: String
-    let imageURL: String?
+    let imageURLs: [String]? // Changed from imageURL: String? to support multiple images
     var didLike: Bool = false
     var didDislike: Bool = false
     var author: String
     var uid: String
     var avatarUrl: String?
+    var flair: String? // Added flair property
     
     // Hashable conformance
     func hash(into hasher: inout Hasher) {

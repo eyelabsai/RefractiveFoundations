@@ -35,6 +35,10 @@ struct CommentRow: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                         
+                        if let flair = viewModel.comment.flair {
+                            FlairView(flair: flair)
+                        }
+                        
                         Text("•")
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)

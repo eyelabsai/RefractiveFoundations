@@ -54,6 +54,7 @@ struct ElegantLoadingView: View {
 struct SignupScreen: View {
     @StateObject private var viewModel = SignupViewModel()
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ZStack {
@@ -78,12 +79,13 @@ struct SignupScreen: View {
                 
                 // App Logo - prominently displayed and large
                 Image("RF Icon")
+                    .renderingMode(colorScheme == .dark ? Image.TemplateRenderingMode.template : Image.TemplateRenderingMode.original)
                     .resizable()
-                    .renderingMode(.original)
                     .scaledToFit()
                     .frame(width: 180, height: 180)
+                    .foregroundColor(colorScheme == .dark ? Color.white : Color.primary)
                     .clipShape(RoundedRectangle(cornerRadius: 30))
-                    .shadow(color: .black.opacity(0.12), radius: 14, x: 0, y: 7)
+                    .shadow(color: Color.black.opacity(0.12), radius: 14, x: 0, y: 7)
                     .padding(.top, 20)
                     .padding(.bottom, 20)
                 

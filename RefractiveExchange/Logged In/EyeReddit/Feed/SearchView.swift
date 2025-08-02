@@ -402,13 +402,13 @@ struct SearchResultCard: View {
             }
             
             // Image preview (if available)
-            if let imageURL = post.imageURL, !imageURL.isEmpty {
+            if let imageURLs = post.imageURLs, !imageURLs.isEmpty {
                 HStack {
                     Image(systemName: "photo")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    Text("Image")
+                    Text(imageURLs.count == 1 ? "Image" : "\(imageURLs.count) Images")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     

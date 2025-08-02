@@ -129,9 +129,15 @@ struct PostDetailView: View {
                             .foregroundColor(.secondary)
                     }
                     
-                    Text("u/\(post.author)")
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
+                    HStack {
+                        Text("u/\(post.author)")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                        
+                        if let flair = post.flair {
+                            FlairView(flair: flair)
+                        }
+                    }
                 }
                 
                 Spacer()
@@ -154,22 +160,61 @@ struct PostDetailView: View {
                     .padding(.vertical, 8)
             }
             
-            // Post image if available
-            if let imageUrlString = post.imageURL, let url = URL(string: imageUrlString) {
-                AsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: 200)
-                        .overlay(
-                            ProgressView()
-                        )
+            // Post images if available
+            if let imageURLs = post.imageURLs, !imageURLs.isEmpty {
+                if imageURLs.count == 1 {
+                    // Single image
+                    if let url = URL(string: imageURLs[0]) {
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } placeholder: {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(height: 200)
+                                .overlay(
+                                    ProgressView()
+                                )
+                        }
+                        .cornerRadius(8)
+                        .padding(.vertical, 8)
+                    }
+                } else {
+                    // Multiple images - horizontal scroll
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("\(imageURLs.count) images")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(Array(imageURLs.enumerated()), id: \.offset) { index, urlString in
+                                    if let url = URL(string: urlString) {
+                                        AsyncImage(url: url) { image in
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 250, height: 180)
+                                                .clipped()
+                                                .cornerRadius(8)
+                                        } placeholder: {
+                                            Rectangle()
+                                                .fill(Color.gray.opacity(0.2))
+                                                .frame(width: 250, height: 180)
+                                                .overlay(
+                                                    ProgressView()
+                                                )
+                                                .cornerRadius(8)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 4)
+                        }
+                    }
+                    .padding(.vertical, 8)
                 }
-                .cornerRadius(8)
-                .padding(.vertical, 8)
             }
             
             // Vote and action buttons - Reddit style
@@ -323,6 +368,8 @@ struct PostDetailView: View {
                 TextField("Add a comment...", text: $commentText, axis: .vertical)
                     .textFieldStyle(.roundedBorder)
                     .lineLimit(1...5)
+                    .autocapitalization(.sentences) // Enable proper capitalization for comments
+                    .autocorrectionDisabled(false) // Enable autocorrect for comments
                 
                 // Post button
                 Button("Post") {
@@ -435,7 +482,7 @@ struct PostDetailView: View {
         upvotes: ["user1", "user2"],
         downvotes: ["user3"],
         subreddit: "r/SampleSubreddit",
-        imageURL: nil,
+        imageURLs: nil,
         didLike: false,
         didDislike: false,
         author: "SampleUser",

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4BF06944258748B3AE20CD2D /* RFLogoNew_White.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BF06945258748B3AE20CD2D /* RFLogoNew_White.png */; };
 		052463792E32A87400536306 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 052463782E32A87400536306 /* FirebaseAuth */; };
 		0524637B2E32A87400536306 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 0524637A2E32A87400536306 /* FirebaseDatabase */; };
 		0524637D2E32A87400536306 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 0524637C2E32A87400536306 /* FirebaseFirestore */; };
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4BF06945258748B3AE20CD2D /* RFLogoNew_White.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = RFLogoNew_White.png; sourceTree = "<group>"; };
 		054E8FFC2E3299D400B27166 /* RefractiveFoundations.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RefractiveFoundations.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		054E900D2E3299D500B27166 /* RefractiveFoundationsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RefractiveFoundationsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		054E90172E3299D500B27166 /* RefractiveFoundationsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RefractiveFoundationsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -45,6 +47,9 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = RefractiveExchange;
 			sourceTree = "<group>";
+            children = (
+                4BF06945258748B3AE20CD2D /* RFLogoNew_White.png */,
+            );
 		};
 		054E90102E3299D500B27166 /* RefractiveExchangeTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -243,6 +248,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4BF06944258748B3AE20CD2D /* RFLogoNew_White.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -443,7 +449,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.refractivefoundations.RefractiveFoundations;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -484,7 +490,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.refractivefoundations.RefractiveFoundations;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;

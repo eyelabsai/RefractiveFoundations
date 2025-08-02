@@ -14,7 +14,7 @@ import FirebaseAuth
 
 class CreatePostViewHandler {
     
-    static func createPost(data: GetData, title: String, text: String, subredditList: [String],selectedSubredditIndex: Int, postImageData: Data?, completion: @escaping (Bool) -> Void) {
+    static func createPost(data: GetData, title: String, text: String, subredditList: [String],selectedSubredditIndex: Int, postImageData: [Data], completion: @escaping (Bool) -> Void) {
         
         // Get current user UID safely
         guard let currentUID = Auth.auth().currentUser?.uid else {
@@ -23,22 +23,50 @@ class CreatePostViewHandler {
             return
         }
         
-        if let postImageData = postImageData {
-            print("🔄 Starting image upload...")
+        if !postImageData.isEmpty {
+            print("🔄 Starting multiple image uploads...")
+            print("📊 Number of images to upload: \(postImageData.count)")
+            
+            uploadMultipleImages(imageDataArray: postImageData, currentUID: currentUID) { imageURLs in
+                if let imageURLs = imageURLs, !imageURLs.isEmpty {
+                    print("✅ All images uploaded successfully")
+                    let post = StoredPost(title: title, text: text, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], subreddit: subredditList[selectedSubredditIndex], imageURLs: imageURLs, didLike: false, didDislike: false, uid: currentUID)
+                    uploadFirebase(post: post, completion: completion)
+                } else {
+                    print("❌ Failed to upload images")
+                    DispatchQueue.main.async {
+                        completion(false)
+                    }
+                }
+            }
+        } else {
+            // No images to upload
+            let post = StoredPost(title: title, text: text, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], subreddit: subredditList[selectedSubredditIndex], imageURLs: nil, didLike: false, didDislike: false, uid: currentUID)
+            uploadFirebase(post: post, completion: completion)
+        }
+    }
+    
+    // Helper function to upload multiple images
+    private static func uploadMultipleImages(imageDataArray: [Data], currentUID: String, completion: @escaping ([String]?) -> Void) {
+        let dispatchGroup = DispatchGroup()
+        var uploadedURLs: [String] = []
+        var hasError = false
+        
+        for (index, imageData) in imageDataArray.enumerated() {
+            dispatchGroup.enter()
             
             // Validate image data
-            guard postImageData.count > 0 else {
-                print("❌ Error: Image data is empty")
-                DispatchQueue.main.async {
-                    completion(false)
-                }
-                return
+            guard imageData.count > 0 else {
+                print("❌ Error: Image data is empty for image \(index)")
+                hasError = true
+                dispatchGroup.leave()
+                continue
             }
             
-            print("📊 Image data size: \(postImageData.count) bytes")
+            print("📊 Image \(index) data size: \(imageData.count) bytes")
             
             // Create unique image reference ID with proper format
-            let imageReferenceID = "post_\(currentUID)_\(Int(Date().timeIntervalSince1970)).jpg"
+            let imageReferenceID = "post_\(currentUID)_\(Int(Date().timeIntervalSince1970))_\(index).jpg"
             let storageRef = Storage.storage().reference()
             let imageRef = storageRef.child("Post_Images/\(imageReferenceID)")
             
@@ -48,52 +76,47 @@ class CreatePostViewHandler {
             let metadata = StorageMetadata()
             metadata.contentType = "image/jpeg"
             
-            imageRef.putData(postImageData, metadata: metadata) { (metadata, error) in
+            imageRef.putData(imageData, metadata: metadata) { (metadata, error) in
                 if let error = error {
-                    print("❌ Error uploading image: \(error.localizedDescription)")
-                    DispatchQueue.main.async {
-                        completion(false)
-                    }
+                    print("❌ Error uploading image \(index): \(error.localizedDescription)")
+                    hasError = true
+                    dispatchGroup.leave()
                     return
                 }
                 
                 guard metadata != nil else {
-                    print("❌ Upload failed: No metadata received")
-                    DispatchQueue.main.async {
-                        completion(false)
-                    }
+                    print("❌ Upload failed for image \(index): No metadata received")
+                    hasError = true
+                    dispatchGroup.leave()
                     return
                 }
                 
-                print("✅ Image uploaded successfully")
+                print("✅ Image \(index) uploaded successfully")
                 
                 // Get download URL
                 imageRef.downloadURL { (url, error) in
                     if let error = error {
-                        print("❌ Error fetching download URL: \(error.localizedDescription)")
-                        DispatchQueue.main.async {
-                            completion(false)
-                        }
-                        return
+                        print("❌ Error fetching download URL for image \(index): \(error.localizedDescription)")
+                        hasError = true
+                    } else if let url = url {
+                        print("✅ Image \(index) URL obtained: \(url.absoluteString)")
+                        uploadedURLs.append(url.absoluteString)
+                    } else {
+                        print("❌ Failed to get download URL for image \(index)")
+                        hasError = true
                     }
                     
-                    guard let url = url else {
-                        print("❌ Failed to get download URL")
-                        DispatchQueue.main.async {
-                            completion(false)
-                        }
-                        return
-                    }
-                    
-                    print("✅ Image URL obtained: \(url.absoluteString)")
-                    let post = StoredPost(title: title, text: text, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], subreddit: subredditList[selectedSubredditIndex], imageURL: url.absoluteString, didLike: false, didDislike: false, uid: currentUID)
-                    uploadFirebase(post: post, completion: completion)
+                    dispatchGroup.leave()
                 }
             }
-        } else {
-            // No image, create post directly
-            let post = StoredPost(title: title, text: text, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], subreddit: subredditList[selectedSubredditIndex], imageURL: nil, didLike: false, didDislike: false, uid: currentUID)
-            uploadFirebase(post: post, completion: completion)
+        }
+        
+        dispatchGroup.notify(queue: .main) {
+            if hasError || uploadedURLs.count != imageDataArray.count {
+                completion(nil)
+            } else {
+                completion(uploadedURLs)
+            }
         }
     }
     

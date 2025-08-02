@@ -124,9 +124,13 @@ struct PublicProfileView: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     if let user = viewModel.user {
-                        Text("\(user.firstName) \(user.lastName)")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.primary)
+                        HStack(spacing: 8) {
+                            Text("\(user.firstName) \(user.lastName)")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.primary)
+                            
+                            FlairView(flair: user.specialty)
+                        }
                         
                         // Practice information
                         if let practiceLocation = user.practiceLocation, !practiceLocation.isEmpty {
@@ -742,7 +746,7 @@ class PublicProfileViewModel: ObservableObject {
                         upvotes: storedPost.upvotes,
                         downvotes: storedPost.downvotes ?? [],
                         subreddit: storedPost.subreddit,
-                        imageURL: storedPost.imageURL,
+                        imageURLs: storedPost.imageURLs,
                         didLike: storedPost.didLike,
                         didDislike: storedPost.didDislike ?? false,
                         author: authorName,

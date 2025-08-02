@@ -10,6 +10,7 @@ struct Main: View {
     @State var resetEyeRedditToHome = false
     @State var navigationPath = NavigationPath()
     @Namespace var animation
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         
@@ -39,7 +40,10 @@ struct Main: View {
                     ProfileView(data: data)
                 }
                 
-                bottomTabBar
+                // Hide tab bar when creating a post for better UX
+                if currentTab != .newPost {
+                    bottomTabBar
+                }
             }
             .zIndex(0)
             
@@ -92,12 +96,13 @@ struct Main: View {
             // App Logo - overlaid in center without affecting layout, clickable link
             Link(destination: URL(string: "https://refractivefoundations.com/")!) {
                 Image("RF Icon")
+                    .renderingMode(colorScheme == .dark ? Image.TemplateRenderingMode.template : Image.TemplateRenderingMode.original)
                     .resizable()
-                    .renderingMode(.original)
                     .scaledToFit()
                     .frame(width: 95, height: 95)
+                    .foregroundColor(colorScheme == .dark ? Color.white : Color.primary)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
             }
         )
     }

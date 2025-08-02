@@ -126,15 +126,44 @@ struct CommentView: View {
                         }
                         
                         
-                        if let urlString = viewModel.post.imageURL, let url = URL(string: urlString) {
-                            AsyncImage(url: url) { image in
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                            } placeholder: {
-                                ProgressView()
+                        if let imageURLs = viewModel.post.imageURLs, !imageURLs.isEmpty {
+                            if imageURLs.count == 1 {
+                                // Single image
+                                if let url = URL(string: imageURLs[0]) {
+                                    AsyncImage(url: url) { image in
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                    } placeholder: {
+                                        ProgressView()
+                                    }
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                }
+                            } else {
+                                // Multiple images - compact view
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 8) {
+                                        ForEach(Array(imageURLs.enumerated()), id: \.offset) { index, urlString in
+                                            if let url = URL(string: urlString) {
+                                                AsyncImage(url: url) { image in
+                                                    image
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fill)
+                                                        .frame(width: 120, height: 90)
+                                                        .clipped()
+                                                        .cornerRadius(8)
+                                                } placeholder: {
+                                                    ProgressView()
+                                                        .frame(width: 120, height: 90)
+                                                        .background(Color(.systemGray6))
+                                                        .cornerRadius(8)
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, 4)
+                                }
                             }
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
     
                     }
@@ -157,7 +186,7 @@ struct CommentView: View {
                 Spacer()
                 
                 HStack  {
-                    CustomTextField(text: $commentText, title: "Leave your thoughts...")
+                    CustomCommentField(text: $commentText, title: "Leave your thoughts...")
                         .frame(width: UIScreen.main.bounds.width * 0.75, height: 40)
                     Button {
                         postComment()

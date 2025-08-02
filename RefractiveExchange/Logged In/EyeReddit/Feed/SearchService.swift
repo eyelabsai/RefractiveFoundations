@@ -68,9 +68,9 @@ class SearchService: ObservableObject {
         // Image filtering (if needed)
         if let hasImage = filters.hasImage {
             if hasImage {
-                firestoreQuery = firestoreQuery.whereField("imageURL", isNotEqualTo: NSNull())
+                firestoreQuery = firestoreQuery.whereField("imageURLs", isNotEqualTo: NSNull())
             } else {
-                firestoreQuery = firestoreQuery.whereField("imageURL", isEqualTo: NSNull())
+                firestoreQuery = firestoreQuery.whereField("imageURLs", isEqualTo: NSNull())
             }
         }
         
@@ -297,7 +297,7 @@ struct SmartSearchEngine {
         }
         
         if let hasImage = filters.hasImage {
-            let postHasImage = post.imageURL != nil && !post.imageURL!.isEmpty
+            let postHasImage = post.imageURLs != nil && !post.imageURLs!.isEmpty
             if hasImage != postHasImage {
                 return false
             }

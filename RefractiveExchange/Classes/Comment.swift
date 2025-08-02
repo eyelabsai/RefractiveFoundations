@@ -18,6 +18,7 @@ struct Comment: Codable, Identifiable  {
     var upvotes: [String]?
     var downvotes: [String]?
     var uid: String?
+    var flair: String? // Added flair property
     
     // Computed properties for safe access
     var safeUpvotes: [String] {

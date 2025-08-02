@@ -44,12 +44,7 @@ class CommentModel: ObservableObject {
                     return
                 }
 
-                DispatchQueue.main.async {
-                    self.comments = documents.compactMap { document in
-                        try? document.data(as: Comment.self)
-                    }
-                    print("✅ Loaded \(self.comments.count) comments with ordering")
-                }
+                self.processCommentDocuments(documents)
             }
     }
     
@@ -63,14 +58,39 @@ class CommentModel: ObservableObject {
                     return
                 }
 
-                DispatchQueue.main.async {
-                    // Sort comments by timestamp on the client side
-                    let comments = documents.compactMap { document in
-                        try? document.data(as: Comment.self)
-                    }
-                    self.comments = comments.sorted { $0.timestamp.dateValue() > $1.timestamp.dateValue() }
-                    print("✅ Loaded \(self.comments.count) comments with client-side sorting")
-                }
+                self.processCommentDocuments(documents)
             }
+    }
+    
+    private func processCommentDocuments(_ documents: [QueryDocumentSnapshot]) {
+        let group = DispatchGroup()
+        var comments: [Comment] = []
+        
+        for document in documents {
+            group.enter()
+            var comment = try? document.data(as: Comment.self)
+            
+            if var aComment = comment {
+                if let uid = aComment.uid {
+                    PostService().fetchUserDetails(uid: uid) { user in
+                        if let user = user {
+                            aComment.flair = user.specialty
+                        }
+                        comments.append(aComment)
+                        group.leave()
+                    }
+                } else {
+                    comments.append(aComment)
+                    group.leave()
+                }
+            } else {
+                group.leave()
+            }
+        }
+        
+        group.notify(queue: .main) {
+            self.comments = comments.sorted { $0.timestamp.dateValue() > $1.timestamp.dateValue() }
+            print("✅ Loaded and processed \(self.comments.count) comments")
+        }
     }
 }

@@ -28,10 +28,8 @@ struct CreatePostView: View {
     
     // Original comprehensive list (commented out for now)
     // let subredditsWithoutAll = ["i/Anterior Segment, Cataract, & Cornea", "i/Glaucoma", "i/Retina", "i/Neuro-Opthamology", "i/Pediatric Opthamology", "i/Ocular Oncology", "i/Oculoplastic Surgery", "i/Uveitis", "i/Residents & Fellows", "i/Medical Students", "i/Company Representatives"]
-    @State private var showImagePicker = false
-    @State private var showImageOptions = false
-    @State private var imageSourceType: UIImagePickerController.SourceType = .photoLibrary
-    @State var postImageData: Data?
+
+    @State var postImageData: [Data] = [] // Changed to array for multiple images
     @State private var isLoading = false
     @ObservedObject var data: GetData
     @Environment(\.dismiss) var dismiss
@@ -40,7 +38,7 @@ struct CreatePostView: View {
     @ObservedObject var feedViewModel = FeedViewModel.shared
     @Binding var tabBarIndex: Int
     
-    @State private var inputImage: UIImage?
+    @State private var selectedImages: [UIImage] = [] // Changed to array for multiple images
     @State private var showErrorToast: Bool = false
     @State private var showSuccessToast: Bool = false
 
@@ -136,7 +134,7 @@ struct CreatePostView: View {
                             .foregroundColor(.primary)
                             .font(.title3)
                             .lineSpacing(5)
-                            .disableAutocorrection(true)
+                            .autocorrectionDisabled(false) // Enable autocorrect for post content
                             .padding()
                             .frame(minWidth: UIScreen.main.bounds.width, maxWidth: UIScreen.main.bounds.width, minHeight: 80, maxHeight: UIScreen.main.bounds.height / 2)
                         
@@ -149,37 +147,7 @@ struct CreatePostView: View {
                                 .allowsHitTesting(false)
                         }
                     }
-                    if let uiImage = inputImage {
-                        let image = Image(uiImage: uiImage)
-                        HStack {
-                            ZStack {
-                                GeometryReader { geometry in
-                                    let size = min(geometry.size.width, geometry.size.height)
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: size, height: size)
-                                        .background(Color.gray.opacity(0.1))
-                                        .cornerRadius(7)
-                                        .clipped()
-                                }
-                                .frame(width: 100, height: 100)
 
-                                Image(systemName: "xmark.circle.fill")
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                    .foregroundColor(.gray)
-                                    .padding(5)
-                                    .clipShape(Circle())
-                                    .offset(x: 45, y: -45)
-                                    .onTapGesture {
-                                        inputImage = nil
-                                    }
-                            }
-                            Spacer()
-                        }
-                        .padding(.leading, 20)
-                    }
 
 
                     
@@ -205,73 +173,14 @@ struct CreatePostView: View {
             
             Divider()
             
-            HStack {
-                Button {
-                    showImageOptions.toggle()
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "photo")
-                            .foregroundColor(.primary)
-                        Text("Add Photo")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.primary)
-                    }
-                    .frame(height: 44)
-                    .padding(.horizontal, 16)
-                    .background(Color(.systemGray5))
-                    .clipShape(RoundedRectangle(cornerRadius: 22))
-                }
-                Spacer()
+            // Multi-image picker section
+            VStack(alignment: .leading, spacing: 12) {
+                MultiImagePicker(selectedImages: $selectedImages, maxImageCount: 5)
             }
-            .padding(.leading, 20)
-
-            // Image preview section
-            if let inputImage = inputImage {
-                VStack(alignment: .leading) {
-                    HStack {
-                        Text("Selected Image")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                        Spacer()
-                        Button("Remove") {
-                            self.inputImage = nil
-                            self.postImageData = nil
-                        }
-                        .foregroundColor(.red)
-                        .font(.caption)
-                    }
-                    
-                    Image(uiImage: inputImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(maxWidth: .infinity, maxHeight: 200)
-                        .clipped()
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
-            }
+            .padding(.horizontal, 20)
             
         }
-        .sheet(isPresented: $showImagePicker) {
-            ImagePicker(inputImage: self.$inputImage, sourceType: imageSourceType)
-        }
-        .actionSheet(isPresented: $showImageOptions) {
-            ActionSheet(
-                title: Text("Select Image Source"),
-                buttons: [
-                    .default(Text("Camera")) {
-                        imageSourceType = .camera
-                        showImagePicker = true
-                    },
-                    .default(Text("Photo Library")) {
-                        imageSourceType = .photoLibrary
-                        showImagePicker = true
-                    },
-                    .cancel()
-                ]
-            )
-        }
+
         .overlay {
             if isLoading    {
                 ProgressView()
@@ -295,13 +204,13 @@ struct CreatePostView: View {
         // Prevent multiple submissions
         guard !isLoading else { return }
         
-        // Prepare image data if image is selected
-        if let uiImage = inputImage {
+        // Prepare image data for multiple images
+        postImageData = []
+        for uiImage in selectedImages {
             // Resize image for better performance and storage efficiency
-            if let resizedImage = resizeImage(image: uiImage, targetSize: CGSize(width: 800, height: 800)) {
-                postImageData = resizedImage.jpegData(compressionQuality: 0.7)
-            } else {
-                postImageData = uiImage.jpegData(compressionQuality: 0.7)
+            let imageToProcess = resizeImage(image: uiImage, targetSize: CGSize(width: 800, height: 800)) ?? uiImage
+            if let imageData = imageToProcess.jpegData(compressionQuality: 0.7) {
+                postImageData.append(imageData)
             }
         }
         
@@ -329,8 +238,8 @@ struct CreatePostView: View {
                     // Clear form fields
                     self.title = ""
                     self.text = ""
-                    self.inputImage = nil
-                    self.postImageData = nil
+                    self.selectedImages = []
+                    self.postImageData = []
                     self.selectedSubredditIndex = 0
                     
                     // Show success feedback

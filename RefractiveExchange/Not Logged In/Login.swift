@@ -11,6 +11,7 @@ import Firebase
 struct LoginScreen: View {
     @ObservedObject var model: NotLoggedInViewModel
     @State private var animateIcon: Bool = false
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         ZStack {
             ScrollView {
@@ -20,12 +21,13 @@ struct LoginScreen: View {
                     // App Logo - prominently displayed and large
                     VStack {
                         Image("RF Icon")
+                            .renderingMode(colorScheme == .dark ? Image.TemplateRenderingMode.template : Image.TemplateRenderingMode.original)
                             .resizable()
-                            .renderingMode(.original)
                             .scaledToFit()
                             .frame(width: 240, height: 240)
+                            .foregroundColor(colorScheme == .dark ? Color.white : Color.primary)
                             .clipShape(RoundedRectangle(cornerRadius: 36))
-                            .shadow(color: .black.opacity(0.15), radius: 18, x: 0, y: 9)
+                            .shadow(color: Color.black.opacity(0.15), radius: 18, x: 0, y: 9)
                             .scaleEffect(model.handle.loading ? 1.05 : 1.0)
                             .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: model.handle.loading)
                     }

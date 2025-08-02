@@ -158,7 +158,7 @@ class SaveService: ObservableObject {
                                     upvotes: storedPost.upvotes,
                                     downvotes: storedPost.downvotes,
                                     subreddit: storedPost.subreddit,
-                                    imageURL: storedPost.imageURL,
+                                    imageURLs: storedPost.imageURLs,
                                     didLike: storedPost.didLike,
                                     didDislike: storedPost.didDislike,
                                     author: authorName,

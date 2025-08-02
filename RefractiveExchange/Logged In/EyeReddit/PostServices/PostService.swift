@@ -99,6 +99,7 @@ struct PostService  {
                 self.fetchUserDetails(uid: storedPost.uid) { user in
                     let authorName: String
                     let avatarUrl: String?
+                    let flair: String?
                     
                     if let user = user {
                         // User found - use their details
@@ -114,12 +115,14 @@ struct PostService  {
                         }
                         
                         avatarUrl = user.avatarUrl
+                        flair = user.specialty // Set flair from user's specialty
                         print("✅ Set author name: '\(authorName)' for post: '\(storedPost.title)'")
                         print("🔍 User data: firstName='\(firstName)', lastName='\(lastName)', exchangeUsername='\(user.exchangeUsername)'")
                     } else {
                         // User not found - use fallback but also try to create the user document
                         authorName = "Unknown User"
                         avatarUrl = nil
+                        flair = nil // No user, no flair
                         print("⚠️ Warning: User document missing for UID: \(storedPost.uid)")
                         print("   Post: \(storedPost.title)")
                         print("   Consider checking if this user exists in Firebase Auth but not in users collection")
@@ -133,12 +136,13 @@ struct PostService  {
                         upvotes: storedPost.upvotes,
                         downvotes: storedPost.downvotes ?? [],
                         subreddit: storedPost.subreddit,
-                        imageURL: storedPost.imageURL,
+                        imageURLs: storedPost.imageURLs,
                         didLike: storedPost.didLike,
                         didDislike: storedPost.didDislike ?? false,
                         author: authorName,
                         uid: storedPost.uid,
-                        avatarUrl: avatarUrl
+                        avatarUrl: avatarUrl,
+                        flair: flair // Pass flair to FetchedPost
                     )
                     fetchedPosts.append(fetchedPost)
                     group.leave()
@@ -248,17 +252,26 @@ struct PostService  {
     }
     
     private func deletePostDocument(postRef: DocumentReference, post: FetchedPost, completion: @escaping (Bool) -> Void) {
-        // If post has an image, delete it from Storage
-        if let imageURL = post.imageURL, !imageURL.isEmpty {
+        // If post has images, delete them from Storage
+        if let imageURLs = post.imageURLs, !imageURLs.isEmpty {
             let storage = Storage.storage()
-            let storageRef = storage.reference(forURL: imageURL)
-            storageRef.delete { error in
-                if let error = error {
-                    print("❌ Error deleting image from Storage: \(error.localizedDescription)")
-                } else {
-                    print("🗑️ Image deleted from Storage")
+            let dispatchGroup = DispatchGroup()
+            
+            for imageURL in imageURLs {
+                dispatchGroup.enter()
+                let storageRef = storage.reference(forURL: imageURL)
+                storageRef.delete { error in
+                    if let error = error {
+                        print("❌ Error deleting image from Storage: \(error.localizedDescription)")
+                    } else {
+                        print("🗑️ Image deleted from Storage")
+                    }
+                    dispatchGroup.leave()
                 }
-                // Continue to delete post regardless of image deletion result
+            }
+            
+            dispatchGroup.notify(queue: .main) {
+                // Continue to delete post regardless of image deletion results
                 postRef.delete { error in
                     if let error = error {
                         print("❌ Error deleting post: \(error.localizedDescription)")
@@ -270,7 +283,7 @@ struct PostService  {
                 }
             }
         } else {
-            // No image, just delete post
+            // No images, just delete post
             postRef.delete { error in
                 if let error = error {
                     print("❌ Error deleting post: \(error.localizedDescription)")

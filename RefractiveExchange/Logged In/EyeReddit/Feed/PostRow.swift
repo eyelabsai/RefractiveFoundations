@@ -100,6 +100,10 @@ struct PostRow: View {
                                             .foregroundColor(.blue)
                                     }
                                     .buttonStyle(PlainButtonStyle())
+                                    
+                                    if let flair = viewModel.post.flair {
+                                        FlairView(flair: flair)
+                                    }
 
                                     Text("•")
                                         .font(.system(size: 12))
@@ -132,44 +136,108 @@ struct PostRow: View {
 
                     }
                     
-                    if let urlString = viewModel.post.imageURL, let url = URL(string: urlString) {
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(minHeight: 150, maxHeight: 400)
-                            case .failure(_):
-                                // Error state with retry option
-                                VStack(spacing: 8) {
-                                    Image(systemName: "photo.badge.exclamationmark")
-                                        .font(.system(size: 24))
-                                        .foregroundColor(.gray)
-                                    Text("Failed to load image")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
+                    // Display multiple images in a horizontal scrollable gallery
+                    if let imageURLs = viewModel.post.imageURLs, !imageURLs.isEmpty {
+                        if imageURLs.count == 1 {
+                            // Single image - display normally
+                            if let url = URL(string: imageURLs[0]) {
+                                AsyncImage(url: url) { phase in
+                                    switch phase {
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(minHeight: 150, maxHeight: 400)
+                                    case .failure(_):
+                                        // Error state with retry option
+                                        VStack(spacing: 8) {
+                                            Image(systemName: "photo.badge.exclamationmark")
+                                                .font(.system(size: 24))
+                                                .foregroundColor(.gray)
+                                            Text("Failed to load image")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+                                        .frame(maxWidth: .infinity, minHeight: 120)
+                                        .background(Color(.systemGray6))
+                                    case .empty:
+                                        // Loading state
+                                        VStack(spacing: 8) {
+                                            ProgressView()
+                                                .progressViewStyle(CircularProgressViewStyle())
+                                            Text("Loading image...")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+                                        .frame(maxWidth: .infinity, minHeight: 120)
+                                        .background(Color(.systemGray6))
+                                    @unknown default:
+                                        EmptyView()
+                                    }
                                 }
-                                .frame(maxWidth: .infinity, minHeight: 120)
-                                .background(Color(.systemGray6))
-                            case .empty:
-                                // Loading state
-                                VStack(spacing: 8) {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle())
-                                    Text("Loading image...")
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
+                            }
+                        } else {
+                            // Multiple images - display in horizontal scroll view
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text("\(imageURLs.count) images")
                                         .font(.caption)
-                                        .foregroundColor(.gray)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
                                 }
-                                .frame(maxWidth: .infinity, minHeight: 120)
-                                .background(Color(.systemGray6))
-                            @unknown default:
-                                EmptyView()
+                                
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(Array(imageURLs.enumerated()), id: \.offset) { index, urlString in
+                                            if let url = URL(string: urlString) {
+                                                AsyncImage(url: url) { phase in
+                                                    switch phase {
+                                                    case .success(let image):
+                                                        image
+                                                            .resizable()
+                                                            .aspectRatio(contentMode: .fill)
+                                                            .frame(width: 200, height: 150)
+                                                            .clipped()
+                                                            .cornerRadius(8)
+                                                    case .failure(_):
+                                                        VStack(spacing: 4) {
+                                                            Image(systemName: "photo.badge.exclamationmark")
+                                                                .font(.system(size: 16))
+                                                                .foregroundColor(.gray)
+                                                            Text("Failed")
+                                                                .font(.caption2)
+                                                                .foregroundColor(.gray)
+                                                        }
+                                                        .frame(width: 200, height: 150)
+                                                        .background(Color(.systemGray6))
+                                                        .cornerRadius(8)
+                                                    case .empty:
+                                                        VStack(spacing: 4) {
+                                                            ProgressView()
+                                                                .progressViewStyle(CircularProgressViewStyle())
+                                                                .scaleEffect(0.8)
+                                                            Text("Loading...")
+                                                                .font(.caption2)
+                                                                .foregroundColor(.gray)
+                                                        }
+                                                        .frame(width: 200, height: 150)
+                                                        .background(Color(.systemGray6))
+                                                        .cornerRadius(8)
+                                                    @unknown default:
+                                                        EmptyView()
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .padding(.leading, 12)
+                                    .padding(.trailing, 12)
+                                }
                             }
                         }
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
                     }
                 }
                 .padding(.horizontal, 16)

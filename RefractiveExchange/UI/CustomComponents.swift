@@ -284,6 +284,27 @@ struct CustomToastView: View {
     }
 }
 
+// Custom Comment TextField Component with autocorrect enabled
+struct CustomCommentField: View {
+    @Binding var text: String
+    let title: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.gray)
+            
+            TextField("", text: $text)
+                .textFieldStyle(CustomTextFieldStyle())
+                .autocapitalization(.sentences) // Enable proper capitalization for comments
+                .autocorrectionDisabled(false) // Enable autocorrect for comments
+                .textContentType(.none)
+                .keyboardType(.default)
+        }
+    }
+}
+
 // Font Extensions
 extension Text {
     func poppinsBold(_ size: CGFloat) -> some View {
