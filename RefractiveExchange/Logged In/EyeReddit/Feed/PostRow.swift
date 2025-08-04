@@ -17,6 +17,7 @@ struct PostRow: View {
     var onSubredditTapped: ((String) -> Void)? = nil
     @State private var isSaved = false
     @State private var showDeleteAlert = false
+    @State private var showEditView = false
     
     let saveService = SaveService.shared
     
@@ -120,6 +121,9 @@ struct PostRow: View {
                                     if let currentUid = Auth.auth().currentUser?.uid, currentUid == viewModel.post.uid {
                                         ThreeDotsMenu(
                                             isAuthor: true,
+                                            onEdit: {
+                                                showEditView = true
+                                            },
                                             onDelete: {
                                                 showDeleteAlert = true
                                             },
@@ -139,6 +143,17 @@ struct PostRow: View {
                                                 secondaryButton: .cancel()
                                             )
                                         }
+                                        .sheet(isPresented: $showEditView) {
+                                            EditPostView(
+                                                post: viewModel.post,
+                                                onSave: { newText in
+                                                    viewModel.updatePostText(newText)
+                                                },
+                                                onCancel: {
+                                                    showEditView = false
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                                 
@@ -151,11 +166,21 @@ struct PostRow: View {
                                         .fixedSize(horizontal: false, vertical: true)
                                     
                                     if !truncatedText.isEmpty {
-                                        Text(truncatedText)
-                                            .font(.system(size: 14))
-                                            .foregroundColor(.primary)
-                                            .multilineTextAlignment(.leading)
-                                            .fixedSize(horizontal: false, vertical: true)
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(truncatedText)
+                                                .font(.system(size: 14))
+                                                .foregroundColor(.primary)
+                                                .multilineTextAlignment(.leading)
+                                                .fixedSize(horizontal: false, vertical: true)
+                                            
+                                            // Show "edited" indicator if post was edited
+                                            if self.viewModel.post.editedAt != nil {
+                                                Text("(edited)")
+                                                    .font(.system(size: 10))
+                                                    .foregroundColor(.secondary)
+                                                    .italic()
+                                            }
+                                        }
                                     }
                                 }
                             }

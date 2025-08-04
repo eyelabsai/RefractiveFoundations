@@ -20,12 +20,13 @@ struct StoredPost: Codable, Identifiable  {
     var didLike: Bool = false
     var didDislike: Bool = false
     var uid: String
+    var editedAt: Timestamp? // Added edited timestamp
 }
 
 struct FetchedPost: Codable, Identifiable, Hashable  {
     @DocumentID var id: String?
     let title: String
-    let text: String
+    var text: String
     let timestamp: Timestamp
     var upvotes: [String]
     var downvotes: [String]?
@@ -37,6 +38,7 @@ struct FetchedPost: Codable, Identifiable, Hashable  {
     var uid: String
     var avatarUrl: String?
     var flair: String? // Added flair property
+    var editedAt: Timestamp? // Added edited timestamp
     
     // Hashable conformance
     func hash(into hasher: inout Hasher) {

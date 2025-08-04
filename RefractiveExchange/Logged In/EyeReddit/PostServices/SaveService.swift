@@ -163,7 +163,8 @@ class SaveService: ObservableObject {
                                     didDislike: storedPost.didDislike,
                                     author: authorName,
                                     uid: storedPost.uid,
-                                    avatarUrl: avatarUrl
+                                    avatarUrl: avatarUrl,
+                                    editedAt: storedPost.editedAt
                                 )
                                 fetchedPosts.append(fetchedPost)
                             }

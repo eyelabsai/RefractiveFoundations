@@ -22,6 +22,7 @@ struct PostDetailView: View {
     @State private var isSaved = false
     @State private var selectedUserProfile: UserProfile?
     @State private var showDeleteAlert = false
+    @State private var showEditView = false
     
     let saveService = SaveService.shared
     
@@ -88,7 +89,7 @@ struct PostDetailView: View {
             HStack(spacing: 8) {
                 // Avatar
                 Group {
-                    if let avatarUrlString = post.avatarUrl, let url = URL(string: avatarUrlString) {
+                    if let avatarUrlString = viewModel.post.avatarUrl, let url = URL(string: avatarUrlString) {
                         AsyncImage(url: url) { image in
                             image
                                 .resizable()
@@ -117,7 +118,7 @@ struct PostDetailView: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 4) {
-                        Text(post.subreddit)
+                        Text(viewModel.post.subreddit)
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(.primary)
                         
@@ -125,16 +126,19 @@ struct PostDetailView: View {
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                         
-                        Text(timeAgoString(from: post.timestamp.dateValue()))
+                        Text(timeAgoString(from: viewModel.post.timestamp.dateValue()))
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                         
                         Spacer()
                         
                         // Three dots menu for post author
-                        if let currentUid = Auth.auth().currentUser?.uid, currentUid == post.uid {
+                        if let currentUid = Auth.auth().currentUser?.uid, currentUid == viewModel.post.uid {
                             ThreeDotsMenu(
                                 isAuthor: true,
+                                onEdit: {
+                                    showEditView = true
+                                },
                                 onDelete: {
                                     showDeleteAlert = true
                                 },
@@ -145,7 +149,7 @@ struct PostDetailView: View {
                                     title: Text("Delete Post"),
                                     message: Text("Are you sure you want to delete this post? This action cannot be undone."),
                                     primaryButton: .destructive(Text("Delete")) {
-                                        PostService().deletePost(post) { success in
+                                        PostService().deletePost(viewModel.post) { success in
                                             if success {
                                                 dismiss()
                                             }
@@ -154,15 +158,26 @@ struct PostDetailView: View {
                                     secondaryButton: .cancel()
                                 )
                             }
+                            .sheet(isPresented: $showEditView) {
+                                EditPostView(
+                                    post: viewModel.post,
+                                    onSave: { newText in
+                                        viewModel.updatePostText(newText)
+                                    },
+                                    onCancel: {
+                                        showEditView = false
+                                    }
+                                )
+                            }
                         }
                     }
                     
                     HStack {
-                        Text("u/\(post.author)")
+                        Text("u/\(viewModel.post.author)")
                             .font(.system(size: 11))
                             .foregroundColor(.secondary)
                         
-                        if let flair = post.flair {
+                        if let flair = viewModel.post.flair {
                             FlairView(flair: flair)
                         }
                     }
@@ -172,24 +187,34 @@ struct PostDetailView: View {
             }
             
             // Post title - Large and prominent like Reddit
-            Text(post.title)
+            Text(viewModel.post.title)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(.primary)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
             
             // Post text - Full text, not truncated
-            if !post.text.isEmpty {
-                Text(post.text)
-                    .font(.system(size: 15))
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.vertical, 8)
+            if !viewModel.post.text.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(viewModel.post.text)
+                        .font(.system(size: 15))
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.vertical, 8)
+                    
+                    // Show "edited" indicator if post was edited
+                    if viewModel.post.editedAt != nil {
+                        Text("(edited)")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                            .italic()
+                    }
+                }
             }
             
             // Post images if available
-            if let imageURLs = post.imageURLs, !imageURLs.isEmpty {
+            if let imageURLs = viewModel.post.imageURLs, !imageURLs.isEmpty {
                 if imageURLs.count == 1 {
                     // Single image
                     if let url = URL(string: imageURLs[0]) {
@@ -450,7 +475,7 @@ struct PostDetailView: View {
                 let authorName = (!firstName.isEmpty || !lastName.isEmpty) ? 
                     "\(firstName) \(lastName)".trimmingCharacters(in: .whitespacesAndNewlines) :
                     (!(data.user?.exchangeUsername.isEmpty ?? true) ? data.user!.exchangeUsername : "Anonymous User")
-                let comment = Comment(postId: post.id!, text: trimmedCommentText, author: authorName, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], uid: Auth.auth().currentUser?.uid ?? "", editedAt: nil)
+                let comment = Comment(postId: viewModel.post.id!, text: trimmedCommentText, author: authorName, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], uid: Auth.auth().currentUser?.uid ?? "", editedAt: nil)
                 try await uploadFirebase(comment)
                 
                 await MainActor.run {
@@ -484,7 +509,7 @@ struct PostDetailView: View {
     }
     
     private func checkIfPostIsSaved() {
-        guard let postId = post.id else { return }
+        guard let postId = viewModel.post.id else { return }
         
         saveService.isPostSaved(postId) { saved in
             DispatchQueue.main.async {
@@ -494,7 +519,7 @@ struct PostDetailView: View {
     }
     
     private func toggleSavePost() {
-        guard let postId = post.id else { return }
+        guard let postId = viewModel.post.id else { return }
         
         saveService.toggleSavePost(postId) { saved in
             DispatchQueue.main.async {
@@ -517,6 +542,7 @@ struct PostDetailView: View {
         didDislike: false,
         author: "SampleUser",
         uid: "sample_uid",
-        avatarUrl: nil
+        avatarUrl: nil,
+        editedAt: nil
     ), data: GetData())
 } 

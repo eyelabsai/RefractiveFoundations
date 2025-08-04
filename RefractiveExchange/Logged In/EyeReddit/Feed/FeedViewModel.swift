@@ -57,4 +57,18 @@ class FeedViewModel: ObservableObject   {
         }
     }
     
+    func updatePost(_ updatedPost: FetchedPost) {
+        guard let postId = updatedPost.id else { return }
+        
+        // Update in allPosts (@Published will automatically trigger UI updates)
+        if let index = allPosts.firstIndex(where: { $0.id == postId }) {
+            allPosts[index] = updatedPost
+        }
+        
+        // Update in filtered posts (@Published will automatically trigger UI updates)
+        if let index = posts.firstIndex(where: { $0.id == postId }) {
+            posts[index] = updatedPost
+        }
+    }
+    
 }

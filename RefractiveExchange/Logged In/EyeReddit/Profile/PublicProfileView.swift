@@ -751,7 +751,8 @@ class PublicProfileViewModel: ObservableObject {
                         didDislike: storedPost.didDislike ?? false,
                         author: authorName,
                         uid: storedPost.uid,
-                        avatarUrl: avatarUrl
+                        avatarUrl: avatarUrl,
+                        editedAt: storedPost.editedAt
                     )
                     fetchedPosts.append(fetchedPost)
                     group.leave()

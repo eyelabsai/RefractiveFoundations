@@ -142,7 +142,8 @@ struct PostService  {
                         author: authorName,
                         uid: storedPost.uid,
                         avatarUrl: avatarUrl,
-                        flair: flair // Pass flair to FetchedPost
+                        flair: flair, // Pass flair to FetchedPost
+                        editedAt: storedPost.editedAt // Pass editedAt to FetchedPost
                     )
                     fetchedPosts.append(fetchedPost)
                     group.leave()
@@ -292,6 +293,26 @@ struct PostService  {
                     print("🗑️ Post deleted from Firestore")
                     completion(true)
                 }
+            }
+        }
+    }
+    
+    func editPost(_ post: FetchedPost, newText: String, completion: @escaping (Bool) -> Void) {
+        guard let postId = post.id else {
+            completion(false)
+            return
+        }
+        
+        Firestore.firestore().collection("posts").document(postId).updateData([
+            "text": newText,
+            "editedAt": Timestamp(date: Date())
+        ]) { error in
+            if let error = error {
+                print("❌ Error editing post: \(error.localizedDescription)")
+                completion(false)
+            } else {
+                print("✏️ Post edited successfully")
+                completion(true)
             }
         }
     }

@@ -101,6 +101,19 @@ class PostRowModel: ObservableObject    {
     private func updateFeedViewModel() {
         FeedViewModel.shared.refreshPosts()
     }
+    
+    func updatePostText(_ newText: String) {
+        // Create updated post
+        var updatedPost = self.post
+        updatedPost.text = newText
+        updatedPost.editedAt = Timestamp(date: Date())
+        
+        // Update local post (this will automatically trigger UI refresh due to @Published)
+        self.post = updatedPost
+        
+        // Update the post in FeedViewModel elegantly without full refresh
+        FeedViewModel.shared.updatePost(updatedPost)
+    }
 
     
 }
