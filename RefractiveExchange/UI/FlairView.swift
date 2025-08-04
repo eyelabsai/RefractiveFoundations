@@ -13,11 +13,11 @@ struct FlairView: View {
     var body: some View {
         Text(flair)
             .font(.system(size: 10, weight: .bold))
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
             .foregroundColor(textColor(for: flair))
             .background(backgroundColor(for: flair))
-            .cornerRadius(4)
+            .cornerRadius(6)
     }
     
     private func backgroundColor(for flair: String) -> Color {

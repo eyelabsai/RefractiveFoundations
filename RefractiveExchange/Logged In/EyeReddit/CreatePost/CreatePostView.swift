@@ -15,8 +15,9 @@ struct CreatePostView: View {
     @State private var text = ""
     @State var subreddit = ""
     @State private var selectedSubredditIndex = 0
-    // Curated list of refractive surgery-specific subreddits (without "i/All")
+    // Curated list of refractive surgery-specific subforums
     let subredditsWithoutAll = [
+        "Choose one",
         "i/IOLs",
         "i/Surgical Techniques", 
         "i/Complications",
@@ -64,9 +65,9 @@ struct CreatePostView: View {
                 .foregroundColor(.white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .background(title.isEmpty ? Color.gray : Color.blue)
+                .background(title.isEmpty || selectedSubredditIndex == 0 ? Color.gray : Color.blue)
                 .cornerRadius(20)
-                .disabled(title.isEmpty || isLoading)
+                .disabled(title.isEmpty || selectedSubredditIndex == 0 || isLoading)
 
 
             }
@@ -161,10 +162,10 @@ struct CreatePostView: View {
             
 
             Spacer()
-            Text("Choose Topic: ")
+            Text("Specify a SubForum: ")
                 .bold()
                 .foregroundColor(.primary)
-            Picker("ChooseTopic", selection: $selectedSubredditIndex) {
+            Picker("SpecifySubForum", selection: $selectedSubredditIndex) {
                 ForEach(0..<subredditsWithoutAll.count) { index in
                     Text(subredditsWithoutAll[index])
                 }
@@ -200,6 +201,9 @@ struct CreatePostView: View {
     // MARK: - Post Creation Function
     private func createPost() {
         guard !title.isEmpty else { return }
+        
+        // Check if a subforum is selected (not "Choose one")
+        guard selectedSubredditIndex > 0 else { return }
         
         // Prevent multiple submissions
         guard !isLoading else { return }

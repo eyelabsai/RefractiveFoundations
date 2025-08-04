@@ -173,9 +173,14 @@ struct PostDetailView: View {
                     }
                     
                     HStack {
-                        Text("u/\(viewModel.post.author)")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
+                        Button(action: {
+                            selectedUserProfile = UserProfile(username: viewModel.post.author, userId: viewModel.post.uid)
+                        }) {
+                            Text("u/\(viewModel.post.author)")
+                                .font(.system(size: 11))
+                                .foregroundColor(.blue)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                         
                         if let flair = viewModel.post.flair {
                             FlairView(flair: flair)

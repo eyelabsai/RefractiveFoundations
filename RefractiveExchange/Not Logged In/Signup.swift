@@ -247,9 +247,9 @@ struct Step1View: View {
                     }
                 }
                 
-                CustomTextField(text: $viewModel.practiceLocation, title: "Practice Location (City)")
+                CustomTextField(text: $viewModel.practiceLocation, title: "Practice Location (City) (Optional)")
                 
-                CustomTextField(text: $viewModel.practiceName, title: "Practice Name")
+                CustomTextField(text: $viewModel.practiceName, title: "Practice Name (Optional)")
                 
                 // Subspecialty picker
                 VStack(alignment: .leading, spacing: 8) {
@@ -449,8 +449,6 @@ class SignupViewModel: ObservableObject {
                !email.isEmpty && 
                email.contains("@") && 
                email.contains(".") &&
-               !practiceLocation.isEmpty &&
-               !practiceName.isEmpty &&
                !isEmailTaken &&
                selectedSpecialty != "Choose one"
     }

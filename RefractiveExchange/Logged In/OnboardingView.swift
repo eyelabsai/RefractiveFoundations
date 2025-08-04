@@ -16,7 +16,7 @@ struct OnboardingView: View {
         OnboardingSlide(
             title: "Welcome to Refractive Exchange",
             subtitle: "Connect with fellow eye care professionals",
-            description: "Join a community of ophthalmologists and optometrists sharing insights, cases, and expertise in refractive surgery.",
+            description: "Join the community to share insights, cases, and expertise in refractive surgery.",
             systemIcon: "eye.fill",
             iconColor: .blue
         ),
@@ -160,10 +160,10 @@ struct OnboardingSlideView: View {
         VStack(spacing: 30) {
             // Icon, custom image, or mockup
             if slide.showPostCreationMockup {
-                // Post creation interface mockup
-                PostCreationMockup()
-                    .frame(maxWidth: 280, maxHeight: 200)
-                    .padding(.top, 20)
+                // Post creation interface mockup - COMMENTED OUT FOR MIDDLE SLIDE
+                // PostCreationMockup()
+                //     .frame(maxWidth: 280, maxHeight: 200)
+                //     .padding(.top, 20)
             } else if let customImage = slide.customImage {
                 // Custom image (screenshot)
                 Image(customImage)

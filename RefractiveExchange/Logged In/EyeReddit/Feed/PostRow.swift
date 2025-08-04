@@ -79,81 +79,89 @@ struct PostRow: View {
                             }
 
                             VStack(alignment: .leading, spacing: 6) {
-                                // Author and metadata
-                                HStack(spacing: 6) {
-                                    Button(action: {
-                                        onSubredditTapped?(self.viewModel.post.subreddit)
-                                    }) {
-                                        Text(self.viewModel.post.subreddit)
-                                            .font(.system(size: 11, weight: .medium))
-                                            .foregroundColor(.blue)
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
+                                // Author and metadata - Split into two rows for better spacing
+                                VStack(alignment: .leading, spacing: 4) {
+                                    // First row: Subforum and username
+                                    HStack(spacing: 6) {
+                                        Button(action: {
+                                            onSubredditTapped?(self.viewModel.post.subreddit)
+                                        }) {
+                                            Text(self.viewModel.post.subreddit)
+                                                .font(.system(size: 12, weight: .medium))
+                                                .foregroundColor(.blue)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
 
-                                    Text("•")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.secondary)
+                                        Text("•")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.secondary)
 
-                                    Button(action: {
-                                        onUsernameTapped?(self.viewModel.post.author, self.viewModel.post.uid)
-                                    }) {
-                                        Text("\(self.viewModel.post.author)")
-                                            .font(.system(size: 13, weight: .medium))
-                                            .foregroundColor(.blue)
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                    
-                                    if let flair = viewModel.post.flair {
-                                        FlairView(flair: flair)
-                                    }
-
-                                    Text("•")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.secondary)
-
-                                    Text(timeAgoString(from: self.viewModel.post.timestamp.dateValue()))
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.secondary)
-                                    
-                                    Spacer()
-                                    
-                                    // Three dots menu (only for post author) - moved to top right
-                                    if let currentUid = Auth.auth().currentUser?.uid, currentUid == viewModel.post.uid {
-                                        ThreeDotsMenu(
-                                            isAuthor: true,
-                                            onEdit: {
-                                                showEditView = true
-                                            },
-                                            onDelete: {
-                                                showDeleteAlert = true
-                                            },
-                                            size: 16
-                                        )
-                                        .alert(isPresented: $showDeleteAlert) {
-                                            Alert(
-                                                title: Text("Delete Post"),
-                                                message: Text("Are you sure you want to delete this post? This action cannot be undone."),
-                                                primaryButton: .destructive(Text("Delete")) {
-                                                    PostService().deletePost(viewModel.post) { success in
-                                                        if success {
-                                                            FeedViewModel.shared.refreshPosts()
+                                        Button(action: {
+                                            onUsernameTapped?(self.viewModel.post.author, self.viewModel.post.uid)
+                                        }) {
+                                            Text("\(self.viewModel.post.author)")
+                                                .font(.system(size: 13, weight: .medium))
+                                                .foregroundColor(.blue)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                        
+                                        Spacer()
+                                        
+                                        // Three dots menu (only for post author) - moved to top right
+                                        if let currentUid = Auth.auth().currentUser?.uid, currentUid == viewModel.post.uid {
+                                            ThreeDotsMenu(
+                                                isAuthor: true,
+                                                onEdit: {
+                                                    showEditView = true
+                                                },
+                                                onDelete: {
+                                                    showDeleteAlert = true
+                                                },
+                                                size: 16
+                                            )
+                                            .alert(isPresented: $showDeleteAlert) {
+                                                Alert(
+                                                    title: Text("Delete Post"),
+                                                    message: Text("Are you sure you want to delete this post? This action cannot be undone."),
+                                                    primaryButton: .destructive(Text("Delete")) {
+                                                        PostService().deletePost(viewModel.post) { success in
+                                                            if success {
+                                                                FeedViewModel.shared.refreshPosts()
+                                                            }
                                                         }
+                                                    },
+                                                    secondaryButton: .cancel()
+                                                )
+                                            }
+                                            .sheet(isPresented: $showEditView) {
+                                                EditPostView(
+                                                    post: viewModel.post,
+                                                    onSave: { newText in
+                                                        viewModel.updatePostText(newText)
+                                                    },
+                                                    onCancel: {
+                                                        showEditView = false
                                                     }
-                                                },
-                                                secondaryButton: .cancel()
-                                            )
+                                                )
+                                            }
                                         }
-                                        .sheet(isPresented: $showEditView) {
-                                            EditPostView(
-                                                post: viewModel.post,
-                                                onSave: { newText in
-                                                    viewModel.updatePostText(newText)
-                                                },
-                                                onCancel: {
-                                                    showEditView = false
-                                                }
-                                            )
+                                    }
+                                    
+                                    // Second row: Flair and timestamp
+                                    HStack(spacing: 6) {
+                                        if let flair = viewModel.post.flair {
+                                            FlairView(flair: flair)
                                         }
+
+                                        Text("•")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.secondary)
+
+                                        Text(timeAgoString(from: self.viewModel.post.timestamp.dateValue()))
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.secondary)
+                                        
+                                        Spacer()
                                     }
                                 }
                                 
