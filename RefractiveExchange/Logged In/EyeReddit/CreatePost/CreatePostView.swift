@@ -201,14 +201,18 @@ struct CreatePostView: View {
                 dismiss()
             }
         }
+        .alert("Choose a SubForum", isPresented: $showSubforumPrompt) {
+            Button("OK") {
+                showSubforumPrompt = false
+            }
+        } message: {
+            Text("Please select a subforum before posting.")
+        }
     }
     
     // MARK: - Post Creation Function
     private func createPost() {
         guard !title.isEmpty else { return }
-        
-        // Check if a subforum is selected (not "Choose one")
-        guard selectedSubredditIndex > 0 else { return }
         
         // Prevent multiple submissions
         guard !isLoading else { return }

@@ -14,7 +14,7 @@ struct OnboardingView: View {
     
     private let slides = [
         OnboardingSlide(
-            title: "Welcome to Refractive Exchange",
+            title: "Welcome to Refractive Foundations",
             subtitle: "Connect with fellow eye care professionals",
             description: "Join the community to share insights, cases, and expertise in refractive surgery.",
             systemIcon: "eye.fill",
@@ -24,9 +24,9 @@ struct OnboardingView: View {
             title: "Share & Discover",
             subtitle: "Post cases, ask questions, get answers",
             description: "Share your interesting cases, learn from others' experiences, and discover the latest techniques and technologies.",
-            systemIcon: "bubble.left.and.bubble.right.fill",
+            systemIcon: "square.and.pencil",
             iconColor: .green,
-            showPostCreationMockup: true
+            showPostCreationMockup: false
         ),
         OnboardingSlide(
             title: "Images and Comments",
@@ -45,10 +45,10 @@ struct OnboardingView: View {
                     .renderingMode(colorScheme == .dark ? .template : .original)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 120, height: 120)
+                    .frame(width: 160, height: 160)
                     .foregroundColor(colorScheme == .dark ? .white : .primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
+                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
             }
             .padding(.top, 80)
             .padding(.bottom, 50)
