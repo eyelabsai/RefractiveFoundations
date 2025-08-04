@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseAuth
+import FirebaseFirestore
 
 class CommentRowModel: ObservableObject {
     
@@ -62,6 +63,13 @@ class CommentRowModel: ObservableObject {
                     self.comment.downvotes?.removeAll(where: { $0 == uid })
                 }
             }
+        }
+    }
+    
+    func updateCommentText(_ newText: String) {
+        DispatchQueue.main.async {
+            self.comment.text = newText
+            self.comment.editedAt = Timestamp(date: Date())
         }
     }
 }

@@ -12,18 +12,21 @@ struct CommentRow: View {
     
     @ObservedObject var viewModel: CommentRowModel
     @State private var showDeleteAlert = false
+    @State private var showEditView = false
     var onUsernameTapped: ((String, String) -> Void)? = nil
+    var onCommentUpdated: (() -> Void)? = nil
     let commentService = CommentService()
     
-    init(comment: Comment, onUsernameTapped: ((String, String) -> Void)? = nil)  {
+    init(comment: Comment, onUsernameTapped: ((String, String) -> Void)? = nil, onCommentUpdated: (() -> Void)? = nil)  {
         self.viewModel = CommentRowModel(comment: comment)
         self.onUsernameTapped = onUsernameTapped
+        self.onCommentUpdated = onCommentUpdated
     }
         
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             if !self.viewModel.comment.author.isEmpty  {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 12) {
                     // Comment header with author and time
                     HStack {
                         Button(action: {
@@ -49,27 +52,47 @@ struct CommentRow: View {
                         
                         Spacer()
                         
-                        // Delete button (only for comment author)
+                        // Three dots menu (only for comment author)
                         if let user = Auth.auth().currentUser {
                             let commentAuthor = self.viewModel.comment.author
-                            if user.displayName == commentAuthor || user.uid == commentAuthor || commentAuthor == user.email {
-                                Button(role: .destructive) {
-                                    showDeleteAlert = true
-                                } label: {
-                                    Image(systemName: "trash")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.red)
-                                }
+                            let commentUid = self.viewModel.comment.safeUid
+                            let isAuthor = user.uid == commentUid || user.displayName == commentAuthor || user.uid == commentAuthor || commentAuthor == user.email
+                            
+                            if isAuthor {
+                                ThreeDotsMenu(
+                                    isAuthor: true,
+                                    onEdit: {
+                                        showEditView = true
+                                    },
+                                    onDelete: {
+                                        showDeleteAlert = true
+                                    },
+                                    size: 12
+                                )
                                 .alert(isPresented: $showDeleteAlert) {
                                     Alert(
                                         title: Text("Delete Comment"),
                                         message: Text("Are you sure you want to delete this comment?"),
                                         primaryButton: .destructive(Text("Delete")) {
                                             commentService.deleteComment(self.viewModel.comment) { success in
-                                                // No direct refresh here; parent view should refresh comments
+                                                if success {
+                                                    onCommentUpdated?()
+                                                }
                                             }
                                         },
                                         secondaryButton: .cancel()
+                                    )
+                                }
+                                .sheet(isPresented: $showEditView) {
+                                    EditCommentView(
+                                        comment: self.viewModel.comment,
+                                        onSave: { newText in
+                                            viewModel.updateCommentText(newText)
+                                            onCommentUpdated?()
+                                        },
+                                        onCancel: {
+                                            showEditView = false
+                                        }
                                     )
                                 }
                             }
@@ -77,50 +100,55 @@ struct CommentRow: View {
                     }
 
                     // Comment text
-                    Text(self.viewModel.comment.text)
-                        .font(.system(size: 14))
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.leading)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(self.viewModel.comment.text)
+                            .font(.system(size: 14))
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.leading)
+                        
+                        // Show "edited" indicator if comment was edited
+                        if self.viewModel.comment.editedAt != nil {
+                            Text("(edited)")
+                                .font(.system(size: 10))
+                                .foregroundColor(.secondary)
+                                .italic()
+                        }
+                    }
                     
                     // Vote buttons - Reddit style
                     HStack(spacing: 16) {
                         // Voting section
-                        HStack(spacing: 6) {
+                        HStack(spacing: 8) {
                             Button {
                                 viewModel.upvote()
                             } label: {
                                 Image(systemName: viewModel.liked ? "arrowtriangle.up.fill" : "arrowtriangle.up")
-                                    .font(.system(size: 14, weight: .medium))
+                                    .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(viewModel.liked ? .orange : .gray)
                             }
                             
                             Text("\(viewModel.comment.safeUpvotes.count - viewModel.comment.safeDownvotes.count)")
-                                .font(.system(size: 12, weight: .bold))
+                                .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(viewModel.liked ? .orange : viewModel.disliked ? .purple : .secondary)
-                                .frame(minWidth: 20)
+                                .frame(minWidth: 24)
                             
                             Button {
                                 viewModel.downvote()
                             } label: {
                                 Image(systemName: viewModel.disliked ? "arrowtriangle.down.fill" : "arrowtriangle.down")
-                                    .font(.system(size: 14, weight: .medium))
+                                    .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(viewModel.disliked ? .purple : .gray)
                             }
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
                         .background(Color(.systemGray6))
-                        .cornerRadius(16)
+                        .cornerRadius(20)
                         
                         Spacer()
                     }
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
             }
-            
-            Divider()
-                .padding(.leading, 16)
         }
     }
     

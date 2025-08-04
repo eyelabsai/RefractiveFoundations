@@ -43,7 +43,7 @@ struct CommentView: View {
                 let authorName = (!firstName.isEmpty || !lastName.isEmpty) ? 
                     "\(firstName) \(lastName)".trimmingCharacters(in: .whitespacesAndNewlines) :
                     (!data.user!.exchangeUsername.isEmpty ? data.user!.exchangeUsername : "Unknown User")
-                let comment = Comment(postId: viewModel.post.id!, text: trimmedCommentText, author: authorName, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], uid: Auth.auth().currentUser?.uid ?? "")
+                let comment = Comment(postId: viewModel.post.id!, text: trimmedCommentText, author: authorName, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], uid: Auth.auth().currentUser?.uid ?? "", editedAt: nil)
                 try await uploadFirebase(comment)
                 commentText = ""
                 refreshComments()
@@ -174,13 +174,19 @@ struct CommentView: View {
                         .poppinsBold(18)
                         .multilineTextAlignment(.leading)
                     Divider()
-                    LazyVStack(alignment: .leading, spacing: 0.5){
+                    LazyVStack(alignment: .leading, spacing: 8){
                         ForEach(viewModel.comments, id: \.timestamp) { comment in
-                            CommentRow(comment: comment)
-                                .padding()
-                                .ignoresSafeArea()
+                            CommentRow(comment: comment, onCommentUpdated: {
+                                refreshComments()
+                            })
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.03), radius: 2, x: 0, y: 1)
                         }
                     }
+                    .padding(.horizontal, 8)
                     .ignoresSafeArea()
                 }
                 Spacer()

@@ -16,6 +16,7 @@ struct PostRow: View {
     var onUsernameTapped: ((String, String) -> Void)? = nil
     var onSubredditTapped: ((String) -> Void)? = nil
     @State private var isSaved = false
+    @State private var showDeleteAlert = false
     
     let saveService = SaveService.shared
     
@@ -112,6 +113,33 @@ struct PostRow: View {
                                     Text(timeAgoString(from: self.viewModel.post.timestamp.dateValue()))
                                         .font(.system(size: 12))
                                         .foregroundColor(.secondary)
+                                    
+                                    Spacer()
+                                    
+                                    // Three dots menu (only for post author) - moved to top right
+                                    if let currentUid = Auth.auth().currentUser?.uid, currentUid == viewModel.post.uid {
+                                        ThreeDotsMenu(
+                                            isAuthor: true,
+                                            onDelete: {
+                                                showDeleteAlert = true
+                                            },
+                                            size: 16
+                                        )
+                                        .alert(isPresented: $showDeleteAlert) {
+                                            Alert(
+                                                title: Text("Delete Post"),
+                                                message: Text("Are you sure you want to delete this post? This action cannot be undone."),
+                                                primaryButton: .destructive(Text("Delete")) {
+                                                    PostService().deletePost(viewModel.post) { success in
+                                                        if success {
+                                                            FeedViewModel.shared.refreshPosts()
+                                                        }
+                                                    }
+                                                },
+                                                secondaryButton: .cancel()
+                                            )
+                                        }
+                                    }
                                 }
                                 
                                 // Post content
@@ -298,30 +326,16 @@ struct PostRow: View {
                     .cornerRadius(16)
                 }
                 
-                // Save button
-                Button {
-                    toggleSavePost()
-                } label: {
-                    Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
-                        .font(.system(size: 16))
-                        .foregroundColor(isSaved ? .orange : .gray)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                
                 Spacer()
-                // Delete button (only for post author)
-                if let currentUid = Auth.auth().currentUser?.uid, currentUid == viewModel.post.uid {
-                    Button(role: .destructive) {
-                        PostService().deletePost(viewModel.post) { success in
-                            if success {
-                                FeedViewModel.shared.refreshPosts()
-                            }
-                        }
+                
+                // Save button for non-authors
+                if let currentUid = Auth.auth().currentUser?.uid, currentUid != viewModel.post.uid {
+                    Button {
+                        toggleSavePost()
                     } label: {
-                        Image(systemName: "trash")
+                        Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
                             .font(.system(size: 16))
-                            .foregroundColor(.red)
+                            .foregroundColor(isSaved ? .orange : .gray)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)

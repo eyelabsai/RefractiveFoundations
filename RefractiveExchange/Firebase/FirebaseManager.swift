@@ -112,7 +112,8 @@ class FirebaseManager: ObservableObject {
                 savedPosts: [],
                 dateJoined: Timestamp(date: Date()),
                 practiceLocation: practiceLocation,
-                practiceName: practiceName
+                practiceName: practiceName,
+                hasCompletedOnboarding: false
             )
             
             self?.saveUserData(user: userData) { result in
@@ -186,7 +187,8 @@ class FirebaseManager: ObservableObject {
                 exchangeUsername: "", // User can set this later
                 favoriteLenses: [],
                 savedPosts: [],
-                dateJoined: Timestamp(date: Date())
+                dateJoined: Timestamp(date: Date()),
+                hasCompletedOnboarding: false
             )
             
             self.saveUserData(user: userData) { result in
@@ -232,6 +234,32 @@ class FirebaseManager: ObservableObject {
                         // Retry fetching after creating the document
                         self?.fetchUserData(uid: uid)
                     }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Onboarding
+    func markOnboardingCompleted() {
+        guard let currentUser = currentUser else {
+            print("❌ No current user to update onboarding status")
+            return
+        }
+        
+        print("✅ Marking onboarding as completed for user: \(currentUser.uid)")
+        
+        Firestore.firestore().collection("users").document(currentUser.uid).updateData([
+            "hasCompletedOnboarding": true
+        ]) { error in
+            if let error = error {
+                print("❌ Error updating onboarding status: \(error)")
+            } else {
+                print("✅ Successfully marked onboarding as completed")
+                // Update local user object
+                DispatchQueue.main.async {
+                    var updatedUser = currentUser
+                    updatedUser.hasCompletedOnboarding = true
+                    self.currentUser = updatedUser
                 }
             }
         }

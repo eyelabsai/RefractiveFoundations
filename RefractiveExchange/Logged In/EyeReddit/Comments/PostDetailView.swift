@@ -21,6 +21,7 @@ struct PostDetailView: View {
     @State private var showErrorToast: Bool = false
     @State private var isSaved = false
     @State private var selectedUserProfile: UserProfile?
+    @State private var showDeleteAlert = false
     
     let saveService = SaveService.shared
     
@@ -127,6 +128,33 @@ struct PostDetailView: View {
                         Text(timeAgoString(from: post.timestamp.dateValue()))
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
+                        
+                        Spacer()
+                        
+                        // Three dots menu for post author
+                        if let currentUid = Auth.auth().currentUser?.uid, currentUid == post.uid {
+                            ThreeDotsMenu(
+                                isAuthor: true,
+                                onDelete: {
+                                    showDeleteAlert = true
+                                },
+                                size: 14
+                            )
+                            .alert(isPresented: $showDeleteAlert) {
+                                Alert(
+                                    title: Text("Delete Post"),
+                                    message: Text("Are you sure you want to delete this post? This action cannot be undone."),
+                                    primaryButton: .destructive(Text("Delete")) {
+                                        PostService().deletePost(post) { success in
+                                            if success {
+                                                dismiss()
+                                            }
+                                        }
+                                    },
+                                    secondaryButton: .cancel()
+                                )
+                            }
+                        }
                     }
                     
                     HStack {
@@ -328,20 +356,22 @@ struct PostDetailView: View {
                 .padding(.vertical, 48)
                 .background(Color(.systemBackground))
             } else {
-                LazyVStack(alignment: .leading, spacing: 0) {
+                LazyVStack(alignment: .leading, spacing: 12) {
                     ForEach(commentModel.comments, id: \.timestamp) { comment in
                         CommentRow(
                             comment: comment,
                             onUsernameTapped: { username, userId in
                                 selectedUserProfile = UserProfile(username: username, userId: userId)
+                            },
+                            onCommentUpdated: {
+                                commentModel.fetchComments()
                             }
                         )
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
                         .background(Color(.systemBackground))
-                        
-                        Divider()
-                            .padding(.leading, 16)
+                        .cornerRadius(12)
+                        .shadow(color: Color.black.opacity(0.03), radius: 2, x: 0, y: 1)
                     }
                 }
             }
@@ -420,7 +450,7 @@ struct PostDetailView: View {
                 let authorName = (!firstName.isEmpty || !lastName.isEmpty) ? 
                     "\(firstName) \(lastName)".trimmingCharacters(in: .whitespacesAndNewlines) :
                     (!(data.user?.exchangeUsername.isEmpty ?? true) ? data.user!.exchangeUsername : "Anonymous User")
-                let comment = Comment(postId: post.id!, text: trimmedCommentText, author: authorName, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], uid: Auth.auth().currentUser?.uid ?? "")
+                let comment = Comment(postId: post.id!, text: trimmedCommentText, author: authorName, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], uid: Auth.auth().currentUser?.uid ?? "", editedAt: nil)
                 try await uploadFirebase(comment)
                 
                 await MainActor.run {

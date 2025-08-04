@@ -70,4 +70,24 @@ struct CommentService   {
             }
         }
     }
+    
+    func editComment(_ comment: Comment, newText: String, completion: @escaping (Bool) -> Void) {
+        guard let commentId = comment.id else {
+            completion(false)
+            return
+        }
+        
+        Firestore.firestore().collection("comments").document(commentId).updateData([
+            "text": newText,
+            "editedAt": Timestamp(date: Date())
+        ]) { error in
+            if let error = error {
+                print("❌ Error editing comment: \(error.localizedDescription)")
+                completion(false)
+            } else {
+                print("✏️ Comment edited successfully")
+                completion(true)
+            }
+        }
+    }
 }

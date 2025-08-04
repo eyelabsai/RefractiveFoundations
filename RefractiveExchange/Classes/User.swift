@@ -47,8 +47,9 @@ struct User: Codable, Identifiable, Equatable {
     var dateJoined: Timestamp?
     var practiceLocation: String?
     var practiceName: String?
+    var hasCompletedOnboarding: Bool?
     
-    init(cases: [IOLCase] = [], credential: String = "", email: String = "", firstName: String = "", lastName: String = "", position: String = "", specialty: String = "", state: String = "", suffix: String = "", uid: String = "", avatarUrl: String? = nil, exchangeUsername: String = "", favoriteLenses: [String]? = nil, savedPosts: [String]? = nil, dateJoined: Timestamp? = nil, practiceLocation: String? = nil, practiceName: String? = nil) {
+    init(cases: [IOLCase] = [], credential: String = "", email: String = "", firstName: String = "", lastName: String = "", position: String = "", specialty: String = "", state: String = "", suffix: String = "", uid: String = "", avatarUrl: String? = nil, exchangeUsername: String = "", favoriteLenses: [String]? = nil, savedPosts: [String]? = nil, dateJoined: Timestamp? = nil, practiceLocation: String? = nil, practiceName: String? = nil, hasCompletedOnboarding: Bool? = nil) {
         self.cases = cases
         self.credential = credential
         self.email = email
@@ -66,6 +67,7 @@ struct User: Codable, Identifiable, Equatable {
         self.dateJoined = dateJoined
         self.practiceLocation = practiceLocation
         self.practiceName = practiceName
+        self.hasCompletedOnboarding = hasCompletedOnboarding
     }
     
     // Equatable conformance

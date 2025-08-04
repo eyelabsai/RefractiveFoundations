@@ -16,11 +16,19 @@ struct ContentView: View {
     var body: some View {
         Group {
             if firebaseManager.isUserAuthenticated {
-                // User is logged in - show main Reddit app
-                Main()
-                    .onAppear {
-                        darkModeManager.applyTheme() // Restore user preference
+                // User is logged in - check onboarding status
+                if shouldShowOnboarding {
+                    OnboardingView {
+                        firebaseManager.markOnboardingCompleted()
                     }
+                    .transition(.opacity)
+                } else {
+                    // User has completed onboarding - show main app
+                    Main()
+                        .onAppear {
+                            darkModeManager.applyTheme() // Restore user preference
+                        }
+                }
             } else {
                 // User is not logged in - show authentication
                 NavigationView {
@@ -38,6 +46,12 @@ struct ContentView: View {
                 }
             }
         }
+        .animation(.easeInOut(duration: 0.5), value: shouldShowOnboarding)
+    }
+    
+    private var shouldShowOnboarding: Bool {
+        guard let currentUser = firebaseManager.currentUser else { return false }
+        return currentUser.hasCompletedOnboarding != true
     }
 }
 

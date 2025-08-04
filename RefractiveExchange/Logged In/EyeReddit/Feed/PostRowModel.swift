@@ -84,7 +84,11 @@ class PostRowModel: ObservableObject    {
                 let author = data["author"] as? String ?? ""
                 let text = data["text"] as? String ?? ""
                 let timestamp = data["timestamp"] as? Timestamp ?? Timestamp(date: Date())
-                let comment = Comment(postId: postId, text: text, author: author, timestamp: timestamp)
+                let upvotes = data["upvotes"] as? [String] ?? []
+                let downvotes = data["downvotes"] as? [String] ?? []
+                let uid = data["uid"] as? String ?? ""
+                let editedAt = data["editedAt"] as? Timestamp
+                let comment = Comment(postId: postId, text: text, author: author, timestamp: timestamp, upvotes: upvotes, downvotes: downvotes, uid: uid, editedAt: editedAt)
                 if postId == self.post.id   {
                     self.comments.append(comment)
                 }
