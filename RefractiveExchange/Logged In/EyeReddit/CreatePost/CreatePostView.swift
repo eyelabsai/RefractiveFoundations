@@ -42,6 +42,7 @@ struct CreatePostView: View {
     @State private var selectedImages: [UIImage] = [] // Changed to array for multiple images
     @State private var showErrorToast: Bool = false
     @State private var showSuccessToast: Bool = false
+    @State private var showSubforumPrompt: Bool = false
 
     
     
@@ -60,14 +61,18 @@ struct CreatePostView: View {
                 Spacer()
                 
                 Button("Post") {
-                    createPost()
+                    if selectedSubredditIndex == 0 {
+                        showSubforumPrompt = true
+                    } else {
+                        createPost()
+                    }
                 }
                 .foregroundColor(.white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .background(title.isEmpty || selectedSubredditIndex == 0 ? Color.gray : Color.blue)
+                .background(title.isEmpty ? Color.gray : Color.blue)
                 .cornerRadius(20)
-                .disabled(title.isEmpty || selectedSubredditIndex == 0 || isLoading)
+                .disabled(title.isEmpty || isLoading)
 
 
             }

@@ -20,7 +20,7 @@ struct SideMenuView: View {
             
             ZStack{
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("SubExchanges")
+                    Text("SubForums")
                         .poppinsBold(24)
                         .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
                         .padding(.leading, 20)

@@ -40,22 +40,18 @@ struct OnboardingView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header with logo
-            VStack(spacing: 16) {
+            VStack(spacing: 0) {
                 Image("RF Icon")
                     .renderingMode(colorScheme == .dark ? .template : .original)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 80, height: 80)
+                    .frame(width: 120, height: 120)
                     .foregroundColor(colorScheme == .dark ? .white : .primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
-                
-                Text("Refractive Exchange")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(.primary)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
             }
-            .padding(.top, 60)
-            .padding(.bottom, 40)
+            .padding(.top, 80)
+            .padding(.bottom, 50)
             
             // Slide content
             TabView(selection: $currentSlide) {
