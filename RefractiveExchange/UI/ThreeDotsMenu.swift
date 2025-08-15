@@ -13,16 +13,24 @@ struct ThreeDotsMenu: View {
     let onDelete: (() -> Void)?
     let onSave: (() -> Void)?
     let isSaved: Bool?
+    let onPin: (() -> Void)?
+    let onUnpin: (() -> Void)?
+    let isPinned: Bool?
+    let canPin: Bool
     let size: CGFloat
     
     @State private var showMenu = false
     
-    init(isAuthor: Bool, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil, onSave: (() -> Void)? = nil, isSaved: Bool? = nil, size: CGFloat = 14) {
+    init(isAuthor: Bool, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil, onSave: (() -> Void)? = nil, isSaved: Bool? = nil, onPin: (() -> Void)? = nil, onUnpin: (() -> Void)? = nil, isPinned: Bool? = nil, canPin: Bool = false, size: CGFloat = 14) {
         self.isAuthor = isAuthor
         self.onEdit = onEdit
         self.onDelete = onDelete
         self.onSave = onSave
         self.isSaved = isSaved
+        self.onPin = onPin
+        self.onUnpin = onUnpin
+        self.isPinned = isPinned
+        self.canPin = canPin
         self.size = size
     }
     
@@ -36,6 +44,25 @@ struct ThreeDotsMenu: View {
                         systemImage: isSaved ? "bookmark.slash" : "bookmark"
                     )
                 }
+            }
+            
+            // Pin/Unpin options (for admins/moderators)
+            if canPin {
+                if let isPinned = isPinned, isPinned {
+                    if let onUnpin = onUnpin {
+                        Button(action: onUnpin) {
+                            Label("Unpin Post", systemImage: "pin.slash")
+                        }
+                    }
+                } else {
+                    if let onPin = onPin {
+                        Button(action: onPin) {
+                            Label("Pin Post", systemImage: "pin")
+                        }
+                    }
+                }
+                
+                Divider()
             }
             
             // Edit option (only for author)

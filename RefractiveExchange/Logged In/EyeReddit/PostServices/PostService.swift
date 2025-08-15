@@ -11,6 +11,8 @@ import FirebaseFirestore
 import FirebaseAuth
 import FirebaseStorage
 
+// Note: AdminService and NotificationService imports will be added once the modules are properly integrated
+
 struct PostService  {
     func upvote(_ post: FetchedPost, completion: @escaping(Bool) -> Void) {
         guard let uid = Auth.auth().currentUser?.uid, let postId = post.id else { return }
@@ -28,7 +30,19 @@ struct PostService  {
                     "upvotes": FieldValue.arrayUnion([uid]),
                     "downvotes": FieldValue.arrayRemove([uid])
                 ]) { error in
-                    completion(true)
+                    if error == nil {
+                        // Create notification for post like
+                        NotificationService.shared.createPostLikeNotification(
+                            postId: postId,
+                            postAuthorId: post.uid,
+                            likerId: uid,
+                            postTitle: post.title
+                        )
+                        print("✅ Post upvoted and notification sent")
+                        completion(true)
+                    } else {
+                        completion(false)
+                    }
                 }
         }
     }
@@ -99,7 +113,6 @@ struct PostService  {
                 self.fetchUserDetails(uid: storedPost.uid) { user in
                     let authorName: String
                     let avatarUrl: String?
-                    let flair: String?
                     
                     if let user = user {
                         // User found - use their details
@@ -115,14 +128,12 @@ struct PostService  {
                         }
                         
                         avatarUrl = user.avatarUrl
-                        flair = user.specialty // Set flair from user's specialty
                         print("✅ Set author name: '\(authorName)' for post: '\(storedPost.title)'")
                         print("🔍 User data: firstName='\(firstName)', lastName='\(lastName)', exchangeUsername='\(user.exchangeUsername)'")
                     } else {
                         // User not found - use fallback but also try to create the user document
                         authorName = "Unknown User"
                         avatarUrl = nil
-                        flair = nil // No user, no flair
                         print("⚠️ Warning: User document missing for UID: \(storedPost.uid)")
                         print("   Post: \(storedPost.title)")
                         print("   Consider checking if this user exists in Firebase Auth but not in users collection")
@@ -142,8 +153,7 @@ struct PostService  {
                         author: authorName,
                         uid: storedPost.uid,
                         avatarUrl: avatarUrl,
-                        flair: flair, // Pass flair to FetchedPost
-                        editedAt: storedPost.editedAt // Pass editedAt to FetchedPost
+                        editedAt: storedPost.editedAt
                     )
                     fetchedPosts.append(fetchedPost)
                     group.leave()
@@ -154,6 +164,71 @@ struct PostService  {
                 completion(fetchedPosts)
             }
 
+        }
+    }
+    
+    func fetchPostById(_ postId: String, completion: @escaping (FetchedPost?) -> Void) {
+        print("🔍 Fetching post by ID: \(postId)")
+        
+        Firestore.firestore().collection("posts").document(postId).getDocument { document, error in
+            if let error = error {
+                print("❌ Error fetching post: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+            
+            guard let document = document, document.exists else {
+                print("❌ Post document not found for ID: \(postId)")
+                completion(nil)
+                return
+            }
+            
+            do {
+                let storedPost = try document.data(as: StoredPost.self)
+                print("✅ Successfully fetched post: \(storedPost.title)")
+                
+                // Fetch user details for the post author
+                self.fetchUserDetails(uid: storedPost.uid) { user in
+                    let authorName: String
+                    let avatarUrl: String?
+                    
+                    if let user = user {
+                        let firstName = user.firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let lastName = user.lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        authorName = (!firstName.isEmpty || !lastName.isEmpty) ? 
+                            "\(firstName) \(lastName)".trimmingCharacters(in: .whitespacesAndNewlines) :
+                            (!user.exchangeUsername.isEmpty ? user.exchangeUsername : "Unknown User")
+                        avatarUrl = user.avatarUrl
+                    } else {
+                        authorName = "Unknown User"
+                        avatarUrl = nil
+                    }
+                    
+                    let fetchedPost = FetchedPost(
+                        id: storedPost.id,
+                        title: storedPost.title,
+                        text: storedPost.text,
+                        timestamp: storedPost.timestamp,
+                        upvotes: storedPost.upvotes,
+                        downvotes: storedPost.downvotes ?? [],
+                        subreddit: storedPost.subreddit,
+                        imageURLs: storedPost.imageURLs,
+                        didLike: storedPost.didLike,
+                        didDislike: storedPost.didDislike ?? false,
+                        author: authorName,
+                        uid: storedPost.uid,
+                        avatarUrl: avatarUrl,
+                        editedAt: storedPost.editedAt
+                    )
+                    
+                    DispatchQueue.main.async {
+                        completion(fetchedPost)
+                    }
+                }
+            } catch {
+                print("❌ Error parsing post document: \(error)")
+                completion(nil)
+            }
         }
     }
     
@@ -216,6 +291,21 @@ struct PostService  {
     
     func deletePost(_ post: FetchedPost, completion: @escaping (Bool) -> Void) {
         guard let postId = post.id else {
+            completion(false)
+            return
+        }
+        
+        // Check if user has permission to delete this post
+        guard let currentUserId = Auth.auth().currentUser?.uid else {
+            completion(false)
+            return
+        }
+        
+        // Allow deletion if user is the author (admin permissions will be added later)
+        let isAuthor = post.uid == currentUserId
+        
+        guard isAuthor else {
+            print("❌ User does not have permission to delete this post")
             completion(false)
             return
         }

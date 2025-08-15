@@ -21,6 +21,9 @@ struct StoredPost: Codable, Identifiable  {
     var didDislike: Bool = false
     var uid: String
     var editedAt: Timestamp? // Added edited timestamp
+    var isPinned: Bool? // Added pinned status for admin announcements
+    var pinnedAt: Timestamp? // When the post was pinned
+    var pinnedBy: String? // Admin who pinned the post
 }
 
 struct FetchedPost: Codable, Identifiable, Hashable  {
@@ -39,6 +42,9 @@ struct FetchedPost: Codable, Identifiable, Hashable  {
     var avatarUrl: String?
     var flair: String? // Added flair property
     var editedAt: Timestamp? // Added edited timestamp
+    var isPinned: Bool? // Added pinned status for admin announcements
+    var pinnedAt: Timestamp? // When the post was pinned
+    var pinnedBy: String? // Admin who pinned the post
     
     // Hashable conformance
     func hash(into hasher: inout Hasher) {

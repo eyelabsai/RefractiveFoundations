@@ -1,8 +1,12 @@
 import SwiftUI
 
+// NotificationService is a Swift class, not a module - we'll use it directly
+
 struct Main: View {
     
     @StateObject var data = GetData()
+    @ObservedObject var firebaseManager = FirebaseManager.shared
+    @ObservedObject var notificationService = NotificationService.shared
     
     @State var searchActivated = false
     @State var currentTab: Tab = .eyeReddit
@@ -22,6 +26,8 @@ struct Main: View {
                 switch currentTab {
                 case .eyeReddit:
                     EyeReddit(data: data, resetToHome: $resetEyeRedditToHome, navigationPath: $navigationPath)
+                case .notifications:
+                    NotificationView()
                 case .messages:
                     ConversationListView()
                 case .newPost:
@@ -45,14 +51,27 @@ struct Main: View {
                     bottomTabBar
                 }
             }
-            .zIndex(0)
-            
-            CustomLoading(handle: $data.handle)
-                .zIndex(2)
-            
-            CustomAlert(handle: $data.handle)
-                .zIndex(3)
         }
+        .zIndex(0)
+        .onAppear {
+            startNotificationListening()
+        }
+        .onChange(of: firebaseManager.currentUser?.uid) { newUID in
+            // When user changes, cleanup old notifications and start new ones
+            if let newUserID = newUID {
+                print("🔄 User changed to \(newUserID)")
+                notificationService.stopListening()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    notificationService.startListening(for: newUserID)
+                }
+            }
+        }
+        
+        CustomLoading(handle: $data.handle)
+            .zIndex(2)
+        
+        CustomAlert(handle: $data.handle)
+            .zIndex(3)
     }
     
     var top: some View {
@@ -78,15 +97,53 @@ struct Main: View {
             
             Spacer()
             
-            // DM button (Instagram-style message)
+            // Notification button with badge
+            Button {
+                withAnimation {
+                    currentTab = .notifications
+                }
+            } label: {
+                ZStack {
+                    Image(systemName: "bell")
+                        .imageScale(.medium)
+                        .foregroundColor(.primary)
+                    
+                    if notificationService.notificationCounts.totalUnread > 0 {
+                        Text("\(notificationService.notificationCounts.totalUnread)")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(Color.red)
+                            .clipShape(Capsule())
+                            .offset(x: 8, y: -8)
+                    }
+                }
+            }
+            .padding(.trailing, 5)
+            
+            // DM button (Instagram-style message) with badge
             Button {
                 withAnimation {
                     currentTab = .messages
                 }
             } label: {
-                Image(systemName: "paperplane")
-                    .imageScale(.medium)
-                    .foregroundColor(.primary)
+                ZStack {
+                    Image(systemName: "paperplane")
+                        .imageScale(.medium)
+                        .foregroundColor(.primary)
+                    
+                    if notificationService.unreadMessageCount > 0 {
+                        Text("\(notificationService.unreadMessageCount)")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(Color.red)
+                            .clipShape(Capsule())
+                            .offset(x: 8, y: -8)
+                    }
+                }
             }
             .padding(.trailing, 5)
         }
@@ -121,6 +178,20 @@ struct Main: View {
                         }
                         currentTab = .eyeReddit
                         resetEyeRedditToHome = true
+                    }
+                }
+            )
+            
+            Spacer()
+            
+            // Notifications Tab
+            TabBarButton(
+                icon: "bell.fill",
+                title: "Notifications",
+                isSelected: currentTab == .notifications,
+                action: {
+                    withAnimation {
+                        currentTab = .notifications
                     }
                 }
             )
@@ -163,6 +234,11 @@ struct Main: View {
             , alignment: .top
         )
     }
+    
+    private func startNotificationListening() {
+        guard let currentUserId = firebaseManager.currentUser?.uid else { return }
+        notificationService.startListening(for: currentUserId)
+    }
 }
 
 struct TabBarButton: View {
@@ -190,6 +266,7 @@ struct TabBarButton: View {
 // Simplified Tab Enum for Reddit-focused app
 enum Tab {
     case eyeReddit
+    case notifications
     case messages
     case newPost
     case account

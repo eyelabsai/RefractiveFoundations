@@ -134,6 +134,10 @@ class FirebaseManager: ObservableObject {
             try Auth.auth().signOut()
             isUserAuthenticated = false
             currentUser = nil
+            
+            // Cleanup notification listeners to prevent session conflicts
+            NotificationService.shared.stopListening()
+            print("✅ Notification listeners cleaned up on sign out")
         } catch {
             print("Error signing out: \(error.localizedDescription)")
         }

@@ -12,6 +12,7 @@ import FirebaseFirestore
 struct ProfileView: View {
     @ObservedObject var data: GetData
     @EnvironmentObject var darkModeManager: DarkModeManager
+    @ObservedObject var adminService = AdminService.shared
     @State private var selectedTab = 0
     @State private var userPosts: [FetchedPost] = []
     @State private var userComments: [Comment] = []
@@ -61,6 +62,9 @@ struct ProfileView: View {
                 print("👤 Current user data: \(data.user?.firstName ?? "nil") \(data.user?.lastName ?? "nil")")
                 print("🔐 Auth UID: \(Auth.auth().currentUser?.uid ?? "nil")")
                 
+                // Check admin role
+                adminService.checkCurrentUserRole()
+                
                 // Check if user needs migration (missing user document)
                 if data.user == nil && Auth.auth().currentUser != nil {
                     print("🚨 User authenticated but no user document found - attempting migration")
@@ -70,6 +74,8 @@ struct ProfileView: View {
                             DispatchQueue.main.async {
                                 self.data.fetchUser()
                                 self.loadUserData()
+                                // Check admin role again after user data loads
+                                self.adminService.checkCurrentUserRole()
                             }
                         }
                     }
@@ -586,7 +592,35 @@ struct ProfileView: View {
                             .padding(.vertical, 12)
                         }
                         .buttonStyle(PlainButtonStyle())
+                        
+                        // Admin Panel Button - Show only for admin/moderator users
+                        if adminService.canAccessAdminPanel() {
+                            Divider()
+                            
+                            NavigationLink(destination: AdminPanelView()) {
+                                HStack {
+                                    Image(systemName: "shield.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.orange)
+                                        .frame(width: 24)
+                                    
+                                    Text("Admin Panel")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.primary)
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.vertical, 12)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
                     }
+                    
+                    // Admin Panel access added
                 }
                 .padding(16)
                 .background(Color(.systemBackground))

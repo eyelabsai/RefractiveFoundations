@@ -44,16 +44,37 @@ class FeedViewModel: ObservableObject   {
         print("🔍 Filtering posts for subreddit: '\(currentSubreddit)'")
         print("📊 Total posts available: \(allPosts.count)")
         
+        var filteredPosts: [FetchedPost]
+        
         if currentSubreddit == "i/All"  {
-            self.posts = allPosts
-            print("✅ Showing all posts: \(posts.count)")
+            filteredPosts = allPosts
+            print("✅ Showing all posts: \(filteredPosts.count)")
         } else  {
-            self.posts = allPosts.filter({$0.subreddit == currentSubreddit})
-            print("✅ Filtered posts: \(posts.count)")
+            filteredPosts = allPosts.filter({$0.subreddit == currentSubreddit})
+            print("✅ Filtered posts: \(filteredPosts.count)")
             
             // Debug: Print all subreddits to see what we have
             let allSubreddits = Set(allPosts.map { $0.subreddit })
             print("🏷️ Available subreddits: \(allSubreddits)")
+        }
+        
+        // Sort posts: Pinned posts first (by pinned date), then regular posts by timestamp
+        self.posts = filteredPosts.sorted { post1, post2 in
+            let isPinned1 = post1.isPinned ?? false
+            let isPinned2 = post2.isPinned ?? false
+            
+            // If both pinned or both not pinned, sort by timestamp (newer first)
+            if isPinned1 == isPinned2 {
+                return post1.timestamp.dateValue() > post2.timestamp.dateValue()
+            }
+            
+            // Pinned posts come first
+            return isPinned1 && !isPinned2
+        }
+        
+        let pinnedCount = posts.filter { $0.isPinned ?? false }.count
+        if pinnedCount > 0 {
+            print("📌 \(pinnedCount) pinned posts at top of feed")
         }
     }
     

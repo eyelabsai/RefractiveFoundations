@@ -11,6 +11,8 @@ import FirebaseFirestore
 import FirebaseAuth
 import Combine
 
+// Note: AdminService and NotificationService imports will be added once the modules are properly integrated
+
 class DirectMessageService: ObservableObject {
     static let shared = DirectMessageService()
     
@@ -240,6 +242,16 @@ class DirectMessageService: ObservableObject {
                 completion(.failure(error))
             } else {
                 print("✅ Message sent successfully")
+                
+                // Create notification for direct message
+                NotificationService.shared.createDirectMessageNotification(
+                    senderId: senderId,
+                    recipientId: recipientId,
+                    conversationId: conversationId,
+                    messageText: text
+                )
+                print("✅ Message sent and notification created")
+                
                 // Post notification to refresh conversation list
                 DispatchQueue.main.async {
                     NotificationCenter.default.post(name: .conversationUpdated, object: nil)

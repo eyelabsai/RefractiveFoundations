@@ -10,6 +10,8 @@ import Firebase
 import FirebaseFirestore
 import FirebaseAuth
 
+// Note: NotificationService import will be added once the module is properly integrated
+
 struct CommentView: View {
     
     @ObservedObject var viewModel: CommentModel
@@ -67,6 +69,15 @@ struct CommentView: View {
         ]
         
         _ = try await Firestore.firestore().collection("comments").addDocument(data: docData)
+        
+        // Create notification for post comment
+        NotificationService.shared.createPostCommentNotification(
+            postId: comment.postId,
+            postAuthorId: viewModel.post.uid,
+            commenterId: comment.uid ?? "",
+            postTitle: viewModel.post.title,
+            commentText: comment.text
+        )
     }
     
     func refreshComments() {

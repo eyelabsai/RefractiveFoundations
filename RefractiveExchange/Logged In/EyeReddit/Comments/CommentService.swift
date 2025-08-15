@@ -10,6 +10,8 @@ import Firebase
 import FirebaseFirestore
 import FirebaseAuth
 
+// Note: AdminService and NotificationService imports will be added once the modules are properly integrated
+
 
 struct CommentService   {
     
@@ -29,7 +31,19 @@ struct CommentService   {
                     "upvotes": FieldValue.arrayUnion([uid]),
                     "downvotes": FieldValue.arrayRemove([uid])
                 ]) { error in
-                    completion(true)
+                    if error == nil {
+                        // Create notification for comment like
+                        NotificationService.shared.createCommentLikeNotification(
+                            commentId: commentId,
+                            commentAuthorId: comment.uid ?? "",
+                            likerId: uid,
+                            postTitle: "Comment" // We'll get the actual post title in the service
+                        )
+                        print("✅ Comment upvoted and notification sent")
+                        completion(true)
+                    } else {
+                        completion(false)
+                    }
                 }
         }
     }
@@ -60,6 +74,21 @@ struct CommentService   {
             completion(false)
             return
         }
+        
+        // Check if user has permission to delete this comment
+        guard let currentUserId = Auth.auth().currentUser?.uid else {
+            completion(false)
+            return
+        }
+        
+        // Allow deletion if user is the author (admin permissions will be added later)
+        let isAuthor = comment.uid == currentUserId
+        
+        guard isAuthor else {
+            print("❌ User does not have permission to delete this comment")
+            completion(false)
+            return
+        }
         Firestore.firestore().collection("comments").document(commentId).delete { error in
             if let error = error {
                 print("❌ Error deleting comment: \(error.localizedDescription)")
@@ -87,6 +116,40 @@ struct CommentService   {
             } else {
                 print("✏️ Comment edited successfully")
                 completion(true)
+            }
+        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func getPostTitleForComment(commentId: String, completion: @escaping (String?) -> Void) {
+        Firestore.firestore().collection("comments").document(commentId).getDocument { document, error in
+            if let error = error {
+                print("❌ Error fetching comment: \(error)")
+                completion(nil)
+                return
+            }
+            
+            guard let document = document, document.exists,
+                  let postId = document.data()?["postId"] as? String else {
+                completion(nil)
+                return
+            }
+            
+            Firestore.firestore().collection("posts").document(postId).getDocument { postDoc, error in
+                if let error = error {
+                    print("❌ Error fetching post: \(error)")
+                    completion(nil)
+                    return
+                }
+                
+                guard let postDoc = postDoc, postDoc.exists,
+                      let title = postDoc.data()?["title"] as? String else {
+                    completion(nil)
+                    return
+                }
+                
+                completion(title)
             }
         }
     }
