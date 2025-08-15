@@ -143,15 +143,31 @@ struct PostRow: View {
                     Text("•")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
-                        .fixedSize(horizontal: true, vertical: false)
+                        .fixedSize()
                     
                     authorButton
                     
-                    Spacer()
+                    Spacer(minLength: 0)
                 }
                 
-                // Second row: Flair and timestamp
-                metadataRow
+                // Second row: Timestamp and flair
+                HStack(spacing: 6) {
+                    Text(timeAgoString(from: self.viewModel.post.timestamp.dateValue()))
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .fixedSize()
+                    
+                    if let flair = viewModel.post.flair {
+                        Text("•")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .fixedSize()
+                        
+                        FlairView(flair: flair)
+                    }
+                    
+                    Spacer(minLength: 0)
+                }
             }
         }
         .alert(isPresented: $showDeleteAlert) {
@@ -180,7 +196,7 @@ struct PostRow: View {
             .font(.system(size: 12, weight: .medium))
             .foregroundColor(.blue)
             .lineLimit(1)
-            .fixedSize(horizontal: true, vertical: false)
+            .truncationMode(.tail)
             .onTapGesture {
                 onSubredditTapped?(self.viewModel.post.subreddit)
             }
@@ -191,7 +207,7 @@ struct PostRow: View {
             .font(.system(size: 13, weight: .medium))
             .foregroundColor(.blue)
             .lineLimit(1)
-            .fixedSize(horizontal: true, vertical: false)
+            .truncationMode(.tail)
             .onTapGesture {
                 onUsernameTapped?(self.viewModel.post.author, self.viewModel.post.uid)
             }
@@ -303,24 +319,7 @@ struct PostRow: View {
         )
     }
     
-    // MARK: - Metadata Row
-    private var metadataRow: some View {
-        HStack(spacing: 6) {
-            if let flair = viewModel.post.flair {
-                FlairView(flair: flair)
-            }
-            
-            Text("•")
-                .font(.system(size: 12))
-                .foregroundColor(.secondary)
-            
-            Text(timeAgoString(from: self.viewModel.post.timestamp.dateValue()))
-                .font(.system(size: 12))
-                .foregroundColor(.secondary)
-            
-            Spacer()
-        }
-    }
+
     
     // MARK: - Post Main Content
     private var postMainContent: some View {

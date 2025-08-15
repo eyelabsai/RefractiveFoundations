@@ -75,7 +75,7 @@ struct PostDetailView: View {
             commentModel.fetchComments()
             checkIfPostIsSaved()
         }
-        .sheet(item: $selectedUserProfile) { userProfile in
+        .fullScreenCover(item: $selectedUserProfile) { userProfile in
             PublicProfileView(
                 username: userProfile.username,
                 userId: userProfile.userId,

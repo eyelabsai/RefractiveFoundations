@@ -117,7 +117,7 @@ struct FeedView: View {
             .navigationDestination(for: FetchedPost.self) { post in
                 PostDetailView(post: post, data: data)
             }
-            .sheet(item: $selectedUserProfile) { userProfile in
+            .fullScreenCover(item: $selectedUserProfile) { userProfile in
                 PublicProfileView(
                     username: userProfile.username,
                     userId: userProfile.userId,

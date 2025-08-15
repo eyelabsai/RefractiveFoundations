@@ -48,11 +48,12 @@ struct PublicProfileView: View {
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }
+            .background(Color(.systemGroupedBackground))
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $showingChatView) {
                 if let otherUser = otherUser {
                     ChatView(
-                        conversationId: existingConversationId, // Use existing conversation ID if found, empty string for new
+                        conversationId: existingConversationId,
                         otherUser: otherUser,
                         displayName: "\(otherUser.firstName) \(otherUser.lastName)"
                     )
@@ -61,9 +62,12 @@ struct PublicProfileView: View {
         }
         .onAppear {
             print("🔍 PublicProfileView appeared for user: \(username) with ID: \(userId)")
-            viewModel.loadUserProfile(userId: userId)
-            viewModel.loadUserPosts(userId: userId)
-            viewModel.loadUserComments(userId: userId)
+            // Only load data if not already loaded to prevent duplicate calls
+            if viewModel.user == nil {
+                viewModel.loadUserProfile(userId: userId)
+                viewModel.loadUserPosts(userId: userId)
+                viewModel.loadUserComments(userId: userId)
+            }
         }
         .onChange(of: viewModel.user) { user in
             if let user = user {
@@ -111,62 +115,68 @@ struct PublicProfileView: View {
     private var profileHeader: some View {
         VStack(spacing: 0) {
             // Main profile content
-            HStack(alignment: .top, spacing: 16) {
+            HStack(alignment: .top, spacing: 12) {
                 // Avatar
                 Circle()
                     .fill(Color.blue.opacity(0.2))
                     .overlay(
                         Image(systemName: "person.fill")
                             .foregroundColor(.blue)
-                            .font(.system(size: 32))
+                            .font(.system(size: 20))
                     )
-                    .frame(width: 80, height: 80)
+                    .frame(width: 50, height: 50)
                 
                 // User info section
                 VStack(alignment: .leading, spacing: 6) {
                     if let user = viewModel.user {
-                        // Name and flair in same row
-                        HStack(alignment: .top, spacing: 8) {
-                            Text("\(user.firstName) \(user.lastName)")
-                                .font(.system(size: 22, weight: .bold))
-                                .foregroundColor(.primary)
-                                .lineLimit(1)
-                                .fixedSize(horizontal: true, vertical: false)
+                        // Name on its own line
+                        Text("\(user.firstName) \(user.lastName)")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.primary)
+                            .lineLimit(1)
+                        
+                        // Member info and flair on second line
+                        HStack(alignment: .center, spacing: 6) {
+                            if viewModel.isLoadingProfile {
+                                Text("Loading...")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.secondary)
+                            } else {
+                                Text("Member since \(viewModel.memberSince)")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.secondary)
+                            }
                             
-                            FlairView(flair: user.specialty)
+                            Spacer()
                         }
                         
-                        // Practice information
+                        // Specialty flair on third line if present
+                        if !user.specialty.isEmpty {
+                            HStack {
+                                FlairView(flair: user.specialty)
+                                Spacer()
+                            }
+                        }
+                        
+                        // Practice information - only show if available
                         if let practiceLocation = user.practiceLocation, !practiceLocation.isEmpty {
                             Text(practiceLocation)
-                                .font(.system(size: 15, weight: .medium))
+                                .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.blue)
                                 .lineLimit(1)
-                                .fixedSize(horizontal: true, vertical: false)
                         }
                         
                         if let practiceName = user.practiceName, !practiceName.isEmpty {
                             Text(practiceName)
-                                .font(.system(size: 13))
+                                .font(.system(size: 12))
                                 .foregroundColor(.secondary)
                                 .lineLimit(1)
-                                .fixedSize(horizontal: true, vertical: false)
-                        }
-                        
-                        // Member since
-                        if viewModel.isLoadingProfile {
-                            Text("Loading...")
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
-                        } else {
-                            Text("Member since \(viewModel.memberSince)")
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
                         }
                     } else {
                         Text("Loading...")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.primary)
+                            .lineLimit(1)
                     }
                 }
                 
@@ -176,7 +186,7 @@ struct PublicProfileView: View {
                 messageButton
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 16)
+            .padding(.vertical, 12)
             
             Divider()
         }
@@ -188,21 +198,19 @@ struct PublicProfileView: View {
         Button(action: {
             startDirectMessage()
         }) {
-            HStack(spacing: 6) {
+            HStack(spacing: 4) {
                 Image(systemName: "message.fill")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                 
                 Text("Message")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                     .lineLimit(1)
-                    .fixedSize(horizontal: true, vertical: false)
             }
             .foregroundColor(.white)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
             .background(Color.blue)
-            .cornerRadius(20)
-            .fixedSize(horizontal: true, vertical: false)
+            .cornerRadius(16)
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
     }
@@ -243,33 +251,43 @@ struct PublicProfileView: View {
         ScrollView {
             LazyVStack(spacing: 8) {
                 if viewModel.isLoadingPosts {
-                    VStack(spacing: 16) {
+                    VStack(spacing: 20) {
                         ProgressView()
-                            .scaleEffect(1.2)
+                            .scaleEffect(1.3)
+                            .tint(.blue)
                         
-                        Text("Loading posts...")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.secondary)
+                        VStack(spacing: 6) {
+                            Text("Loading posts...")
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundColor(.primary)
+                            
+                            Text("Please wait while we fetch the user's posts")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 48)
+                    .padding(.vertical, 60)
                 } else if viewModel.posts.isEmpty {
-                    VStack(spacing: 16) {
+                    VStack(spacing: 20) {
                         Image(systemName: "doc.text")
-                            .font(.system(size: 48))
-                            .foregroundColor(.gray.opacity(0.5))
+                            .font(.system(size: 52))
+                            .foregroundColor(.gray.opacity(0.4))
                         
-                        Text("No posts yet")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.secondary)
-                        
-                        Text("This user hasn't made any posts yet.")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
+                        VStack(spacing: 8) {
+                            Text("No posts yet")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.primary)
+                            
+                            Text("This user hasn't made any posts yet.")
+                                .font(.system(size: 15))
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 48)
+                    .padding(.vertical, 60)
                 } else {
                     ForEach(viewModel.posts) { post in
                         PostRow(
@@ -298,33 +316,43 @@ struct PublicProfileView: View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 if viewModel.isLoadingComments {
-                    VStack(spacing: 16) {
+                    VStack(spacing: 20) {
                         ProgressView()
-                            .scaleEffect(1.2)
+                            .scaleEffect(1.3)
+                            .tint(.blue)
                         
-                        Text("Loading comments...")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.secondary)
+                        VStack(spacing: 6) {
+                            Text("Loading comments...")
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundColor(.primary)
+                            
+                            Text("Please wait while we fetch the user's comments")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 48)
+                    .padding(.vertical, 60)
                 } else if viewModel.comments.isEmpty {
-                    VStack(spacing: 16) {
+                    VStack(spacing: 20) {
                         Image(systemName: "bubble.left")
-                            .font(.system(size: 48))
-                            .foregroundColor(.gray.opacity(0.5))
+                            .font(.system(size: 52))
+                            .foregroundColor(.gray.opacity(0.4))
                         
-                        Text("No comments yet")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.secondary)
-                        
-                        Text("This user hasn't made any comments yet.")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
+                        VStack(spacing: 8) {
+                            Text("No comments yet")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.primary)
+                            
+                            Text("This user hasn't made any comments yet.")
+                                .font(.system(size: 15))
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 48)
+                    .padding(.vertical, 60)
                 } else {
                     ForEach(viewModel.comments) { comment in
                         CommentRow(
