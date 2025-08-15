@@ -1012,6 +1012,9 @@ struct SettingsView: View {
                                 ))
                                 .toggleStyle(SwitchToggleStyle())
                             }
+                            
+                            // Notification Settings Button
+                            NotificationSettingsButton()
                         }
                     }
                     .padding(16)
@@ -1605,6 +1608,39 @@ struct InfoRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.vertical, 2)
+    }
+}
+
+// MARK: - Notification Settings Button
+struct NotificationSettingsButton: View {
+    @State private var showingNotificationSettings = false
+    
+    var body: some View {
+        Button(action: {
+            showingNotificationSettings = true
+        }) {
+            HStack {
+                HStack(spacing: 12) {
+                    Image(systemName: "bell.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(.blue)
+                        .frame(width: 24)
+                    
+                    Text("Notification Settings")
+                        .font(.system(size: 16))
+                        .foregroundColor(.primary)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .sheet(isPresented: $showingNotificationSettings) {
+            NotificationSettingsView()
+        }
     }
 }
 

@@ -15,6 +15,7 @@
 		052463832E32A87400536306 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 052463822E32A87400536306 /* FirebaseStorage */; };
 		052463862E32AACA00536306 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 052463852E32AACA00536306 /* SDWebImageSwiftUI */; };
 		052463882E32AB5200536306 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 052463872E32AB5200536306 /* FirebaseAnalytics */; };
+		053337E22E4EE06A00F9900D /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 053337E12E4EE06A00F9900D /* FirebaseMessaging */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		053337DF2E4EDE5E00F9900D /* RefractiveFoundations-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "RefractiveFoundations-Info.plist"; sourceTree = "<group>"; };
 		054E8FFC2E3299D400B27166 /* RefractiveFoundations.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RefractiveFoundations.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		054E900D2E3299D500B27166 /* RefractiveFoundationsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RefractiveFoundationsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		054E90172E3299D500B27166 /* RefractiveFoundationsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RefractiveFoundationsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -63,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				053337E22E4EE06A00F9900D /* FirebaseMessaging in Frameworks */,
 				052463862E32AACA00536306 /* SDWebImageSwiftUI in Frameworks */,
 				0524637B2E32A87400536306 /* FirebaseDatabase in Frameworks */,
 				052463882E32AB5200536306 /* FirebaseAnalytics in Frameworks */,
@@ -91,12 +94,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		053337E02E4EE06A00F9900D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		054E8FF32E3299D400B27166 = {
 			isa = PBXGroup;
 			children = (
+				053337DF2E4EDE5E00F9900D /* RefractiveFoundations-Info.plist */,
 				054E8FFE2E3299D400B27166 /* RefractiveExchange */,
 				054E90102E3299D500B27166 /* RefractiveExchangeTests */,
 				054E901A2E3299D500B27166 /* RefractiveExchangeUITests */,
+				053337E02E4EE06A00F9900D /* Frameworks */,
 				054E8FFD2E3299D400B27166 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -139,6 +151,7 @@
 				052463822E32A87400536306 /* FirebaseStorage */,
 				052463852E32AACA00536306 /* SDWebImageSwiftUI */,
 				052463872E32AB5200536306 /* FirebaseAnalytics */,
+				053337E12E4EE06A00F9900D /* FirebaseMessaging */,
 			);
 			productName = RefractiveExchange;
 			productReference = 054E8FFC2E3299D400B27166 /* RefractiveFoundations.app */;
@@ -427,6 +440,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "RefractiveFoundations-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Refractive Exchange";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -443,7 +457,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.refractivefoundations.RefractiveFoundations;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -468,6 +482,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "RefractiveFoundations-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Refractive Exchange";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -484,7 +499,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.refractivefoundations.RefractiveFoundations;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -686,6 +701,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 05D58CC72E32A65900D9CC4A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalytics;
+		};
+		053337E12E4EE06A00F9900D /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 05D58CC72E32A65900D9CC4A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -55,6 +55,7 @@ struct Main: View {
         .zIndex(0)
         .onAppear {
             startNotificationListening()
+            setupPushNotifications()
         }
         .onChange(of: firebaseManager.currentUser?.uid) { newUID in
             // When user changes, cleanup old notifications and start new ones
@@ -238,6 +239,29 @@ struct Main: View {
     private func startNotificationListening() {
         guard let currentUserId = firebaseManager.currentUser?.uid else { return }
         notificationService.startListening(for: currentUserId)
+    }
+    
+    private func setupPushNotifications() {
+        print("🔔 Setting up push notifications...")
+        
+        // Check if permission is already granted
+        PushNotificationManager.shared.checkNotificationPermissionStatus()
+        
+        // Request permission if not already authorized
+        if !PushNotificationManager.shared.isAuthorized {
+            // Small delay to let the user see the main interface first
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                PushNotificationManager.shared.requestNotificationPermission()
+            }
+        }
+        
+        // Get FCM token for this user
+        PushNotificationManager.shared.getFCMToken()
+        
+        // Load notification preferences for current user
+        if let userId = firebaseManager.currentUser?.uid {
+            NotificationPreferencesManager.shared.loadPreferences(for: userId)
+        }
     }
 }
 

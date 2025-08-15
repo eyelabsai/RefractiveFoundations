@@ -45,6 +45,7 @@ struct FetchedPost: Codable, Identifiable, Hashable  {
     var isPinned: Bool? // Added pinned status for admin announcements
     var pinnedAt: Timestamp? // When the post was pinned
     var pinnedBy: String? // Admin who pinned the post
+    var commentCount: Int = 0 // Added comment count for display in feed
     
     // Hashable conformance
     func hash(into hasher: inout Hasher) {

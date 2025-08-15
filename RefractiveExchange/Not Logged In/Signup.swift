@@ -86,8 +86,8 @@ struct SignupScreen: View {
                     .foregroundColor(colorScheme == .dark ? Color.white : Color.primary)
                     .clipShape(RoundedRectangle(cornerRadius: 30))
                     .shadow(color: Color.black.opacity(0.12), radius: 14, x: 0, y: 7)
-                    .padding(.top, 20)
-                    .padding(.bottom, 20)
+                    .padding(.top, 16)
+                    .padding(.bottom, 16)
                 
                 // Dynamic content based on step
                 if viewModel.currentStep == 0 {
@@ -99,7 +99,7 @@ struct SignupScreen: View {
                 Spacer()
                 
                 // Navigation buttons
-                VStack(spacing: 16) {
+                VStack(spacing: 12) {
                     if viewModel.currentStep == 0 {
                         CustomButton(
                             loading: .constant(false),
@@ -115,7 +115,7 @@ struct SignupScreen: View {
                         .disabled(!viewModel.isStep1Valid)
                         .opacity(viewModel.isStep1Valid ? 1.0 : 0.6)
                     } else {
-                        VStack(spacing: 8) {
+                        VStack(spacing: 6) {
                             CustomButton(
                                 loading: $viewModel.handle.loading,
                                 title: .constant("Create Account"),
@@ -129,20 +129,20 @@ struct SignupScreen: View {
                             .opacity((viewModel.isStep2Valid && !viewModel.handle.loading) ? 1.0 : 0.6)
                             
                             if viewModel.handle.loading {
-                                Text("Checking availability...")
+                                Text("Creating your account...")
                                     .font(.system(size: 12))
                                     .foregroundColor(.secondary)
                                     .animation(.easeInOut(duration: 0.3), value: viewModel.handle.loading)
                             }
-                        }
-                        
-                        Button("Back") {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                viewModel.previousStep()
+                            
+                            Button("Back") {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    viewModel.previousStep()
+                                }
                             }
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.blue)
                         }
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.blue)
                     }
                     
                     // Sign in link
@@ -159,7 +159,7 @@ struct SignupScreen: View {
                     }
                 }
                 .padding(.horizontal, 24)
-                .padding(.bottom, 30)
+                .padding(.bottom, 20)
             }
             .zIndex(0)
             
@@ -173,6 +173,7 @@ struct SignupScreen: View {
         }
         .navigationBarHidden(true)
         .background(Color(.systemBackground))
+
     }
 }
 
@@ -293,8 +294,8 @@ struct Step2View: View {
     @ObservedObject var viewModel: SignupViewModel
     
     var body: some View {
-        VStack(spacing: 24) {
-            VStack(spacing: 8) {
+        VStack(spacing: 16) {
+            VStack(spacing: 6) {
                 Text("Secure your account")
                     .font(.system(size: 28, weight: .semibold, design: .rounded))
                     .foregroundColor(.primary)
@@ -304,9 +305,9 @@ struct Step2View: View {
                     .foregroundColor(.secondary)
             }
             
-            VStack(spacing: 20) {
+            VStack(spacing: 16) {
                 // Username field with live validation
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Username")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.gray)
@@ -357,7 +358,7 @@ struct Step2View: View {
                 CustomTextField(text: $viewModel.password, title: "Password", isPassword: true)
                 
                 // Custom confirm password field with validation styling
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Confirm Password")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.gray)
@@ -406,11 +407,314 @@ struct Step2View: View {
                         .animation(.easeInOut(duration: 0.2), value: viewModel.passwordsMatch)
                     }
                 }
+                
+                // Subtle Terms and Agreement section
+                VStack(spacing: 8) {
+                    Divider()
+                        .padding(.vertical, 2)
+                    
+                    VStack(spacing: 8) {
+                        HStack {
+                            Text("Terms & Privacy")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    viewModel.showTermsDetails.toggle()
+                                }
+                            }) {
+                                HStack(spacing: 4) {
+                                    Text(viewModel.showTermsDetails ? "Hide" : "Read")
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundColor(.blue)
+                                    Image(systemName: viewModel.showTermsDetails ? "chevron.up" : "chevron.down")
+                                        .font(.system(size: 10, weight: .medium))
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                        
+                        if viewModel.showTermsDetails {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text("Terms & Privacy Policy")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.primary)
+                                    
+                                    Spacer()
+                                    
+                                    HStack(spacing: 4) {
+                                        Text("Scroll to read all")
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundColor(.blue)
+                                        Image(systemName: "arrow.up.arrow.down")
+                                            .font(.system(size: 10, weight: .medium))
+                                            .foregroundColor(.blue)
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .fill(Color.blue.opacity(0.1))
+                                    )
+                                }
+                                .padding(.horizontal, 4)
+                                
+                                // Properly scrollable terms content
+                                ScrollView(.vertical, showsIndicators: true) {
+                                    LazyVStack(alignment: .leading, spacing: 16) {
+                                        // Privacy Statement Section
+                                        VStack(alignment: .leading, spacing: 12) {
+                                            Text("Privacy Statement")
+                                                .font(.system(size: 16, weight: .bold))
+                                                .foregroundColor(.primary)
+                                            
+                                            Text("Effective: August 1, 2025 | Governing Law: Texas")
+                                                .font(.system(size: 12, weight: .medium))
+                                                .foregroundColor(.secondary)
+                                            
+                                            Text("Refractive Foundations operates an online forum for ophthalmology professionals to share cases, ask questions, and foster collaborative learning in refractive surgery.")
+                                                .font(.system(size: 13, weight: .regular))
+                                                .foregroundColor(.primary)
+                                                .lineSpacing(2)
+                                            
+                                            Text("Key Privacy Points:")
+                                                .font(.system(size: 14, weight: .semibold))
+                                                .foregroundColor(.primary)
+                                                .padding(.top, 8)
+                                            
+                                            VStack(alignment: .leading, spacing: 8) {
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("No PHI or patient identifiers allowed")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Educational content only, not medical advice")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("We collect basic account & usage data")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Content licensing for forum operation")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Texas law governs disputes")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Be respectful and follow community guidelines")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Report violations to Gurpal.Virdi@gmail.com")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                            }
+                                        }
+                                        
+                                        Divider()
+                                            .padding(.vertical, 8)
+                                        
+                                        // User Agreement Section
+                                        VStack(alignment: .leading, spacing: 12) {
+                                            Text("User Agreement")
+                                                .font(.system(size: 16, weight: .bold))
+                                                .foregroundColor(.primary)
+                                            
+                                            Text("By using this platform, you agree to:")
+                                                .font(.system(size: 13, weight: .regular))
+                                                .foregroundColor(.primary)
+                                                .lineSpacing(2)
+                                            
+                                            VStack(alignment: .leading, spacing: 8) {
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Maintain HIPAA compliance")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("De-identify all patient data")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Use content for educational purposes only")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Follow community guidelines")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                            }
+                                        }
+                                        
+                                        // Bottom spacing for better scrolling
+                                        Color.clear
+                                            .frame(height: 20)
+                                        
+                                        // Additional content to demonstrate scrolling
+                                        VStack(alignment: .leading, spacing: 12) {
+                                            Text("Community Guidelines")
+                                                .font(.system(size: 16, weight: .bold))
+                                                .foregroundColor(.primary)
+                                            
+                                            Text("Our community follows these core principles:")
+                                                .font(.system(size: 13, weight: .regular))
+                                                .foregroundColor(.primary)
+                                                .lineSpacing(2)
+                                            
+                                            VStack(alignment: .leading, spacing: 8) {
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Respect all members and their contributions")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Maintain professional conduct at all times")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Share knowledge for educational purposes")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                                
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text("•")
+                                                        .foregroundColor(.blue)
+                                                    Text("Report any violations immediately")
+                                                }
+                                                .font(.system(size: 13, weight: .regular))
+                                            }
+                                        }
+                                        
+                                        Divider()
+                                            .padding(.vertical, 8)
+                                        
+                                        // Final section
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            Text("Contact & Support")
+                                                .font(.system(size: 14, weight: .semibold))
+                                                .foregroundColor(.primary)
+                                            
+                                            Text("For questions about these terms or to report violations, contact us at Gurpal.Virdi@gmail.com")
+                                                .font(.system(size: 12, weight: .regular))
+                                                .foregroundColor(.secondary)
+                                                .lineSpacing(2)
+                                        }
+                                        
+                                        // Extra bottom spacing to ensure scrolling is visible
+                                        Color.clear
+                                            .frame(height: 40)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 16)
+                                }
+                                .frame(minHeight: 200, maxHeight: 400) // Much larger for comfortable reading
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(.systemBackground))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(Color(.systemGray4), lineWidth: 1)
+                                        )
+                                        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
+                                )
+                            }
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+                        
+                        HStack(spacing: 12) {
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    viewModel.isAgreedToTerms.toggle()
+                                }
+                            }) {
+                                Image(systemName: viewModel.isAgreedToTerms ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(viewModel.isAgreedToTerms ? .blue : .secondary)
+                                    .font(.system(size: 20))
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            
+                            Text("I agree to the Terms of Service and Privacy Policy")
+                                .font(.system(size: 14, weight: .regular))
+                                .foregroundColor(.primary)
+                                .multilineTextAlignment(.leading)
+                            
+                            Spacer()
+                            
+                            if viewModel.isAgreedToTerms {
+                                Text("✓")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.green)
+                                    .transition(.scale.combined(with: .opacity))
+                            }
+                        }
+                        
+                        if !viewModel.isAgreedToTerms {
+                            HStack(spacing: 8) {
+                                Image(systemName: "info.circle.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.system(size: 12))
+                                Text("Please accept the terms to continue")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.blue)
+                            }
+                            .padding(.horizontal, 4)
+                        }
+                    }
+                    .padding(.horizontal, 4)
+                }
             }
             .padding(.horizontal, 24)
         }
     }
 }
+
+
+
+
 
 class SignupViewModel: ObservableObject {
     @Published var currentStep = 0
@@ -435,6 +739,17 @@ class SignupViewModel: ObservableObject {
     @Published var isEmailTaken = false
     @Published var isEmailAvailable = false
     
+    // Terms and Agreement states
+    @Published var isAgreedToTerms = false
+    
+    // New state for terms details
+    @Published var showTermsDetails = false
+    
+
+
+    
+
+    
     let specialties = [
         "Resident",
         "Fellow",
@@ -458,7 +773,8 @@ class SignupViewModel: ObservableObject {
                !password.isEmpty && 
                password.count >= 6 && 
                passwordsMatch &&
-               !isUsernameTaken
+               !isUsernameTaken &&
+               isAgreedToTerms
     }
     
     var passwordsMatch: Bool {
@@ -603,7 +919,7 @@ class SignupViewModel: ObservableObject {
         // Final validation
         guard isStep1Valid && isStep2Valid else {
             print("❌ Validation failed - Step 1 valid: \(isStep1Valid), Step 2 valid: \(isStep2Valid)")
-            handle.presentAlert(msg: "Please fill in all required fields correctly")
+            handle.presentAlert(msg: "Please fill in all required fields and agree to terms.")
             return
         }
         
@@ -686,3 +1002,5 @@ class SignupViewModel: ObservableObject {
         }
     }
 }
+
+

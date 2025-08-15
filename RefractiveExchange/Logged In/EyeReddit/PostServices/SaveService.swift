@@ -50,6 +50,61 @@ class SaveService: ObservableObject {
         }
     }
     
+    // Save a specific post
+    func savePost(postId: String, completion: @escaping (Bool) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(false)
+            return
+        }
+        
+        let userRef = Firestore.firestore().collection("users").document(uid)
+        
+        userRef.getDocument { document, error in
+            if let document = document, document.exists {
+                let data = document.data()
+                var savedPosts = data?["savedPosts"] as? [String] ?? []
+                
+                if !savedPosts.contains(postId) {
+                    savedPosts.append(postId)
+                    userRef.updateData(["savedPosts": savedPosts]) { error in
+                        completion(error == nil)
+                    }
+                } else {
+                    completion(true) // Already saved
+                }
+            } else {
+                // Create new savedPosts array
+                userRef.updateData(["savedPosts": [postId]]) { error in
+                    completion(error == nil)
+                }
+            }
+        }
+    }
+    
+    // Unsave a specific post
+    func unsavePost(postId: String, completion: @escaping (Bool) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(false)
+            return
+        }
+        
+        let userRef = Firestore.firestore().collection("users").document(uid)
+        
+        userRef.getDocument { document, error in
+            if let document = document, document.exists {
+                let data = document.data()
+                var savedPosts = data?["savedPosts"] as? [String] ?? []
+                
+                savedPosts.removeAll { $0 == postId }
+                userRef.updateData(["savedPosts": savedPosts]) { error in
+                    completion(error == nil)
+                }
+            } else {
+                completion(true) // Nothing to unsave
+            }
+        }
+    }
+    
     // Check if a post is saved
     func isPostSaved(_ postId: String, completion: @escaping (Bool) -> Void) {
         guard let uid = Auth.auth().currentUser?.uid else {

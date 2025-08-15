@@ -167,7 +167,8 @@ struct PostService  {
                         editedAt: storedPost.editedAt,
                         isPinned: storedPost.isPinned,
                         pinnedAt: storedPost.pinnedAt,
-                        pinnedBy: storedPost.pinnedBy
+                        pinnedBy: storedPost.pinnedBy,
+                        commentCount: 0 // Initialize comment count, will be updated by PostRowModel
                     )
                     fetchedPosts.append(fetchedPost)
                     group.leave()

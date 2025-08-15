@@ -20,6 +20,7 @@ struct PostRow: View {
     @State private var showEditView = false
     @State private var showPinAlert = false
     @State private var showUnpinAlert = false
+    @State private var isPostMuted = false
     
     let saveService = SaveService.shared
     @ObservedObject var adminService = AdminService.shared
@@ -45,7 +46,14 @@ struct PostRow: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            postContentButton
+            // Post content area - tappable for opening post
+            postContent
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    onPostTapped?()
+                }
+            
+            // Interaction bar - fully interactive, not tappable for post opening
             postInteractionBar
         }
         .background(Color(.systemBackground))
@@ -58,36 +66,26 @@ struct PostRow: View {
         }
     }
     
-    // MARK: - Main Post Content Button
-    private var postContentButton: some View {
+    // MARK: - Main Post Content (no longer wrapped in Button)
+    private var postContent: some View {
         VStack(alignment: .leading, spacing: 8) {
             if !self.viewModel.post.author.isEmpty {
                 // Header with author info and admin menu
                 HStack {
-                    // Author section (tappable)
-                    Button(action: {
-                        onPostTapped?()
-                    }) {
-                        HStack(spacing: 12) {
-                            authorAvatar
-                            authorInfo
-                        }
+                    // Author section (no longer tappable since whole card is tappable)
+                    HStack(spacing: 12) {
+                        authorAvatar
+                        authorInfo
                     }
-                    .buttonStyle(PlainButtonStyle())
                     
                     Spacer()
                     
-                    // Admin menu in top-right corner
-                    adminMenuButton
+                    // Post options menu in top-right corner
+                    postOptionsMenu
                 }
                 
-                // Main content area (tappable)
-                Button(action: {
-                    onPostTapped?()
-                }) {
-                    postMainContent
-                }
-                .buttonStyle(PlainButtonStyle())
+                // Main content area (no longer tappable since whole card is tappable)
+                postMainContent
             }
         }
         .padding(.horizontal, 16)
@@ -145,6 +143,7 @@ struct PostRow: View {
                     Text("•")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
+                        .fixedSize(horizontal: true, vertical: false)
                     
                     authorButton
                     
@@ -177,63 +176,75 @@ struct PostRow: View {
     
     // MARK: - Component Views
     private var subredditButton: some View {
-        Button(action: {
-            onSubredditTapped?(self.viewModel.post.subreddit)
-        }) {
-            Text(self.viewModel.post.subreddit)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.blue)
-        }
-        .buttonStyle(PlainButtonStyle())
+        Text(self.viewModel.post.subreddit)
+            .font(.system(size: 12, weight: .medium))
+            .foregroundColor(.blue)
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
+            .onTapGesture {
+                onSubredditTapped?(self.viewModel.post.subreddit)
+            }
     }
     
     private var authorButton: some View {
-        Button(action: {
-            onUsernameTapped?(self.viewModel.post.author, self.viewModel.post.uid)
-        }) {
-            HStack(spacing: 4) {
-                Text("\(self.viewModel.post.author)")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.blue)
+        Text(self.viewModel.post.author)
+            .font(.system(size: 13, weight: .medium))
+            .foregroundColor(.blue)
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
+            .onTapGesture {
+                onUsernameTapped?(self.viewModel.post.author, self.viewModel.post.uid)
             }
-        }
-        .buttonStyle(PlainButtonStyle())
     }
     
-    private var adminMenuButton: some View {
+    private var postOptionsMenu: some View {
         Group {
             if let currentUid = Auth.auth().currentUser?.uid {
                 let isAuthor = currentUid == viewModel.post.uid
                 let canPin = adminService.hasPermission(.pinPosts)
                 let canDeleteAny = adminService.hasPermission(.deleteAnyPost)
                 
-                if isAuthor || canPin || canDeleteAny {
-                    ThreeDotsMenu(
-                        isAuthor: isAuthor,
-                        onEdit: isAuthor ? { 
-                            print("📝 Edit button tapped")
-                            showEditView = true 
-                        } : nil,
-                        onDelete: (isAuthor || canDeleteAny) ? { 
-                            print("🗑️ Delete button tapped")
-                            showDeleteAlert = true 
-                        } : nil,
-                        onPin: canPin ? { 
-                            print("📌 Pin button tapped")
-                            showPinAlert = true 
-                        } : nil,
-                        onUnpin: canPin ? { 
-                            print("📌 Unpin button tapped")
-                            showUnpinAlert = true 
-                        } : nil,
-                        isPinned: viewModel.post.isPinned,
-                        canPin: canPin,
-                        canDeleteAny: canDeleteAny,
-                        size: 16
-                    )
-                    .onAppear {
-                        print("🔍 AdminMenuButton - UID: \(currentUid), isAuthor: \(isAuthor), canPin: \(canPin), canDeleteAny: \(canDeleteAny), currentRole: \(adminService.currentUserRole)")
-                    }
+                // Show menu for everyone (save, mute options for all users, admin options for admins)
+                ThreeDotsMenu(
+                    isAuthor: isAuthor,
+                    onEdit: isAuthor ? { 
+                        print("📝 Edit button tapped")
+                        showEditView = true 
+                    } : nil,
+                    onDelete: (isAuthor || canDeleteAny) ? { 
+                        print("🗑️ Delete button tapped")
+                        showDeleteAlert = true 
+                    } : nil,
+                    onSave: {
+                        print("💾 Save button tapped")
+                        toggleSave()
+                    },
+                    isSaved: isSaved,
+                    onPin: canPin ? { 
+                        print("📌 Pin button tapped")
+                        showPinAlert = true 
+                    } : nil,
+                    onUnpin: canPin ? { 
+                        print("📌 Unpin button tapped")
+                        showUnpinAlert = true 
+                    } : nil,
+                    isPinned: viewModel.post.isPinned,
+                    canPin: canPin,
+                    canDeleteAny: canDeleteAny,
+                    onMute: {
+                        print("🔕 Mute button tapped")
+                        mutePost()
+                    },
+                    onUnmute: {
+                        print("🔔 Unmute button tapped")
+                        unmutePost()
+                    },
+                    isMuted: isPostMuted,
+                    size: 16
+                )
+                .onAppear {
+                    checkIfPostIsMuted()
+                    print("🔍 PostOptionsMenu - UID: \(currentUid), isAuthor: \(isAuthor), canPin: \(canPin), canDeleteAny: \(canDeleteAny)")
                 }
             }
         }
@@ -314,9 +325,6 @@ struct PostRow: View {
     // MARK: - Post Main Content
     private var postMainContent: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Metadata row (flair, timestamp)
-            metadataRow
-            
             // Pinned post indicator (like Reddit)
             if viewModel.post.isPinned == true {
                 pinnedIndicator
@@ -510,20 +518,51 @@ struct PostRow: View {
     
     // MARK: - Post Interaction Bar
     private var postInteractionBar: some View {
-        HStack(spacing: 16) {
-            // Upvote button
+        HStack(spacing: 12) {
+            // Upvote button (Reddit style - Orange)
             Button {
                 viewModel.upvote()
             } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: viewModel.post.didLike ? "arrow.up.circle.fill" : "arrow.up.circle")
-                        .font(.system(size: 16))
-                        .foregroundColor(viewModel.post.didLike ? .orange : .gray)
+                HStack(spacing: 3) {
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(viewModel.liked ? .white : .gray)
                     
                     Text("\(viewModel.post.upvotes.count)")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(viewModel.post.didLike ? .orange : .gray)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(viewModel.liked ? .white : .gray)
                 }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(viewModel.liked ? Color.orange : Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                )
+            }
+            
+            // Downvote button (Reddit style - Red)
+            Button {
+                viewModel.downvote()
+            } label: {
+                HStack(spacing: 3) {
+                    Image(systemName: "arrow.down")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(viewModel.disliked ? .white : .gray)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(viewModel.disliked ? Color.red : Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                )
             }
             
             // Comment button
@@ -535,9 +574,15 @@ struct PostRow: View {
                         .font(.system(size: 16))
                         .foregroundColor(.gray)
                     
-                    Text("Comment")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.gray)
+                    if viewModel.comments.count > 0 {
+                        Text("\(viewModel.comments.count)")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.gray)
+                    } else {
+                        Text("Comment")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.gray)
+                    }
                 }
             }
             
@@ -641,5 +686,51 @@ struct PostRow: View {
                 }
             }
         }
+    }
+    
+    // MARK: - Save Functionality
+    private func toggleSave() {
+        guard let postId = viewModel.post.id else { return }
+        
+        if isSaved {
+            saveService.unsavePost(postId: postId) { success in
+                DispatchQueue.main.async {
+                    if success {
+                        self.isSaved = false
+                    }
+                }
+            }
+        } else {
+            saveService.savePost(postId: postId) { success in
+                DispatchQueue.main.async {
+                    if success {
+                        self.isSaved = true
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Mute Functionality
+    private func checkIfPostIsMuted() {
+        guard let postId = viewModel.post.id else { return }
+        
+        if let preferences = NotificationPreferencesManager.shared.preferences {
+            isPostMuted = preferences.mutedPosts.contains(postId)
+        }
+    }
+    
+    private func mutePost() {
+        guard let postId = viewModel.post.id else { return }
+        
+        NotificationPreferencesManager.shared.mutePost(postId)
+        isPostMuted = true
+    }
+    
+    private func unmutePost() {
+        guard let postId = viewModel.post.id else { return }
+        
+        NotificationPreferencesManager.shared.unmutePost(postId)
+        isPostMuted = false
     }
 }

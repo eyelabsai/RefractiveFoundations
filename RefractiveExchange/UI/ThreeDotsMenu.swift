@@ -18,11 +18,14 @@ struct ThreeDotsMenu: View {
     let isPinned: Bool?
     let canPin: Bool
     let canDeleteAny: Bool
+    let onMute: (() -> Void)?
+    let onUnmute: (() -> Void)?
+    let isMuted: Bool?
     let size: CGFloat
     
     @State private var showMenu = false
     
-    init(isAuthor: Bool, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil, onSave: (() -> Void)? = nil, isSaved: Bool? = nil, onPin: (() -> Void)? = nil, onUnpin: (() -> Void)? = nil, isPinned: Bool? = nil, canPin: Bool = false, canDeleteAny: Bool = false, size: CGFloat = 14) {
+    init(isAuthor: Bool, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil, onSave: (() -> Void)? = nil, isSaved: Bool? = nil, onPin: (() -> Void)? = nil, onUnpin: (() -> Void)? = nil, isPinned: Bool? = nil, canPin: Bool = false, canDeleteAny: Bool = false, onMute: (() -> Void)? = nil, onUnmute: (() -> Void)? = nil, isMuted: Bool? = nil, size: CGFloat = 14) {
         self.isAuthor = isAuthor
         self.onEdit = onEdit
         self.onDelete = onDelete
@@ -33,6 +36,9 @@ struct ThreeDotsMenu: View {
         self.isPinned = isPinned
         self.canPin = canPin
         self.canDeleteAny = canDeleteAny
+        self.onMute = onMute
+        self.onUnmute = onUnmute
+        self.isMuted = isMuted
         self.size = size
     }
     
@@ -45,6 +51,23 @@ struct ThreeDotsMenu: View {
                         isSaved ? "Unsave" : "Save",
                         systemImage: isSaved ? "bookmark.slash" : "bookmark"
                     )
+                }
+            }
+            
+            // Mute/Unmute option (if provided)
+            if let isMuted = isMuted {
+                if isMuted {
+                    if let onUnmute = onUnmute {
+                        Button(action: onUnmute) {
+                            Label("Unmute Notifications", systemImage: "bell")
+                        }
+                    }
+                } else {
+                    if let onMute = onMute {
+                        Button(action: onMute) {
+                            Label("Mute Notifications", systemImage: "bell.slash")
+                        }
+                    }
                 }
             }
             

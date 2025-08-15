@@ -109,9 +109,9 @@ struct PublicProfileView: View {
     
     // MARK: - Profile Header
     private var profileHeader: some View {
-        VStack(spacing: 16) {
-            // Avatar and basic info
-            HStack(spacing: 16) {
+        VStack(spacing: 0) {
+            // Main profile content
+            HStack(alignment: .top, spacing: 16) {
                 // Avatar
                 Circle()
                     .fill(Color.blue.opacity(0.2))
@@ -122,12 +122,16 @@ struct PublicProfileView: View {
                     )
                     .frame(width: 80, height: 80)
                 
-                VStack(alignment: .leading, spacing: 4) {
+                // User info section
+                VStack(alignment: .leading, spacing: 6) {
                     if let user = viewModel.user {
-                        HStack(spacing: 8) {
+                        // Name and flair in same row
+                        HStack(alignment: .top, spacing: 8) {
                             Text("\(user.firstName) \(user.lastName)")
-                                .font(.system(size: 20, weight: .bold))
+                                .font(.system(size: 22, weight: .bold))
                                 .foregroundColor(.primary)
+                                .lineLimit(1)
+                                .fixedSize(horizontal: true, vertical: false)
                             
                             FlairView(flair: user.specialty)
                         }
@@ -135,29 +139,34 @@ struct PublicProfileView: View {
                         // Practice information
                         if let practiceLocation = user.practiceLocation, !practiceLocation.isEmpty {
                             Text(practiceLocation)
-                                .font(.system(size: 14, weight: .medium))
+                                .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(.blue)
+                                .lineLimit(1)
+                                .fixedSize(horizontal: true, vertical: false)
                         }
                         
                         if let practiceName = user.practiceName, !practiceName.isEmpty {
                             Text(practiceName)
-                                .font(.system(size: 12))
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                                .fixedSize(horizontal: true, vertical: false)
+                        }
+                        
+                        // Member since
+                        if viewModel.isLoadingProfile {
+                            Text("Loading...")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("Member since \(viewModel.memberSince)")
+                                .font(.system(size: 14))
                                 .foregroundColor(.secondary)
                         }
                     } else {
                         Text("Loading...")
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.primary)
-                    }
-                    
-                    if viewModel.isLoadingProfile {
-                        Text("Loading...")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                    } else {
-                        Text("Member since \(viewModel.memberSince)")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
                     }
                 }
                 
@@ -167,6 +176,7 @@ struct PublicProfileView: View {
                 messageButton
             }
             .padding(.horizontal, 16)
+            .padding(.vertical, 16)
             
             Divider()
         }
@@ -194,6 +204,7 @@ struct PublicProfileView: View {
             .cornerRadius(20)
             .fixedSize(horizontal: true, vertical: false)
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
     
     // MARK: - Tab Selector

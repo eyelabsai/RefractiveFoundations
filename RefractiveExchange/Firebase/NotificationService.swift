@@ -334,12 +334,71 @@ class NotificationService: ObservableObject {
     // MARK: - Helper Methods
     
     private func saveNotification(_ notification: AppNotification) {
-        do {
-            _ = try Firestore.firestore().collection("notifications").addDocument(from: notification)
-            print("✅ Notification saved successfully")
-        } catch {
-            print("❌ Error saving notification: \(error)")
+        // Check if in-app notifications are allowed for this type
+        let shouldSaveInApp = NotificationPreferencesManager.shared.shouldSendNotification(
+            type: notification.type,
+            pushNotification: false,
+            postId: notification.metadata?.postId,
+            conversationId: notification.metadata?.conversationId,
+            senderId: notification.senderId
+        )
+        
+        if shouldSaveInApp {
+            do {
+                _ = try Firestore.firestore().collection("notifications").addDocument(from: notification)
+                print("✅ Notification saved successfully")
+            } catch {
+                print("❌ Error saving notification: \(error)")
+            }
+        } else {
+            print("🔕 In-app notification blocked by user preferences for type: \(notification.type)")
         }
+        
+        // Always check push notification preferences separately (user might want push but not in-app)
+        sendPushNotificationForAppNotification(notification)
+    }
+    
+    private func sendPushNotificationForAppNotification(_ notification: AppNotification) {
+        // Check user preferences before sending push notification
+        let shouldSendPush = NotificationPreferencesManager.shared.shouldSendNotification(
+            type: notification.type,
+            pushNotification: true,
+            postId: notification.metadata?.postId,
+            conversationId: notification.metadata?.conversationId,
+            senderId: notification.senderId
+        )
+        
+        if !shouldSendPush {
+            print("🔕 Push notification blocked by user preferences for type: \(notification.type)")
+            return
+        }
+        
+        // Create data payload for navigation
+        var data: [String: Any] = [
+            "notificationId": notification.id ?? "",
+            "type": notification.type.rawValue
+        ]
+        
+        // Add specific data based on notification type
+        if let metadata = notification.metadata {
+            if let postId = metadata.postId {
+                data["postId"] = postId
+            }
+            if let conversationId = metadata.conversationId {
+                data["conversationId"] = conversationId
+            }
+            if let commentId = metadata.commentId {
+                data["commentId"] = commentId
+            }
+        }
+        
+        // Send the push notification
+        PushNotificationManager.shared.sendPushNotification(
+            to: notification.recipientId,
+            title: notification.title,
+            body: notification.message,
+            data: data
+        )
     }
     
     private func fetchUserDetails(userId: String, completion: @escaping (User?) -> Void) {
