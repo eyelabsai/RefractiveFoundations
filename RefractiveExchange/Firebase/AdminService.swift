@@ -232,12 +232,18 @@ class AdminService: ObservableObject {
     // MARK: - Content Management
     
     func pinPost(_ postId: String, completion: @escaping (Bool) -> Void) {
+        print("🔐 AdminService.pinPost called for: \(postId)")
+        print("🔐 User has pinPosts permission: \(hasPermission(.pinPosts))")
+        print("🔐 Current user role: \(currentUserRole)")
+        
         guard hasPermission(.pinPosts) else {
+            print("❌ Pin denied: No pinPosts permission")
             completion(false)
             return
         }
         
         guard let adminId = Auth.auth().currentUser?.uid else {
+            print("❌ Pin denied: No authenticated user")
             completion(false)
             return
         }
@@ -248,12 +254,15 @@ class AdminService: ObservableObject {
             "pinnedBy": adminId
         ]
         
+        print("🔐 Updating Firestore with data: \(updateData)")
+        
         Firestore.firestore().collection("posts").document(postId)
             .updateData(updateData) { [weak self] error in
                 if let error = error {
                     print("❌ Error pinning post: \(error)")
                     completion(false)
                 } else {
+                    print("✅ Successfully updated Firestore for pin")
                     self?.logAdminAction(.postPinned, targetContentId: postId, details: "Post pinned to top of feed")
                     completion(true)
                 }
@@ -261,7 +270,12 @@ class AdminService: ObservableObject {
     }
     
     func unpinPost(_ postId: String, completion: @escaping (Bool) -> Void) {
+        print("🔐 AdminService.unpinPost called for: \(postId)")
+        print("🔐 User has pinPosts permission: \(hasPermission(.pinPosts))")
+        print("🔐 Current user role: \(currentUserRole)")
+        
         guard hasPermission(.pinPosts) else {
+            print("❌ Unpin denied: No pinPosts permission")
             completion(false)
             return
         }
@@ -272,12 +286,15 @@ class AdminService: ObservableObject {
             "pinnedBy": FieldValue.delete()
         ]
         
+        print("🔐 Updating Firestore to remove pin data: \(updateData)")
+        
         Firestore.firestore().collection("posts").document(postId)
             .updateData(updateData) { [weak self] error in
                 if let error = error {
                     print("❌ Error unpinning post: \(error)")
                     completion(false)
                 } else {
+                    print("✅ Successfully updated Firestore for unpin")
                     self?.logAdminAction(.postUnpinned, targetContentId: postId, details: "Post unpinned from feed")
                     completion(true)
                 }
@@ -285,16 +302,24 @@ class AdminService: ObservableObject {
     }
     
     func deletePost(_ postId: String, reason: String, completion: @escaping (Bool) -> Void) {
+        print("🔐 AdminService.deletePost called for postId: \(postId)")
+        print("🔐 User has deleteAnyPost permission: \(hasPermission(.deleteAnyPost))")
+        print("🔐 Current user role: \(currentUserRole)")
+        
         guard hasPermission(.deleteAnyPost) else {
+            print("❌ Delete denied: No deleteAnyPost permission")
             completion(false)
             return
         }
+        
+        print("🔐 Proceeding with post deletion from Firestore")
         
         Firestore.firestore().collection("posts").document(postId).delete { [weak self] error in
             if let error = error {
                 print("❌ Error deleting post: \(error)")
                 completion(false)
             } else {
+                print("✅ Successfully deleted post from Firestore")
                 self?.logAdminAction(.postDeleted, targetContentId: postId, details: "Reason: \(reason)")
                 completion(true)
             }

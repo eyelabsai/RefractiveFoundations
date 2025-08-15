@@ -151,9 +151,25 @@ struct PostDetailView: View {
                                     title: Text("Delete Post"),
                                     message: Text("Are you sure you want to delete this post? This action cannot be undone."),
                                     primaryButton: .destructive(Text("Delete")) {
-                                        PostService().deletePost(viewModel.post) { success in
-                                            if success {
-                                                dismiss()
+                                        // Check if user is author or has admin delete permissions
+                                        if let currentUid = Auth.auth().currentUser?.uid {
+                                            let isAuthor = currentUid == viewModel.post.uid
+                                            let canDeleteAny = AdminService.shared.hasPermission(.deleteAnyPost)
+                                            
+                                            if isAuthor {
+                                                // Use PostService for author deletion
+                                                PostService().deletePost(viewModel.post) { success in
+                                                    if success {
+                                                        dismiss()
+                                                    }
+                                                }
+                                            } else if canDeleteAny {
+                                                // Use AdminService for admin deletion
+                                                AdminService.shared.deletePost(viewModel.post.id ?? "", reason: "Admin deletion") { success in
+                                                    if success {
+                                                        dismiss()
+                                                    }
+                                                }
                                             }
                                         }
                                     },

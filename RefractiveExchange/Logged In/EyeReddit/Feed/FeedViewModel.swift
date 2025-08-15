@@ -58,10 +58,24 @@ class FeedViewModel: ObservableObject   {
             print("🏷️ Available subreddits: \(allSubreddits)")
         }
         
+        // Debug: Check what pinned data we have
+        for post in filteredPosts {
+            if let isPinned = post.isPinned {
+                print("📌 DEBUG: Post '\(post.title)' isPinned: \(isPinned)")
+                if isPinned {
+                    print("📌 DEBUG: Pinned post details - pinnedAt: \(post.pinnedAt?.dateValue() ?? Date()), pinnedBy: \(post.pinnedBy ?? "unknown")")
+                }
+            } else {
+                print("📌 DEBUG: Post '\(post.title)' has nil isPinned")
+            }
+        }
+        
         // Sort posts: Pinned posts first (by pinned date), then regular posts by timestamp
         self.posts = filteredPosts.sorted { post1, post2 in
             let isPinned1 = post1.isPinned ?? false
             let isPinned2 = post2.isPinned ?? false
+            
+            print("📌 DEBUG: Sorting '\(post1.title)' (pinned: \(isPinned1)) vs '\(post2.title)' (pinned: \(isPinned2))")
             
             // If both pinned or both not pinned, sort by timestamp (newer first)
             if isPinned1 == isPinned2 {
@@ -75,6 +89,13 @@ class FeedViewModel: ObservableObject   {
         let pinnedCount = posts.filter { $0.isPinned ?? false }.count
         if pinnedCount > 0 {
             print("📌 \(pinnedCount) pinned posts at top of feed")
+            // List the pinned posts
+            let pinnedPosts = posts.filter { $0.isPinned ?? false }
+            for post in pinnedPosts {
+                print("📌 Pinned: '\(post.title)' at position \(posts.firstIndex(where: { $0.id == post.id }) ?? -1)")
+            }
+        } else {
+            print("📌 No pinned posts found in feed")
         }
     }
     

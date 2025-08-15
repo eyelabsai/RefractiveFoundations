@@ -60,19 +60,38 @@ struct PostRow: View {
     
     // MARK: - Main Post Content Button
     private var postContentButton: some View {
-        Button(action: {
-            onPostTapped?()
-        }) {
-            VStack(alignment: .leading, spacing: 8) {
-                if !self.viewModel.post.author.isEmpty {
-                    authorSection
+        VStack(alignment: .leading, spacing: 8) {
+            if !self.viewModel.post.author.isEmpty {
+                // Header with author info and admin menu
+                HStack {
+                    // Author section (tappable)
+                    Button(action: {
+                        onPostTapped?()
+                    }) {
+                        HStack(spacing: 12) {
+                            authorAvatar
+                            authorInfo
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    Spacer()
+                    
+                    // Admin menu in top-right corner
+                    adminMenuButton
+                }
+                
+                // Main content area (tappable)
+                Button(action: {
+                    onPostTapped?()
+                }) {
                     postMainContent
                 }
+                .buttonStyle(PlainButtonStyle())
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
         }
-        .buttonStyle(PlainButtonStyle())
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
     
     // MARK: - Author Section
@@ -130,8 +149,6 @@ struct PostRow: View {
                     authorButton
                     
                     Spacer()
-                    
-                    adminMenuButton
                 }
                 
                 // Second row: Flair and timestamp
@@ -188,18 +205,35 @@ struct PostRow: View {
             if let currentUid = Auth.auth().currentUser?.uid {
                 let isAuthor = currentUid == viewModel.post.uid
                 let canPin = adminService.hasPermission(.pinPosts)
+                let canDeleteAny = adminService.hasPermission(.deleteAnyPost)
                 
-                if isAuthor || canPin {
+                if isAuthor || canPin || canDeleteAny {
                     ThreeDotsMenu(
                         isAuthor: isAuthor,
-                        onEdit: isAuthor ? { showEditView = true } : nil,
-                        onDelete: isAuthor ? { showDeleteAlert = true } : nil,
-                        onPin: canPin ? { showPinAlert = true } : nil,
-                        onUnpin: canPin ? { showUnpinAlert = true } : nil,
+                        onEdit: isAuthor ? { 
+                            print("📝 Edit button tapped")
+                            showEditView = true 
+                        } : nil,
+                        onDelete: (isAuthor || canDeleteAny) ? { 
+                            print("🗑️ Delete button tapped")
+                            showDeleteAlert = true 
+                        } : nil,
+                        onPin: canPin ? { 
+                            print("📌 Pin button tapped")
+                            showPinAlert = true 
+                        } : nil,
+                        onUnpin: canPin ? { 
+                            print("📌 Unpin button tapped")
+                            showUnpinAlert = true 
+                        } : nil,
                         isPinned: viewModel.post.isPinned,
                         canPin: canPin,
+                        canDeleteAny: canDeleteAny,
                         size: 16
                     )
+                    .onAppear {
+                        print("🔍 AdminMenuButton - UID: \(currentUid), isAuthor: \(isAuthor), canPin: \(canPin), canDeleteAny: \(canDeleteAny), currentRole: \(adminService.currentUserRole)")
+                    }
                 }
             }
         }
@@ -211,9 +245,34 @@ struct PostRow: View {
             title: Text("Delete Post"),
             message: Text("Are you sure you want to delete this post? This action cannot be undone."),
             primaryButton: .destructive(Text("Delete")) {
-                PostService().deletePost(viewModel.post) { success in
-                    if success {
-                        FeedViewModel.shared.refreshPosts()
+                // Check if user is author or has admin delete permissions
+                if let currentUid = Auth.auth().currentUser?.uid {
+                    let isAuthor = currentUid == viewModel.post.uid
+                    let canDeleteAny = adminService.hasPermission(.deleteAnyPost)
+                    
+                    print("🗑️ Delete Alert - UID: \(currentUid), isAuthor: \(isAuthor), canDeleteAny: \(canDeleteAny)")
+                    print("🗑️ Post ID: \(viewModel.post.id ?? "nil"), Post UID: \(viewModel.post.uid)")
+                    
+                    if isAuthor {
+                        print("🗑️ Using PostService for author deletion")
+                        // Use PostService for author deletion
+                        PostService().deletePost(viewModel.post) { success in
+                            print("🗑️ PostService deletion result: \(success)")
+                            if success {
+                                FeedViewModel.shared.refreshPosts()
+                            }
+                        }
+                    } else if canDeleteAny {
+                        print("🗑️ Using AdminService for admin deletion")
+                        // Use AdminService for admin deletion
+                        adminService.deletePost(viewModel.post.id ?? "", reason: "Admin deletion") { success in
+                            print("🗑️ AdminService deletion result: \(success)")
+                            if success {
+                                FeedViewModel.shared.refreshPosts()
+                            }
+                        }
+                    } else {
+                        print("❌ User has no permission to delete this post")
                     }
                 }
             },
@@ -255,6 +314,9 @@ struct PostRow: View {
     // MARK: - Post Main Content
     private var postMainContent: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Metadata row (flair, timestamp)
+            metadataRow
+            
             // Pinned post indicator (like Reddit)
             if viewModel.post.isPinned == true {
                 pinnedIndicator
@@ -267,21 +329,21 @@ struct PostRow: View {
     }
     
     private var pinnedIndicator: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 4) {
             Image(systemName: "pin.fill")
-                .font(.system(size: 12, weight: .medium))
+                .font(.system(size: 10, weight: .medium))
                 .foregroundColor(.green)
             
-            Text("PINNED BY MODERATOR")
-                .font(.system(size: 11, weight: .bold))
+            Text("PINNED")
+                .font(.system(size: 10, weight: .medium))
                 .foregroundColor(.green)
             
             Spacer()
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.green.opacity(0.1))
-        .cornerRadius(6)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(Color.green.opacity(0.05))
+        .cornerRadius(4)
     }
     
     private var postTitle: some View {
@@ -536,30 +598,46 @@ struct PostRow: View {
     
     // MARK: - Admin Pin Functionality
     private func pinPost() {
-        guard let postId = viewModel.post.id else { return }
+        guard let postId = viewModel.post.id else { 
+            print("❌ Pin failed: No post ID")
+            return 
+        }
+        
+        print("📌 Attempting to pin post: \(postId)")
+        print("📌 Current post isPinned: \(viewModel.post.isPinned ?? false)")
+        print("📌 Admin has pinPosts permission: \(adminService.hasPermission(.pinPosts))")
         
         adminService.pinPost(postId) { success in
             DispatchQueue.main.async {
                 if success {
+                    print("✅ Successfully pinned post: \(postId)")
                     // Refresh the feed to show updated pin status
                     FeedViewModel.shared.refreshPosts()
                 } else {
-                    print("❌ Failed to pin post")
+                    print("❌ Failed to pin post: \(postId)")
                 }
             }
         }
     }
     
     private func unpinPost() {
-        guard let postId = viewModel.post.id else { return }
+        guard let postId = viewModel.post.id else { 
+            print("❌ Unpin failed: No post ID")
+            return 
+        }
+        
+        print("📌 Attempting to unpin post: \(postId)")
+        print("📌 Current post isPinned: \(viewModel.post.isPinned ?? false)")
+        print("📌 Admin has pinPosts permission: \(adminService.hasPermission(.pinPosts))")
         
         adminService.unpinPost(postId) { success in
             DispatchQueue.main.async {
                 if success {
+                    print("✅ Successfully unpinned post: \(postId)")
                     // Refresh the feed to show updated pin status
                     FeedViewModel.shared.refreshPosts()
                 } else {
-                    print("❌ Failed to unpin post")
+                    print("❌ Failed to unpin post: \(postId)")
                 }
             }
         }

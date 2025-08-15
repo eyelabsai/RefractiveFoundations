@@ -139,6 +139,16 @@ struct PostService  {
                         print("   Consider checking if this user exists in Firebase Auth but not in users collection")
                     }
                     
+                    // Debug: Check pinned status during conversion
+                    if let isPinned = storedPost.isPinned {
+                        print("📌 DEBUG: Converting post '\(storedPost.title)' - isPinned: \(isPinned)")
+                        if isPinned {
+                            print("📌 DEBUG: Pinned post found! pinnedAt: \(storedPost.pinnedAt?.dateValue() ?? Date()), pinnedBy: \(storedPost.pinnedBy ?? "unknown")")
+                        }
+                    } else {
+                        print("📌 DEBUG: Converting post '\(storedPost.title)' - isPinned: nil")
+                    }
+                    
                     let fetchedPost = FetchedPost(
                         id: storedPost.id,
                         title: storedPost.title,
@@ -153,7 +163,11 @@ struct PostService  {
                         author: authorName,
                         uid: storedPost.uid,
                         avatarUrl: avatarUrl,
-                        editedAt: storedPost.editedAt
+                        flair: nil, // Add missing flair field
+                        editedAt: storedPost.editedAt,
+                        isPinned: storedPost.isPinned,
+                        pinnedAt: storedPost.pinnedAt,
+                        pinnedBy: storedPost.pinnedBy
                     )
                     fetchedPosts.append(fetchedPost)
                     group.leave()
@@ -218,7 +232,10 @@ struct PostService  {
                         author: authorName,
                         uid: storedPost.uid,
                         avatarUrl: avatarUrl,
-                        editedAt: storedPost.editedAt
+                        editedAt: storedPost.editedAt,
+                        isPinned: storedPost.isPinned,
+                        pinnedAt: storedPost.pinnedAt,
+                        pinnedBy: storedPost.pinnedBy
                     )
                     
                     DispatchQueue.main.async {

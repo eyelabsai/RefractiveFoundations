@@ -17,11 +17,12 @@ struct ThreeDotsMenu: View {
     let onUnpin: (() -> Void)?
     let isPinned: Bool?
     let canPin: Bool
+    let canDeleteAny: Bool
     let size: CGFloat
     
     @State private var showMenu = false
     
-    init(isAuthor: Bool, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil, onSave: (() -> Void)? = nil, isSaved: Bool? = nil, onPin: (() -> Void)? = nil, onUnpin: (() -> Void)? = nil, isPinned: Bool? = nil, canPin: Bool = false, size: CGFloat = 14) {
+    init(isAuthor: Bool, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil, onSave: (() -> Void)? = nil, isSaved: Bool? = nil, onPin: (() -> Void)? = nil, onUnpin: (() -> Void)? = nil, isPinned: Bool? = nil, canPin: Bool = false, canDeleteAny: Bool = false, size: CGFloat = 14) {
         self.isAuthor = isAuthor
         self.onEdit = onEdit
         self.onDelete = onDelete
@@ -31,6 +32,7 @@ struct ThreeDotsMenu: View {
         self.onUnpin = onUnpin
         self.isPinned = isPinned
         self.canPin = canPin
+        self.canDeleteAny = canDeleteAny
         self.size = size
     }
     
@@ -72,10 +74,10 @@ struct ThreeDotsMenu: View {
                 }
             }
             
-            // Delete option (only for author)
-            if isAuthor, let onDelete = onDelete {
+            // Delete option (for author or admin with deleteAnyPost permission)
+            if (isAuthor || canDeleteAny), let onDelete = onDelete {
                 Button(role: .destructive, action: onDelete) {
-                    Label("Delete", systemImage: "trash")
+                    Label(isAuthor ? "Delete" : "Delete Post (Admin)", systemImage: "trash")
                 }
             }
         } label: {
@@ -101,6 +103,7 @@ struct ThreeDotsMenu: View {
                 onDelete: { print("Delete tapped") },
                 onSave: { print("Save tapped") },
                 isSaved: false,
+                canDeleteAny: false,
                 size: 16
             )
         }
@@ -113,7 +116,8 @@ struct ThreeDotsMenu: View {
             ThreeDotsMenu(
                 isAuthor: false,
                 onSave: { print("Save tapped") },
-                isSaved: true
+                isSaved: true,
+                canDeleteAny: false
             )
         }
         .padding()
@@ -126,6 +130,7 @@ struct ThreeDotsMenu: View {
                 isAuthor: true,
                 onEdit: { print("Edit tapped") },
                 onDelete: { print("Delete tapped") },
+                canDeleteAny: false,
                 size: 12
             )
         }
