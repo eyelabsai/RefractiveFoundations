@@ -70,13 +70,9 @@ struct PostRow: View {
     private var postContent: some View {
         VStack(alignment: .leading, spacing: 8) {
             if !self.viewModel.post.author.isEmpty {
-                // Header with author info and admin menu
+                // Header with author info (no avatar) and admin menu
                 HStack {
-                    // Author section (no longer tappable since whole card is tappable)
-                    HStack(spacing: 12) {
-                        authorAvatar
-                        authorInfo
-                    }
+                    authorInfo
                     
                     Spacer()
                     
@@ -136,37 +132,36 @@ struct PostRow: View {
     private var authorInfo: some View {
         VStack(alignment: .leading, spacing: 6) {
             VStack(alignment: .leading, spacing: 4) {
-                // First row: Subforum and username
-                HStack(spacing: 6) {
+                // First row: Subforum • Username • Timestamp
+                HStack(spacing: 3) {
                     subredditButton
                     
                     Text("•")
-                        .font(.system(size: 12))
+                        .font(.system(size: 10))
                         .foregroundColor(.secondary)
                         .fixedSize()
                     
                     authorButton
                     
-                    Spacer(minLength: 0)
-                }
-                
-                // Second row: Timestamp and flair
-                HStack(spacing: 6) {
-                    Text(timeAgoString(from: self.viewModel.post.timestamp.dateValue()))
-                        .font(.system(size: 12))
+                    Text("•")
+                        .font(.system(size: 10))
                         .foregroundColor(.secondary)
                         .fixedSize()
                     
-                    if let flair = viewModel.post.flair {
-                        Text("•")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                            .fixedSize()
-                        
-                        FlairView(flair: flair)
-                    }
+                    Text(timeAgoString(from: self.viewModel.post.timestamp.dateValue()))
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                        .fixedSize()
                     
                     Spacer(minLength: 0)
+                }
+                
+                // Second row: Flair only (if present)
+                if let flair = viewModel.post.flair {
+                    HStack {
+                        FlairView(flair: flair)
+                        Spacer()
+                    }
                 }
             }
         }
@@ -196,7 +191,7 @@ struct PostRow: View {
             .font(.system(size: 12, weight: .medium))
             .foregroundColor(.blue)
             .lineLimit(1)
-            .truncationMode(.tail)
+            .layoutPriority(1)
             .onTapGesture {
                 onSubredditTapped?(self.viewModel.post.subreddit)
             }
@@ -208,6 +203,7 @@ struct PostRow: View {
             .foregroundColor(.blue)
             .lineLimit(1)
             .truncationMode(.tail)
+            .layoutPriority(1)
             .onTapGesture {
                 onUsernameTapped?(self.viewModel.post.author, self.viewModel.post.uid)
             }
