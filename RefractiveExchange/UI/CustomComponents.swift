@@ -35,6 +35,7 @@ struct CustomTextField: View {
     @Binding var text: String
     let title: String
     var isPassword: Bool = false
+    @State private var isPasswordVisible: Bool = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -42,17 +43,58 @@ struct CustomTextField: View {
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.gray)
             
-            if isPassword {
-                SecureField("", text: $text)
-                    .textFieldStyle(CustomTextFieldStyle())
-                    .textContentType(.password)
-            } else {
-                TextField("", text: $text)
-                    .textFieldStyle(CustomTextFieldStyle())
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-                    .textContentType(title.lowercased().contains("email") ? .emailAddress : .none)
-                    .keyboardType(title.lowercased().contains("email") ? .emailAddress : .default)
+            ZStack(alignment: .trailing) {
+                if isPassword {
+                    HStack {
+                        if isPasswordVisible {
+                            TextField("", text: $text)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .padding(.trailing, 40) // Space for eye button
+                                .background(Color(.systemGray6))
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color(.systemGray4), lineWidth: 1)
+                                )
+                                .textContentType(.password)
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                        } else {
+                            SecureField("", text: $text)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .padding(.trailing, 40) // Space for eye button
+                                .background(Color(.systemGray6))
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color(.systemGray4), lineWidth: 1)
+                                )
+                                .textContentType(.password)
+                        }
+                        
+                        Spacer()
+                    }
+                    
+                    // Eye button positioned on the right
+                    Button(action: {
+                        isPasswordVisible.toggle()
+                    }) {
+                        Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 16))
+                            .frame(width: 24, height: 24)
+                    }
+                    .padding(.trailing, 12)
+                } else {
+                    TextField("", text: $text)
+                        .textFieldStyle(CustomTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .textContentType(title.lowercased().contains("email") ? .emailAddress : .none)
+                        .keyboardType(title.lowercased().contains("email") ? .emailAddress : .default)
+                }
             }
         }
     }

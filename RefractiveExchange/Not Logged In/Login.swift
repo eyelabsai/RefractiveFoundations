@@ -76,6 +76,8 @@ struct LoginScreen: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
                 
+                // REGISTRATION TEMPORARILY DISABLED - ADMIN ONLY USER CREATION
+                /*
                 HStack(spacing: 5) {
                     Spacer()
                     Text("New user?")
@@ -90,6 +92,17 @@ struct LoginScreen: View {
                             .underline()
                             .poppinsMedium(16)
                     }
+                    Spacer()
+                }
+                */
+                
+                // Temporary message for users
+                HStack {
+                    Spacer()
+                    Text("Account registration is currently by invitation only.")
+                        .foregroundColor(.gray)
+                        .poppinsMedium(14)
+                        .multilineTextAlignment(.center)
                     Spacer()
                 }
                 .frame(maxWidth: 400)

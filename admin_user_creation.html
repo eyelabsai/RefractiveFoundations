@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RefractiveExchange - Admin User Creation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .auth-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .auth-section.authenticated {
+            border-left-color: #27ae60;
+            background: #d5f4e6;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn.danger {
+            background: #e74c3c;
+        }
+        
+        .btn.danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn.success {
+            background: #27ae60;
+        }
+        
+        .btn.success:hover {
+            background: #219a52;
+        }
+        
+        .btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+        }
+        
+        .result-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .result-item.error {
+            background: #fdf2f2;
+            border-left-color: #e74c3c;
+        }
+        
+        .result-item.success {
+            background: #f0f9f0;
+            border-left-color: #27ae60;
+        }
+        
+        .csv-preview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .csv-preview.show {
+            display: block;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Admin User Creation</h1>
+            <p>Create user accounts for RefractiveExchange</p>
+        </div>
+        
+        <div class="content">
+            <!-- Authentication Status -->
+            <div class="auth-section" id="authSection">
+                <h3>🔑 Authentication Required</h3>
+                <p>Please sign in with your admin account to create users.</p>
+                <button class="btn" onclick="signIn()">Sign In</button>
+            </div>
+            
+            <!-- Single User Creation -->
+            <div id="userCreationForm" style="display: none;">
+                <h3>👤 Create Single User</h3>
+                <div class="form-group">
+                    <label for="firstName">First Name *</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="lastName">Last Name *</label>
+                    <input type="text" id="lastName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="practiceName">Practice Name</label>
+                    <input type="text" id="practiceName">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tempPassword">Temporary Password *</label>
+                    <input type="text" id="tempPassword" placeholder="Leave empty to generate automatically">
+                    <button type="button" class="btn" onclick="generatePassword()">Generate Password</button>
+                </div>
+                
+                <button class="btn success" onclick="createSingleUser()">Create User</button>
+            </div>
+            
+            <!-- Bulk User Creation -->
+            <div id="bulkCreationForm" style="display: none;">
+                <h3>📊 Bulk User Creation</h3>
+                <div class="form-group">
+                    <label for="csvFile">CSV File *</label>
+                    <input type="file" id="csvFile" accept=".csv" onchange="previewCSV()">
+                    <small>Required columns: first_name, last_name, email, practice_name</small>
+                </div>
+                
+                <div class="csv-preview" id="csvPreview"></div>
+                
+                <button class="btn success" onclick="createBulkUsers()" id="bulkCreateBtn" disabled>Create Users</button>
+            </div>
+            
+            <!-- Loading -->
+            <div class="loading" id="loading">
+                <p>🔄 Processing users...</p>
+            </div>
+            
+            <!-- Results -->
+            <div class="results" id="results">
+                <h3>📊 Results</h3>
+                <div class="stats" id="stats"></div>
+                <div id="resultsList"></div>
+                <button class="btn" onclick="downloadCredentials()" id="downloadBtn" style="display: none;">Download Credentials</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js';
+        import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.5.0/firebase-functions.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js';
+
+        // Your Firebase config - Update with your project details
+        const firebaseConfig = {
+            // Add your Firebase config here
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const functions = getFunctions(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let createUserFunction = httpsCallable(functions, 'createUser');
+        let createBulkUsersFunction = httpsCallable(functions, 'createBulkUsers');
+        let csvData = [];
+        let lastResults = [];
+
+        // Make functions globally available
+        window.signIn = signIn;
+        window.createSingleUser = createSingleUser;
+        window.createBulkUsers = createBulkUsers;
+        window.generatePassword = generatePassword;
+        window.previewCSV = previewCSV;
+        window.downloadCredentials = downloadCredentials;
+
+        // Authentication state listener
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Check if user is admin
+                const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+                if (adminDoc.exists()) {
+                    currentUser = user;
+                    updateAuthUI(true);
+                } else {
+                    alert('You do not have admin privileges');
+                    auth.signOut();
+                }
+            } else {
+                currentUser = null;
+                updateAuthUI(false);
+            }
+        });
+
+        function updateAuthUI(isAuthenticated) {
+            const authSection = document.getElementById('authSection');
+            const userForm = document.getElementById('userCreationForm');
+            const bulkForm = document.getElementById('bulkCreationForm');
+
+            if (isAuthenticated) {
+                authSection.classList.add('authenticated');
+                authSection.innerHTML = `
+                    <h3>✅ Authenticated as Admin</h3>
+                    <p>You can now create user accounts.</p>
+                    <button class="btn danger" onclick="auth.signOut()">Sign Out</button>
+                `;
+                userForm.style.display = 'block';
+                bulkForm.style.display = 'block';
+            } else {
+                authSection.classList.remove('authenticated');
+                authSection.innerHTML = `
+                    <h3>🔑 Authentication Required</h3>
+                    <p>Please sign in with your admin account to create users.</p>
+                    <button class="btn" onclick="signIn()">Sign In</button>
+                `;
+                userForm.style.display = 'none';
+                bulkForm.style.display = 'none';
+            }
+        }
+
+        function signIn() {
+            const email = prompt('Enter admin email:');
+            const password = prompt('Enter password:');
+            
+            if (email && password) {
+                signInWithEmailAndPassword(auth, email, password)
+                    .catch(error => {
+                        alert('Sign in failed: ' + error.message);
+                    });
+            }
+        }
+
+        function generatePassword() {
+            const length = 12;
+            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+            let password = "";
+            for (let i = 0; i < length; i++) {
+                password += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            document.getElementById('tempPassword').value = password;
+        }
+
+        async function createSingleUser() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const practiceName = document.getElementById('practiceName').value.trim();
+            let tempPassword = document.getElementById('tempPassword').value.trim();
+
+            if (!firstName || !lastName || !email) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            if (!tempPassword) {
+                // Generate password if not provided
+                generatePassword();
+                tempPassword = document.getElementById('tempPassword').value;
+            }
+
+            setLoading(true);
+
+            try {
+                const result = await createUserFunction({
+                    firstName,
+                    lastName,
+                    email,
+                    practiceName,
+                    tempPassword
+                });
+
+                showResults([{
+                    success: true,
+                    email: email,
+                    name: `${firstName} ${lastName}`,
+                    tempPassword: tempPassword,
+                    uid: result.data.uid
+                }]);
+
+                // Clear form
+                document.getElementById('firstName').value = '';
+                document.getElementById('lastName').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('practiceName').value = '';
+                document.getElementById('tempPassword').value = '';
+
+            } catch (error) {
+                showResults([{
+                    success: false,
+                    email: email,
+                    error: error.message,
+                    name: `${firstName} ${lastName}`
+                }]);
+            }
+
+            setLoading(false);
+        }
+
+        function previewCSV() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            const preview = document.getElementById('csvPreview');
+            const bulkBtn = document.getElementById('bulkCreateBtn');
+
+            if (!file) {
+                preview.classList.remove('show');
+                bulkBtn.disabled = true;
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split('\n').filter(line => line.trim());
+                
+                if (lines.length < 2) {
+                    alert('CSV file must contain at least a header and one data row');
+                    return;
+                }
+
+                // Parse CSV
+                csvData = parseCSV(text);
+                
+                // Validate headers
+                const headers = Object.keys(csvData[0] || {});
+                const requiredHeaders = ['first_name', 'last_name', 'email', 'practice_name'];
+                const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+                
+                if (missingHeaders.length > 0) {
+                    alert(`Missing required columns: ${missingHeaders.join(', ')}`);
+                    bulkBtn.disabled = true;
+                    return;
+                }
+
+                // Show preview
+                preview.innerHTML = `
+                    <strong>CSV Preview (${csvData.length} users):</strong><br>
+                    ${lines.slice(0, 6).join('<br>')}
+                    ${lines.length > 6 ? '<br>...' : ''}
+                `;
+                preview.classList.add('show');
+                bulkBtn.disabled = false;
+            };
+            reader.readAsText(file);
+        }
+
+        async function createBulkUsers() {
+            if (csvData.length === 0) {
+                alert('Please select a valid CSV file first');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                const result = await createBulkUsersFunction({ users: csvData });
+                showResults(result.data.results);
+            } catch (error) {
+                alert('Bulk creation failed: ' + error.message);
+            }
+
+            setLoading(false);
+        }
+
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(line => line.trim());
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            
+            return lines.slice(1).map(line => {
+                const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = values[index] || '';
+                });
+                return obj;
+            });
+        }
+
+        function setLoading(isLoading) {
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            
+            if (isLoading) {
+                loading.classList.add('show');
+                results.classList.remove('show');
+            } else {
+                loading.classList.remove('show');
+            }
+        }
+
+        function showResults(results) {
+            lastResults = results;
+            const resultsDiv = document.getElementById('results');
+            const statsDiv = document.getElementById('stats');
+            const listDiv = document.getElementById('resultsList');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            const successful = results.filter(r => r.success);
+            const failed = results.filter(r => !r.success);
+
+            // Update stats
+            statsDiv.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${results.length}</div>
+                    <div class="stat-label">Total Processed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${successful.length}</div>
+                    <div class="stat-label">Successful</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${failed.length}</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+            `;
+
+            // Update results list
+            listDiv.innerHTML = results.map(result => `
+                <div class="result-item ${result.success ? 'success' : 'error'}">
+                    <strong>${result.name}</strong> (${result.email})<br>
+                    ${result.success ? 
+                        `✅ Created successfully${result.tempPassword ? ' - Password: ' + result.tempPassword : ''}` : 
+                        `❌ Failed: ${result.error}`
+                    }
+                </div>
+            `).join('');
+
+            // Show download button if there are successful results
+            downloadBtn.style.display = successful.length > 0 ? 'block' : 'none';
+            
+            resultsDiv.classList.add('show');
+        }
+
+        function downloadCredentials() {
+            const successful = lastResults.filter(r => r.success);
+            if (successful.length === 0) return;
+
+            const csvContent = [
+                'name,email,temp_password,practice_name,uid',
+                ...successful.map(user => 
+                    `"${user.name}","${user.email}","${user.tempPassword || 'N/A'}","${user.practice_name || ''}","${user.uid || ''}"`
+                )
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'user_credentials_' + new Date().toISOString().split('T')[0] + '.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Make auth globally available for sign out
+        window.auth = auth;
+    </script>
+</body>
+</html>

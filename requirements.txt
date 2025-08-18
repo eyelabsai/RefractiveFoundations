@@ -1,0 +1,3 @@
+# Requirements for RefractiveExchange Bulk User Creation
+firebase-admin==6.2.0
+pandas==2.1.0

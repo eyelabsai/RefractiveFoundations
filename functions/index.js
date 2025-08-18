@@ -107,3 +107,231 @@ exports.testNotification = functions.https.onCall(async (data, context) => {
     throw error;
   }
 });
+
+// Admin-only user creation function
+exports.createUser = functions.https.onCall(async (data, context) => {
+  try {
+    // Check if user is authenticated and has admin privileges
+    if (!context.auth) {
+      throw new functions.https.HttpsError("unauthenticated",
+          "User must be authenticated");
+    }
+
+    // Check if user is admin (you can implement custom claims or check admin collection)
+    const adminDoc = await admin.firestore()
+        .collection("admins")
+        .doc(context.auth.uid)
+        .get();
+
+    if (!adminDoc.exists) {
+      throw new functions.https.HttpsError("permission-denied",
+          "User does not have admin privileges");
+    }
+
+    const {email, firstName, lastName, practiceName, tempPassword} = data;
+
+    // Validate required fields
+    if (!email || !firstName || !lastName || !tempPassword) {
+      throw new functions.https.HttpsError("invalid-argument",
+          "Missing required parameters: email, firstName, lastName, tempPassword");
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new functions.https.HttpsError("invalid-argument",
+          "Invalid email format");
+    }
+
+    // Create user in Firebase Auth
+    const userRecord = await admin.auth().createUser({
+      email: email,
+      password: tempPassword,
+      displayName: `${firstName} ${lastName}`,
+    });
+
+    console.log("Created Firebase Auth user:", userRecord.uid);
+
+    // Create user document in Firestore
+    const userData = {
+      credential: "",
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      position: "",
+      specialty: "General Ophthalmology",
+      state: "",
+      suffix: "",
+      uid: userRecord.uid,
+      avatarUrl: null,
+      exchangeUsername: "",
+      favoriteLenses: [],
+      savedPosts: [],
+      dateJoined: admin.firestore.FieldValue.serverTimestamp(),
+      practiceLocation: "",
+      practiceName: practiceName || "",
+      hasCompletedOnboarding: false,
+      notificationPreferences: {
+        comments: true,
+        directMessages: true,
+        posts: true,
+        mentions: true,
+      },
+    };
+
+    await admin.firestore()
+        .collection("users")
+        .doc(userRecord.uid)
+        .set(userData);
+
+    console.log("Created Firestore document for user:", userRecord.uid);
+
+    return {
+      success: true,
+      uid: userRecord.uid,
+      email: email,
+      name: `${firstName} ${lastName}`,
+      message: "User created successfully",
+    };
+  } catch (error) {
+    console.error("Error in createUser:", error);
+    
+    // Handle specific Firebase Auth errors
+    if (error.code === "auth/email-already-exists") {
+      throw new functions.https.HttpsError("already-exists",
+          "User with this email already exists");
+    }
+    
+    // Re-throw HttpsError as-is
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    
+    // Wrap other errors
+    throw new functions.https.HttpsError("internal",
+        `Failed to create user: ${error.message}`);
+  }
+});
+
+// Bulk user creation function
+exports.createBulkUsers = functions.https.onCall(async (data, context) => {
+  try {
+    // Check authentication and admin privileges
+    if (!context.auth) {
+      throw new functions.https.HttpsError("unauthenticated",
+          "User must be authenticated");
+    }
+
+    const adminDoc = await admin.firestore()
+        .collection("admins")
+        .doc(context.auth.uid)
+        .get();
+
+    if (!adminDoc.exists) {
+      throw new functions.https.HttpsError("permission-denied",
+          "User does not have admin privileges");
+    }
+
+    const {users} = data;
+
+    if (!users || !Array.isArray(users) || users.length === 0) {
+      throw new functions.https.HttpsError("invalid-argument",
+          "Users array is required and must not be empty");
+    }
+
+    if (users.length > 50) {
+      throw new functions.https.HttpsError("invalid-argument",
+          "Maximum 50 users can be created in one batch");
+    }
+
+    const results = [];
+    const batch = admin.firestore().batch();
+
+    for (const userData of users) {
+      try {
+        const {email, firstName, lastName, practiceName} = userData;
+        
+        // Generate temporary password
+        const tempPassword = generateTempPassword();
+
+        // Create user in Firebase Auth
+        const userRecord = await admin.auth().createUser({
+          email: email,
+          password: tempPassword,
+          displayName: `${firstName} ${lastName}`,
+        });
+
+        // Prepare Firestore document
+        const firestoreData = {
+          credential: "",
+          email: email,
+          firstName: firstName,
+          lastName: lastName,
+          position: "",
+          specialty: "General Ophthalmology",
+          state: "",
+          suffix: "",
+          uid: userRecord.uid,
+          avatarUrl: null,
+          exchangeUsername: "",
+          favoriteLenses: [],
+          savedPosts: [],
+          dateJoined: admin.firestore.FieldValue.serverTimestamp(),
+          practiceLocation: "",
+          practiceName: practiceName || "",
+          hasCompletedOnboarding: false,
+          notificationPreferences: {
+            comments: true,
+            directMessages: true,
+            posts: true,
+            mentions: true,
+          },
+        };
+
+        // Add to batch
+        const userRef = admin.firestore().collection("users").doc(userRecord.uid);
+        batch.set(userRef, firestoreData);
+
+        results.push({
+          success: true,
+          email: email,
+          uid: userRecord.uid,
+          tempPassword: tempPassword,
+          name: `${firstName} ${lastName}`,
+        });
+      } catch (error) {
+        console.error(`Failed to create user ${userData.email}:`, error);
+        results.push({
+          success: false,
+          email: userData.email,
+          error: error.message,
+          name: `${userData.firstName} ${userData.lastName}`,
+        });
+      }
+    }
+
+    // Commit batch write for Firestore documents
+    await batch.commit();
+
+    const successful = results.filter((r) => r.success);
+    const failed = results.filter((r) => !r.success);
+
+    return {
+      success: true,
+      totalProcessed: results.length,
+      successful: successful.length,
+      failed: failed.length,
+      results: results,
+    };
+  } catch (error) {
+    console.error("Error in createBulkUsers:", error);
+    throw new functions.https.HttpsError("internal",
+        `Bulk user creation failed: ${error.message}`);
+  }
+});
+
+// Helper function to generate temporary password
+function generateTempPassword(length = 12) {
+  // Use fixed password for easier distribution
+  return "RefractiveFoundations";
+}
