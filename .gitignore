@@ -67,3 +67,5 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+service-account-key.json
+*.json # If you want to exclude all JSON files
