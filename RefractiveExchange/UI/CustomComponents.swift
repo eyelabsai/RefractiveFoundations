@@ -243,14 +243,19 @@ struct CustomAlert: View {
     var body: some View {
         if handle.alert {
             ZStack {
-                Color.black.opacity(0.4)
-                    .edgesIgnoringSafeArea(.all)
+                Color.black.opacity(0.5)
+                    .ignoresSafeArea(.all)
                     .onTapGesture {
                         handle.alert = false
                     }
                 
                 VStack(spacing: 20) {
-                    Text("Alert")
+                    // Error Icon
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.orange)
+                    
+                    Text("Error")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
@@ -259,22 +264,29 @@ struct CustomAlert: View {
                         .multilineTextAlignment(.center)
                         .foregroundColor(.primary)
                         .padding(.horizontal)
+                        .font(.system(size: 16))
                     
                     Button("OK") {
                         handle.alert = false
                     }
+                    .frame(minWidth: 100)
                     .padding(.horizontal, 30)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 12)
                     .background(Color.blue)
                     .foregroundColor(.white)
-                    .cornerRadius(8)
+                    .cornerRadius(10)
+                    .font(.system(size: 16, weight: .medium))
                 }
                 .padding(30)
                 .background(Color(.systemBackground))
                 .cornerRadius(15)
-                .shadow(radius: 10)
+                .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 5)
                 .padding(40)
+                .scaleEffect(handle.alert ? 1.0 : 0.8)
+                .opacity(handle.alert ? 1.0 : 0.0)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: handle.alert)
             }
+            .zIndex(999) // Ensure it's always on top
         }
     }
 }

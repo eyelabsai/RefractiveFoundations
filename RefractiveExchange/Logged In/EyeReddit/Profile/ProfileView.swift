@@ -23,6 +23,12 @@ struct ProfileView: View {
     @State private var showingSettings = false
     @State private var showingEditProfile = false
     @State private var showingDeleteAccountAlert = false
+    @State private var showingChangePassword = false
+    
+    // Change Password fields
+    @State private var currentPassword = ""
+    @State private var newPassword = ""
+    @State private var confirmPassword = ""
     
     let tabTitles = ["Posts", "Comments", "Saved", "About"]
     let service = PostService()
@@ -96,6 +102,19 @@ struct ProfileView: View {
                 }
             } message: {
                 Text("Are you sure? Deleting your account will permanently erase all saved data and cannot be undone.")
+            }
+            .sheet(isPresented: $showingChangePassword) {
+                ChangePasswordView(
+                    currentPassword: $currentPassword,
+                    newPassword: $newPassword,
+                    confirmPassword: $confirmPassword,
+                    onPasswordChanged: {
+                        // Clear password fields after successful change
+                        currentPassword = ""
+                        newPassword = ""
+                        confirmPassword = ""
+                    }
+                )
             }
         }
     }
@@ -571,6 +590,31 @@ struct ProfileView: View {
                         Divider()
                         
                         Button(action: {
+                            showingChangePassword = true
+                        }) {
+                            HStack {
+                                Image(systemName: "lock.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.blue)
+                                    .frame(width: 24)
+                                
+                                Text("Change Password")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.primary)
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 12)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        Divider()
+                        
+                        Button(action: {
                             showingSettings = true
                         }) {
                             HStack {
@@ -960,6 +1004,7 @@ struct SettingsView: View {
     @State private var memberSince = ""
     @State private var yearsActive = 0
     @State private var showingDeleteAccountAlert = false
+    @State private var showingEditProfile = false
     
     var body: some View {
         NavigationStack {
@@ -1030,7 +1075,7 @@ struct SettingsView: View {
                         VStack(spacing: 12) {
                             // Edit Profile Button
                             Button(action: {
-                                // TODO: Navigate to edit profile
+                                showingEditProfile = true
                             }) {
                                 HStack {
                                     Image(systemName: "pencil")
@@ -1123,6 +1168,9 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("Are you sure? Deleting your account will permanently erase all saved data and cannot be undone.")
+            }
+            .sheet(isPresented: $showingEditProfile) {
+                EditProfileView(data: data)
             }
         }
     }
@@ -1253,6 +1301,12 @@ struct EditProfileView: View {
     @State private var isLoading = false
     @State private var showAlert = false
     @State private var alertMessage = ""
+    @State private var showingChangePassword = false
+    
+    // Change Password fields
+    @State private var currentPassword = ""
+    @State private var newPassword = ""
+    @State private var confirmPassword = ""
     
     let specialties = [
         "Resident",
@@ -1430,6 +1484,41 @@ struct EditProfileView: View {
                     .padding(16)
                     .background(Color(.systemBackground))
                     .cornerRadius(12)
+                    
+                    // Change Password Section
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Change Password")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.primary)
+                        
+                        VStack(spacing: 8) {
+                            Button(action: {
+                                showingChangePassword = true
+                            }) {
+                                HStack {
+                                    Image(systemName: "lock.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.blue)
+                                        .frame(width: 24)
+                                    
+                                    Text("Change Password")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.primary)
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.vertical, 12)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding(16)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 20)
@@ -1461,6 +1550,21 @@ struct EditProfileView: View {
                 Button("OK") { }
             } message: {
                 Text(alertMessage)
+            }
+            .sheet(isPresented: $showingChangePassword) {
+                ChangePasswordView(
+                    currentPassword: $currentPassword,
+                    newPassword: $newPassword,
+                    confirmPassword: $confirmPassword,
+                    onPasswordChanged: {
+                        alertMessage = "Password changed successfully!"
+                        showAlert = true
+                        // Clear password fields
+                        currentPassword = ""
+                        newPassword = ""
+                        confirmPassword = ""
+                    }
+                )
             }
         }
     }
@@ -1640,6 +1744,229 @@ struct NotificationSettingsButton: View {
         }
         .sheet(isPresented: $showingNotificationSettings) {
             NotificationSettingsView()
+        }
+    }
+}
+
+// MARK: - Change Password View
+struct ChangePasswordView: View {
+    @Binding var currentPassword: String
+    @Binding var newPassword: String
+    @Binding var confirmPassword: String
+    let onPasswordChanged: () -> Void
+    
+    @Environment(\.dismiss) var dismiss
+    @State private var isLoading = false
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    // Header
+                    VStack(alignment: .center, spacing: 8) {
+                        Image(systemName: "lock.shield")
+                            .font(.system(size: 48))
+                            .foregroundColor(.blue)
+                        
+                        Text("Change Password")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.primary)
+                        
+                        Text("Enter your current password and choose a new secure password.")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 20)
+                    
+                    // Password Fields
+                    VStack(alignment: .leading, spacing: 20) {
+                        // Current Password
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Current Password")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            
+                            SecureField("Enter your current password", text: $currentPassword)
+                                .font(.system(size: 16))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color(.systemGray4), lineWidth: 0.5)
+                                )
+                        }
+                        
+                        // New Password
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("New Password")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            
+                            SecureField("Enter new password", text: $newPassword)
+                                .font(.system(size: 16))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(
+                                            newPassword.count >= 6 ? Color.green : Color(.systemGray4),
+                                            lineWidth: newPassword.isEmpty ? 0.5 : 1
+                                        )
+                                )
+                            
+                            // Password requirements
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: newPassword.count >= 6 ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(newPassword.count >= 6 ? .green : .red)
+                                    
+                                    Text("At least 6 characters")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(newPassword.count >= 6 ? .green : .secondary)
+                                }
+                                
+                                HStack(spacing: 8) {
+                                    Image(systemName: newPassword != currentPassword && !newPassword.isEmpty ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(newPassword != currentPassword && !newPassword.isEmpty ? .green : .red)
+                                    
+                                    Text("Different from current password")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(newPassword != currentPassword && !newPassword.isEmpty ? .green : .secondary)
+                                }
+                            }
+                            .padding(.top, 4)
+                        }
+                        
+                        // Confirm Password
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Confirm New Password")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                            
+                            SecureField("Confirm new password", text: $confirmPassword)
+                                .font(.system(size: 16))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(
+                                            (!confirmPassword.isEmpty && confirmPassword == newPassword) ? Color.green : Color(.systemGray4),
+                                            lineWidth: confirmPassword.isEmpty ? 0.5 : 1
+                                        )
+                                )
+                            
+                            if !confirmPassword.isEmpty {
+                                HStack(spacing: 8) {
+                                    Image(systemName: confirmPassword == newPassword ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(confirmPassword == newPassword ? .green : .red)
+                                    
+                                    Text("Passwords match")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(confirmPassword == newPassword ? .green : .red)
+                                }
+                                .padding(.top, 4)
+                            }
+                        }
+                        
+                        // Change Password Button
+                        Button(action: {
+                            changePassword()
+                        }) {
+                            HStack {
+                                if isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                        .scaleEffect(0.8)
+                                }
+                                
+                                Text(isLoading ? "Changing Password..." : "Change Password")
+                                    .font(.system(size: 16, weight: .medium))
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                isFormValid() ? Color.blue : Color.gray.opacity(0.5)
+                            )
+                            .cornerRadius(10)
+                        }
+                        .disabled(!isFormValid() || isLoading)
+                        .padding(.top, 16)
+                    }
+                    .padding(20)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 20)
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Change Password")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .foregroundColor(.blue)
+                }
+            }
+            .alert("Password Change", isPresented: $showAlert) {
+                Button("OK") {
+                    if alertMessage.contains("successfully") {
+                        dismiss()
+                    }
+                }
+            } message: {
+                Text(alertMessage)
+            }
+        }
+    }
+    
+    private func isFormValid() -> Bool {
+        return !currentPassword.isEmpty &&
+               !newPassword.isEmpty &&
+               !confirmPassword.isEmpty &&
+               newPassword.count >= 6 &&
+               newPassword == confirmPassword &&
+               newPassword != currentPassword
+    }
+    
+    private func changePassword() {
+        guard isFormValid() else { return }
+        
+        isLoading = true
+        
+        FirebaseManager.shared.changePassword(
+            currentPassword: currentPassword,
+            newPassword: newPassword
+        ) { [self] result in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                switch result {
+                case .success:
+                    self.onPasswordChanged()
+                    self.dismiss()
+                case .failure(let error):
+                    self.alertMessage = error.localizedDescription
+                    self.showAlert = true
+                }
+            }
         }
     }
 }

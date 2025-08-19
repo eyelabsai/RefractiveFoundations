@@ -59,8 +59,9 @@ struct EyeReddit: View {
         .onChange(of: resetToHome) { shouldReset in
             if shouldReset {
                 currentSubreddit = "i/All"  // Reset to main subreddit
-                viewModel.currentSubreddit = "i/All"  // Update view model
-                viewModel.refreshPosts()  // Refresh to show all posts
+                viewModel.setSubreddit(subreddit: "i/All")  // Update view model properly
+                viewModel.filterBySubreddit()  // Apply the filter immediately
+                viewModel.refreshPosts()  // Refresh to get latest posts
                 resetToHome = false  // Reset the flag
             }
         }

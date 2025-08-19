@@ -36,10 +36,22 @@ struct LoginScreen: View {
                 VStack(spacing: 20) {
                     CustomTextField(text: $model.user.email, title: "Email")
                         .frame(maxWidth: 400)
+                        .onChange(of: model.user.email) { _ in
+                            // Clear error message when user starts typing
+                            if !model.errorMessage.isEmpty {
+                                model.errorMessage = ""
+                            }
+                        }
                     
                     if !model.resetPassword {
                         CustomTextField(text: $model.password, title: "Password", isPassword: true)
                             .frame(maxWidth: 400)
+                            .onChange(of: model.password) { _ in
+                                // Clear error message when user starts typing
+                                if !model.errorMessage.isEmpty {
+                                    model.errorMessage = ""
+                                }
+                            }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -64,7 +76,7 @@ struct LoginScreen: View {
                     }
                     .frame(maxWidth: 400)
                     
-                    CustomButton(loading: $model.handle.loading, title: $model.resetButtonText, width: .constant(min(UIScreen.main.bounds.width - 50, 400)), color: .black, transpositionMode: false) {
+                    CustomButton(loading: .constant(model.handle.loading && model.errorMessage.isEmpty), title: $model.resetButtonText, width: .constant(min(UIScreen.main.bounds.width - 50, 400)), color: .black, transpositionMode: false) {
                         
                         if model.resetPassword {
                             model.sendResetEmail()
@@ -75,6 +87,21 @@ struct LoginScreen: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
+                
+                // Error message display
+                if !model.errorMessage.isEmpty {
+                    HStack {
+                        Spacer()
+                        Text(model.errorMessage)
+                            .foregroundColor(.red)
+                            .poppinsMedium(14)
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                    }
+                    .frame(maxWidth: 400)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                }
                 
                 // REGISTRATION TEMPORARILY DISABLED - ADMIN ONLY USER CREATION
                 /*
@@ -109,6 +136,8 @@ struct LoginScreen: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
                 
+
+                
                     Spacer(minLength: 30)
                 }
                 .frame(maxWidth: .infinity)
@@ -116,11 +145,14 @@ struct LoginScreen: View {
             }
             .zIndex(0)
             
-            CustomAlert(handle: $model.handle)
-                .zIndex(1)
+            // CustomAlert only for password reset success messages
+            if model.handle.alert && model.handle.msg.contains("Password reset email sent") {
+                CustomAlert(handle: $model.handle)
+                    .zIndex(999)
+            }
            
-                // Subtle loading overlay
-                if model.handle.loading {
+                // Subtle loading overlay - only show when loading AND no error message
+                if model.handle.loading && model.errorMessage.isEmpty {
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
                         .zIndex(2)
@@ -130,7 +162,7 @@ struct LoginScreen: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             .scaleEffect(1.5)
                         
-                        Text("Signing in...")
+                        Text(model.loadingMessage)
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.white)
                     }

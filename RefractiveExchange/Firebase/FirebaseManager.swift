@@ -36,20 +36,33 @@ class FirebaseManager: ObservableObject {
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] result, error in
             if let error = error as NSError? {
                 print("❌ Sign in failed with error code \(error.code): \(error.localizedDescription)")
+                print("❌ Error domain: \(error.domain)")
+                print("❌ User info: \(error.userInfo)")
                 let message: String
                 switch AuthErrorCode(rawValue: error.code) {
                 case .wrongPassword:
-                    message = "Incorrect password."
+                    message = "Incorrect password. Please try again."
                 case .userNotFound:
-                    message = "No account found with this email."
+                    message = "No account found with this email address."
                 case .invalidEmail:
-                    message = "Invalid email address."
+                    message = "Please enter a valid email address."
                 case .userDisabled:
-                    message = "This account has been disabled."
+                    message = "This account has been disabled. Please contact support."
                 case .networkError:
                     message = "Network error. Please check your internet connection."
+                case .invalidCredential:
+                    message = "Invalid email or password. Please check your credentials and try again."
+                case .operationNotAllowed:
+                    message = "Email/password accounts are not enabled. Please contact support."
+                case .tooManyRequests:
+                    message = "Too many unsuccessful sign-in attempts. Please try again later."
                 default:
-                    message = error.localizedDescription
+                    // For error codes that might indicate wrong password but aren't caught above
+                    if error.code == 17004 || error.code == 17011 || error.code == 17020 {
+                        message = "Invalid email or password. Please check your credentials and try again."
+                    } else {
+                        message = "Sign in failed. Please check your email and password and try again."
+                    }
                 }
                 completion(.failure(NSError(domain: "FirebaseManager", code: error.code, userInfo: [NSLocalizedDescriptionKey: message])))
             } else {
@@ -149,6 +162,58 @@ class FirebaseManager: ObservableObject {
                 completion(.failure(error))
             } else {
                 completion(.success(()))
+            }
+        }
+    }
+    
+    func changePassword(currentPassword: String, newPassword: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let user = Auth.auth().currentUser, let email = user.email else {
+            completion(.failure(NSError(domain: "FirebaseManager", code: 0, userInfo: [NSLocalizedDescriptionKey: "No authenticated user found"])))
+            return
+        }
+        
+        // Create credential with current email and password for reauthentication
+        let credential = EmailAuthProvider.credential(withEmail: email, password: currentPassword)
+        
+        // Reauthenticate user before changing password
+        user.reauthenticate(with: credential) { result, error in
+            if let error = error as NSError? {
+                print("❌ Reauthentication failed: \(error.localizedDescription)")
+                let message: String
+                switch AuthErrorCode(rawValue: error.code) {
+                case .wrongPassword:
+                    message = "Current password is incorrect."
+                case .tooManyRequests:
+                    message = "Too many attempts. Please try again later."
+                case .networkError:
+                    message = "Network error. Please check your internet connection."
+                default:
+                    message = "Authentication failed: \(error.localizedDescription)"
+                }
+                completion(.failure(NSError(domain: "FirebaseManager", code: error.code, userInfo: [NSLocalizedDescriptionKey: message])))
+                return
+            }
+            
+            // User is reauthenticated, now update password
+            user.updatePassword(to: newPassword) { error in
+                if let error = error as NSError? {
+                    print("❌ Password update failed: \(error.localizedDescription)")
+                    let message: String
+                    switch AuthErrorCode(rawValue: error.code) {
+                    case .weakPassword:
+                        message = "New password is too weak. Please choose a stronger password."
+                    case .operationNotAllowed:
+                        message = "Password change is not allowed."
+                    case .networkError:
+                        message = "Network error. Please check your internet connection."
+                    default:
+                        message = "Failed to update password: \(error.localizedDescription)"
+                    }
+                    completion(.failure(NSError(domain: "FirebaseManager", code: error.code, userInfo: [NSLocalizedDescriptionKey: message])))
+                } else {
+                    print("✅ Password updated successfully")
+                    completion(.success(()))
+                }
             }
         }
     }

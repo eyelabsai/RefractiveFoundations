@@ -167,6 +167,8 @@ struct Main: View {
     
     var bottomTabBar: some View {
         HStack {
+            Spacer()
+            
             // Home/Feed Tab
             TabBarButton(
                 icon: "house.fill",
@@ -185,7 +187,8 @@ struct Main: View {
             
             Spacer()
             
-            // Notifications Tab
+            // Notifications Tab - COMMENTED OUT
+            /*
             TabBarButton(
                 icon: "bell.fill",
                 title: "Notifications",
@@ -196,10 +199,9 @@ struct Main: View {
                     }
                 }
             )
+            */
             
-            Spacer()
-            
-            // New Post Tab (middle)
+            // New Post Tab (now centered)
             TabBarButton(
                 icon: "plus",
                 title: "New Post",
@@ -224,6 +226,8 @@ struct Main: View {
                     }
                 }
             )
+            
+            Spacer()
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 12)
