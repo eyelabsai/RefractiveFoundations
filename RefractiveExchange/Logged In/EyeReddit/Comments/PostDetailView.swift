@@ -219,12 +219,13 @@ struct PostDetailView: View {
             // Post text - Full text, not truncated
             if !viewModel.post.text.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(viewModel.post.text)
-                        .font(.system(size: 15))
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.vertical, 8)
+                    ClickableTextView(
+                        text: viewModel.post.text,
+                        font: .system(size: 15),
+                        color: .primary,
+                        multilineTextAlignment: .leading
+                    )
+                    .padding(.vertical, 8)
                     
                     // Show "edited" indicator if post was edited
                     if viewModel.post.editedAt != nil {

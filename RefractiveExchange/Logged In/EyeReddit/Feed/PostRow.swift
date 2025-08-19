@@ -361,11 +361,12 @@ struct PostRow: View {
         Group {
             if !truncatedText.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(truncatedText)
-                        .font(.system(size: 14))
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
+                    ClickableTextView(
+                        text: truncatedText,
+                        font: .system(size: 14),
+                        color: .primary,
+                        multilineTextAlignment: .leading
+                    )
                     
                     // Show "edited" indicator if post was edited
                     if self.viewModel.post.editedAt != nil {

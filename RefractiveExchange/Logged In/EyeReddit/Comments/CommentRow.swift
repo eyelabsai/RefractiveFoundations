@@ -101,10 +101,12 @@ struct CommentRow: View {
 
                     // Comment text
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(self.viewModel.comment.text)
-                            .font(.system(size: 14))
-                            .foregroundColor(.primary)
-                            .multilineTextAlignment(.leading)
+                        ClickableTextView(
+                            text: self.viewModel.comment.text,
+                            font: .system(size: 14),
+                            color: .primary,
+                            multilineTextAlignment: .leading
+                        )
                         
                         // Show "edited" indicator if comment was edited
                         if self.viewModel.comment.editedAt != nil {
