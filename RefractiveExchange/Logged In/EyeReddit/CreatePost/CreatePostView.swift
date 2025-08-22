@@ -8,6 +8,7 @@
 import SwiftUI
 import Firebase
 import FirebaseFirestore
+import LinkPresentation
 
 struct CreatePostView: View {
     
@@ -43,6 +44,11 @@ struct CreatePostView: View {
     @State private var showErrorToast: Bool = false
     @State private var showSuccessToast: Bool = false
     @State private var showSubforumPrompt: Bool = false
+    @State private var detectedLinks: [String] = []
+    @State private var linkPreview: LinkPreviewData? = nil
+    @State private var isLoadingLinkPreview: Bool = false
+    
+    @ObservedObject private var linkPreviewService = LinkPreviewService.shared
 
     
     
@@ -153,6 +159,41 @@ struct CreatePostView: View {
                                 .allowsHitTesting(false)
                         }
                     }
+                    .onChange(of: text) { newValue in
+                        detectLinksInText(newValue)
+                    }
+                    
+                    // Link Preview Section
+                    if isLoadingLinkPreview {
+                        LinkPreviewLoadingView()
+                            .padding(.horizontal, 15)
+                    } else if let linkPreview = linkPreview {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Link Preview")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                
+                                Spacer()
+                                
+                                Button("Remove") {
+                                    self.linkPreview = nil
+                                }
+                                .font(.system(size: 12))
+                                .foregroundColor(.blue)
+                            }
+                            
+                            LinkPreviewView(linkPreview: linkPreview) {
+                                // Handle link tap if needed
+                                if let url = URL(string: linkPreview.url) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 15)
+                    }
+                    
+
 
 
 
@@ -239,7 +280,8 @@ struct CreatePostView: View {
             text: finalText,
             subredditList: subredditsWithoutAll,
             selectedSubredditIndex: selectedSubredditIndex,
-            postImageData: postImageData
+            postImageData: postImageData,
+            linkPreview: linkPreview
         ) { success in
             DispatchQueue.main.async {
                 self.isLoading = false
@@ -254,6 +296,8 @@ struct CreatePostView: View {
                     self.selectedImages = []
                     self.postImageData = []
                     self.selectedSubredditIndex = 0
+                    self.linkPreview = nil
+                    self.detectedLinks = []
                     
                     // Show success feedback
                     withAnimation {
@@ -319,6 +363,38 @@ struct CreatePostView: View {
         UIGraphicsEndImageContext()
         
         return newImage
+    }
+    
+    // MARK: - Link Detection
+    private func detectLinksInText(_ text: String) {
+        let urls = linkPreviewService.extractURLs(from: text)
+        
+        if let firstURL = urls.first, firstURL != detectedLinks.first {
+            print("🔗 New link detected, generating preview...")
+            detectedLinks = urls
+            generateLinkPreview(for: firstURL)
+        } else if urls.isEmpty && !detectedLinks.isEmpty {
+            detectedLinks = []
+            linkPreview = nil
+        }
+    }
+    
+    private func generateLinkPreview(for url: String) {
+        print("🔄 Starting link preview generation for: \(url)")
+        isLoadingLinkPreview = true
+        
+        linkPreviewService.generateLinkPreview(for: url) { preview in
+            DispatchQueue.main.async {
+                self.isLoadingLinkPreview = false
+                if let preview = preview {
+                    print("✅ Link preview generated successfully: \(preview.title ?? "No title")")
+                    self.linkPreview = preview
+                } else {
+                    print("❌ Failed to generate link preview")
+                    self.linkPreview = nil
+                }
+            }
+        }
     }
 }
 

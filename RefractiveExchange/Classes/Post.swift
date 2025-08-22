@@ -24,6 +24,7 @@ struct StoredPost: Codable, Identifiable  {
     var isPinned: Bool? // Added pinned status for admin announcements
     var pinnedAt: Timestamp? // When the post was pinned
     var pinnedBy: String? // Admin who pinned the post
+    var linkPreview: LinkPreviewData? // Added link preview data
 }
 
 struct FetchedPost: Codable, Identifiable, Hashable  {
@@ -46,6 +47,7 @@ struct FetchedPost: Codable, Identifiable, Hashable  {
     var pinnedAt: Timestamp? // When the post was pinned
     var pinnedBy: String? // Admin who pinned the post
     var commentCount: Int = 0 // Added comment count for display in feed
+    var linkPreview: LinkPreviewData? // Added link preview data
     
     // Hashable conformance
     func hash(into hasher: inout Hasher) {
@@ -54,5 +56,39 @@ struct FetchedPost: Codable, Identifiable, Hashable  {
     
     static func == (lhs: FetchedPost, rhs: FetchedPost) -> Bool {
         return lhs.id == rhs.id
+    }
+}
+
+// MARK: - Link Preview Data
+struct LinkPreviewData: Codable, Hashable {
+    let url: String
+    let title: String?
+    let description: String?
+    let imageUrl: String?
+    let siteName: String?
+    let domain: String
+    
+    init(url: String, title: String? = nil, description: String? = nil, imageUrl: String? = nil, siteName: String? = nil) {
+        self.url = url
+        self.title = title
+        self.description = description
+        self.imageUrl = imageUrl
+        self.siteName = siteName
+        
+        // Extract domain from URL
+        if let urlComponents = URLComponents(string: url) {
+            self.domain = urlComponents.host ?? url
+        } else {
+            self.domain = url
+        }
+    }
+    
+    // Hashable conformance
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(url)
+    }
+    
+    static func == (lhs: LinkPreviewData, rhs: LinkPreviewData) -> Bool {
+        return lhs.url == rhs.url
     }
 }

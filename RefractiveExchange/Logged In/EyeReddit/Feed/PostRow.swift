@@ -8,6 +8,7 @@ import SwiftUI
 import Firebase
 import FirebaseFirestore
 import FirebaseAuth
+import LinkPresentation
 
 struct PostRow: View {
     @ObservedObject var viewModel: PostRowModel
@@ -328,6 +329,7 @@ struct PostRow: View {
             postTitle
             postTextContent
             postImages
+            postLinkPreview
         }
     }
     
@@ -508,6 +510,19 @@ struct PostRow: View {
                     }
                 }
                 .padding(.horizontal, 4)
+            }
+        }
+    }
+    
+    private var postLinkPreview: some View {
+        Group {
+            if let linkPreview = viewModel.post.linkPreview {
+                CompactLinkPreviewView(linkPreview: linkPreview) {
+                    if let url = URL(string: linkPreview.url) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                .padding(.top, 8)
             }
         }
     }

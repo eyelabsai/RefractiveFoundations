@@ -331,6 +331,40 @@ class NotificationService: ObservableObject {
             }
     }
     
+    func clearAllNotifications(for userId: String, completion: @escaping (Bool) -> Void) {
+        let batch = Firestore.firestore().batch()
+        
+        Firestore.firestore().collection("notifications")
+            .whereField("recipientId", isEqualTo: userId)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("❌ Error fetching notifications to clear: \(error)")
+                    completion(false)
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    print("⚠️ No notifications found to clear")
+                    completion(true)
+                    return
+                }
+                
+                for document in documents {
+                    batch.deleteDocument(document.reference)
+                }
+                
+                batch.commit { error in
+                    if let error = error {
+                        print("❌ Error clearing all notifications: \(error)")
+                        completion(false)
+                    } else {
+                        print("✅ All notifications cleared successfully")
+                        completion(true)
+                    }
+                }
+            }
+    }
+    
     // MARK: - Helper Methods
     
     private func saveNotification(_ notification: AppNotification) {
@@ -343,23 +377,7 @@ class NotificationService: ObservableObject {
             senderId: notification.senderId
         )
         
-        if shouldSaveInApp {
-            do {
-                _ = try Firestore.firestore().collection("notifications").addDocument(from: notification)
-                print("✅ Notification saved successfully")
-            } catch {
-                print("❌ Error saving notification: \(error)")
-            }
-        } else {
-            print("🔕 In-app notification blocked by user preferences for type: \(notification.type)")
-        }
-        
-        // Always check push notification preferences separately (user might want push but not in-app)
-        sendPushNotificationForAppNotification(notification)
-    }
-    
-    private func sendPushNotificationForAppNotification(_ notification: AppNotification) {
-        // Check user preferences before sending push notification
+        // Check if push notifications are allowed for this type
         let shouldSendPush = NotificationPreferencesManager.shared.shouldSendNotification(
             type: notification.type,
             pushNotification: true,
@@ -368,38 +386,23 @@ class NotificationService: ObservableObject {
             senderId: notification.senderId
         )
         
-        if !shouldSendPush {
-            print("🔕 Push notification blocked by user preferences for type: \(notification.type)")
-            return
+        // Only save to Firestore if either in-app OR push notifications are allowed
+        // The Cloud Function will handle the actual push notification sending
+        if shouldSaveInApp || shouldSendPush {
+            do {
+                _ = try Firestore.firestore().collection("notifications").addDocument(from: notification)
+                print("✅ Notification saved successfully to Firestore - Cloud Function will handle push notification")
+            } catch {
+                print("❌ Error saving notification: \(error)")
+            }
+        } else {
+            print("🔕 Both in-app and push notifications blocked by user preferences for type: \(notification.type)")
         }
-        
-        // Create data payload for navigation
-        var data: [String: Any] = [
-            "notificationId": notification.id ?? "",
-            "type": notification.type.rawValue
-        ]
-        
-        // Add specific data based on notification type
-        if let metadata = notification.metadata {
-            if let postId = metadata.postId {
-                data["postId"] = postId
-            }
-            if let conversationId = metadata.conversationId {
-                data["conversationId"] = conversationId
-            }
-            if let commentId = metadata.commentId {
-                data["commentId"] = commentId
-            }
-        }
-        
-        // Send the push notification
-        PushNotificationManager.shared.sendPushNotification(
-            to: notification.recipientId,
-            title: notification.title,
-            body: notification.message,
-            data: data
-        )
     }
+    
+    // REMOVED: sendPushNotificationForAppNotification
+    // Push notifications are now handled by Cloud Functions when notification is saved to Firestore
+    // This removes the duplicate/broken client-side push notification logic
     
     private func fetchUserDetails(userId: String, completion: @escaping (User?) -> Void) {
         Firestore.firestore().collection("users").document(userId).getDocument { document, error in

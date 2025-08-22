@@ -14,7 +14,7 @@ import FirebaseAuth
 
 class CreatePostViewHandler {
     
-    static func createPost(data: GetData, title: String, text: String, subredditList: [String],selectedSubredditIndex: Int, postImageData: [Data], completion: @escaping (Bool) -> Void) {
+    static func createPost(data: GetData, title: String, text: String, subredditList: [String],selectedSubredditIndex: Int, postImageData: [Data], linkPreview: LinkPreviewData? = nil, completion: @escaping (Bool) -> Void) {
         
         // Get current user UID safely
         guard let currentUID = Auth.auth().currentUser?.uid else {
@@ -30,7 +30,7 @@ class CreatePostViewHandler {
             uploadMultipleImages(imageDataArray: postImageData, currentUID: currentUID) { imageURLs in
                 if let imageURLs = imageURLs, !imageURLs.isEmpty {
                     print("✅ All images uploaded successfully")
-                    let post = StoredPost(title: title, text: text, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], subreddit: subredditList[selectedSubredditIndex], imageURLs: imageURLs, didLike: false, didDislike: false, uid: currentUID)
+                    let post = StoredPost(title: title, text: text, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], subreddit: subredditList[selectedSubredditIndex], imageURLs: imageURLs, didLike: false, didDislike: false, uid: currentUID, linkPreview: linkPreview)
                     uploadFirebase(post: post, completion: completion)
                 } else {
                     print("❌ Failed to upload images")
@@ -41,7 +41,7 @@ class CreatePostViewHandler {
             }
         } else {
             // No images to upload
-            let post = StoredPost(title: title, text: text, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], subreddit: subredditList[selectedSubredditIndex], imageURLs: nil, didLike: false, didDislike: false, uid: currentUID)
+            let post = StoredPost(title: title, text: text, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], subreddit: subredditList[selectedSubredditIndex], imageURLs: nil, didLike: false, didDislike: false, uid: currentUID, linkPreview: linkPreview)
             uploadFirebase(post: post, completion: completion)
         }
     }

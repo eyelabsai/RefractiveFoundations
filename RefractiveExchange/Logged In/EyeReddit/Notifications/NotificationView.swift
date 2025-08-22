@@ -17,6 +17,8 @@ struct NotificationView: View {
     @State private var navigationPath = NavigationPath()
     @State private var selectedPost: FetchedPost?
     @State private var isLoadingPost = false
+    @State private var showingClearAllAlert = false
+    @State private var isOperationInProgress = false
     @ObservedObject var data = GetData()
     
     var filteredNotifications: [NotificationPreview] {
@@ -51,19 +53,34 @@ struct NotificationView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button("Mark All as Read") {
-                            if let currentUserId = firebaseManager.currentUser?.uid {
-                                notificationService.markAllNotificationsAsRead(for: currentUserId)
-                            }
+                            markAllNotificationsAsRead()
                         }
-                        .disabled(notificationService.notificationCounts.totalUnread == 0)
+                        .disabled(notificationService.notificationCounts.totalUnread == 0 || isOperationInProgress)
+                        
+                        Divider()
+                        
+                        Button("Clear All Notifications", role: .destructive) {
+                            showingClearAllAlert = true
+                        }
+                        .disabled(notificationService.notifications.isEmpty || isOperationInProgress)
+                        
+                        Divider()
                         
                         Button("Filter Options") {
                             showingFilterMenu = true
                         }
                     } label: {
-                        Image(systemName: "ellipsis.circle")
-                            .font(.system(size: 18, weight: .medium))
+                        HStack(spacing: 4) {
+                            if isOperationInProgress {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "ellipsis.circle")
+                                    .font(.system(size: 18, weight: .medium))
+                            }
+                        }
                     }
+                    .disabled(isOperationInProgress)
                 }
             }
             .actionSheet(isPresented: $showingFilterMenu) {
@@ -75,6 +92,14 @@ struct NotificationView: View {
                         }
                     } + [.cancel()]
                 )
+            }
+            .alert("Clear All Notifications", isPresented: $showingClearAllAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Clear All", role: .destructive) {
+                    clearAllNotifications()
+                }
+            } message: {
+                Text("This will permanently delete all your notifications. This action cannot be undone.")
             }
             .navigationDestination(for: FetchedPost.self) { post in
                 PostDetailView(post: post, data: data)
@@ -95,7 +120,7 @@ struct NotificationView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
                 ForEach(NotificationFilter.allCases, id: \.self) { filter in
-                    FilterChip(
+                    NotificationFilterChip(
                         title: filter.title,
                         count: getFilterCount(filter),
                         isSelected: selectedFilter == filter
@@ -294,10 +319,40 @@ struct NotificationView: View {
             }
         }
     }
+    
+    // MARK: - Action Methods
+    
+    private func markAllNotificationsAsRead() {
+        guard let currentUserId = firebaseManager.currentUser?.uid else { return }
+        
+        isOperationInProgress = true
+        notificationService.markAllNotificationsAsRead(for: currentUserId)
+        
+        // Reset operation state after a delay since the notification service doesn't provide completion callback
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            isOperationInProgress = false
+        }
+    }
+    
+    private func clearAllNotifications() {
+        guard let currentUserId = firebaseManager.currentUser?.uid else { return }
+        
+        isOperationInProgress = true
+        notificationService.clearAllNotifications(for: currentUserId) { success in
+            DispatchQueue.main.async {
+                isOperationInProgress = false
+                if success {
+                    // Optionally show a success message or haptic feedback
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                    impactFeedback.impactOccurred()
+                }
+            }
+        }
+    }
+}
 
-
-// MARK: - Filter Chip
-struct FilterChip: View {
+// MARK: - Notification Filter Chip
+struct NotificationFilterChip: View {
     let title: String
     let count: Int
     let isSelected: Bool
@@ -442,7 +497,7 @@ struct NotificationRowView: View {
         }
     }
 }
-}
+
 
 // MARK: - Notification Filter
 enum NotificationFilter: CaseIterable {
