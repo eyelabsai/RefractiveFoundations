@@ -30,12 +30,11 @@ exports.sendNotification = functions.firestore
           return;
         }
 
-        // Create the push notification payload
+        // Create the push notification payload (FCM v1 API format)
         const payload = {
           notification: {
             title: notification.title,
             body: notification.message,
-            sound: "default",
           },
           data: {
             notificationId: context.params.notificationId,
@@ -46,6 +45,23 @@ exports.sendNotification = functions.firestore
                 {conversationId: notification.metadata.conversationId}),
             ...(notification.metadata && notification.metadata.commentId &&
                 {commentId: notification.metadata.commentId}),
+          },
+          apns: {
+            payload: {
+              aps: {
+                "alert": {
+                  "title": notification.title,
+                  "body": notification.message,
+                },
+                "sound": "default",
+                "badge": 1,
+                "content-available": 1,
+              },
+            },
+            headers: {
+              "apns-priority": "10",
+              "apns-push-type": "alert",
+            },
           },
           token: fcmToken,
         };
@@ -91,11 +107,27 @@ exports.testNotification = functions.https.onCall(async (data, context) => {
       notification: {
         title: title,
         body: body,
-        sound: "default",
       },
       data: {
         type: "test",
         timestamp: Date.now().toString(),
+      },
+      apns: {
+        payload: {
+          aps: {
+            "alert": {
+              "title": title,
+              "body": body,
+            },
+            "sound": "default",
+            "badge": 1,
+            "content-available": 1,
+          },
+        },
+        headers: {
+          "apns-priority": "10",
+          "apns-push-type": "alert",
+        },
       },
       token: fcmToken,
     };
@@ -117,7 +149,8 @@ exports.createUser = functions.https.onCall(async (data, context) => {
           "User must be authenticated");
     }
 
-    // Check if user is admin (you can implement custom claims or check admin collection)
+    // Check if user is admin
+    // (you can implement custom claims or check admin collection)
     const adminDoc = await admin.firestore()
         .collection("admins")
         .doc(context.auth.uid)
@@ -133,7 +166,7 @@ exports.createUser = functions.https.onCall(async (data, context) => {
     // Validate required fields
     if (!email || !firstName || !lastName || !tempPassword) {
       throw new functions.https.HttpsError("invalid-argument",
-          "Missing required parameters: email, firstName, lastName, tempPassword");
+          "Missing required: email, firstName, lastName, tempPassword");
     }
 
     // Validate email format
@@ -195,18 +228,18 @@ exports.createUser = functions.https.onCall(async (data, context) => {
     };
   } catch (error) {
     console.error("Error in createUser:", error);
-    
+
     // Handle specific Firebase Auth errors
     if (error.code === "auth/email-already-exists") {
       throw new functions.https.HttpsError("already-exists",
           "User with this email already exists");
     }
-    
+
     // Re-throw HttpsError as-is
     if (error instanceof functions.https.HttpsError) {
       throw error;
     }
-    
+
     // Wrap other errors
     throw new functions.https.HttpsError("internal",
         `Failed to create user: ${error.message}`);
@@ -250,7 +283,7 @@ exports.createBulkUsers = functions.https.onCall(async (data, context) => {
     for (const userData of users) {
       try {
         const {email, firstName, lastName, practiceName} = userData;
-        
+
         // Generate temporary password
         const tempPassword = generateTempPassword();
 
@@ -289,7 +322,8 @@ exports.createBulkUsers = functions.https.onCall(async (data, context) => {
         };
 
         // Add to batch
-        const userRef = admin.firestore().collection("users").doc(userRecord.uid);
+        const userRef = admin.firestore()
+            .collection("users").doc(userRecord.uid);
         batch.set(userRef, firestoreData);
 
         results.push({
@@ -330,8 +364,16 @@ exports.createBulkUsers = functions.https.onCall(async (data, context) => {
   }
 });
 
-// Helper function to generate temporary password
+/**
+ * Helper function to generate temporary password
+ * @param {number} length - Length of password (unused, returns fixed password)
+ * @return {string} Fixed temporary password
+ */
 function generateTempPassword(length = 12) {
   // Use fixed password for easier distribution
   return "RefractiveFoundations";
 }
+
+// Import and export the fix function
+const {fixUserProfiles} = require("./fixUserProfiles");
+exports.fixUserProfiles = fixUserProfiles;
