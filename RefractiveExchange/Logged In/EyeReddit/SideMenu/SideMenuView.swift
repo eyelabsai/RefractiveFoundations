@@ -33,9 +33,10 @@ struct SideMenuView: View {
                                 presentSideMenu.toggle()
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                currentSubreddit = row
-                                feedModel.currentSubreddit = row
-                                feedModel.refreshPosts()
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    currentSubreddit = row
+                                }
+                                feedModel.setSubreddit(subreddit: row)
                             }
                         }
                     }

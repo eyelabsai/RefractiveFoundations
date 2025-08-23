@@ -58,11 +58,17 @@ struct EyeReddit: View {
         .animation(Animation.easeIn(duration: 0.2), value: isSidebarVisible)
         .onChange(of: resetToHome) { shouldReset in
             if shouldReset {
-                currentSubreddit = "i/All"  // Reset to main subreddit
-                viewModel.setSubreddit(subreddit: "i/All")  // Update view model properly
-                viewModel.filterBySubreddit()  // Apply the filter immediately
-                viewModel.refreshPosts()  // Refresh to get latest posts
+                print("🏠 Home button pressed - resetting to i/All")
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    // Close sidebar if open
+                    isSidebarVisible = false
+                    // Reset to main subreddit
+                    currentSubreddit = "i/All"
+                }
+                // Update viewModel after animation starts
+                viewModel.setSubreddit(subreddit: "i/All")  // This now calls filterBySubreddit() internally
                 resetToHome = false  // Reset the flag
+                print("🏠 Successfully reset to i/All subreddit")
             }
         }
     }

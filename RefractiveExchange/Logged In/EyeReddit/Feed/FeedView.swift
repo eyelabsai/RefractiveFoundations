@@ -47,6 +47,7 @@ struct FeedView: View {
                         Text(currentSubreddit)
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.primary)
+                            .animation(.easeInOut(duration: 0.3), value: currentSubreddit)
                         
                         Spacer()
                         
@@ -95,15 +96,17 @@ struct FeedView: View {
                                         selectedUserProfile = UserProfile(username: username, userId: userId)
                                     },
                                     onSubredditTapped: { subreddit in
-                                        // Navigate to the specific subreddit
-                                        currentSubreddit = subreddit
+                                        // Navigate to the specific subreddit with animation
+                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                            currentSubreddit = subreddit
+                                        }
                                         viewModel.setSubreddit(subreddit: subreddit)
-                                        viewModel.refreshPosts()
                                     }
                                 )
                             }
                         }
                         .background(Color(.systemGroupedBackground))
+                        .animation(.easeInOut(duration: 0.3), value: viewModel.currentSubreddit)
                     }
                     .refreshable {
                         print("🔄 Manual refresh triggered")
@@ -113,6 +116,12 @@ struct FeedView: View {
             }
             .onAppear{
                 viewModel.refreshPosts()
+            }
+            .onChange(of: viewModel.currentSubreddit) { newSubreddit in
+                // Keep the binding in sync with the viewModel
+                if currentSubreddit != newSubreddit {
+                    currentSubreddit = newSubreddit
+                }
             }
             .navigationDestination(for: FetchedPost.self) { post in
                 PostDetailView(post: post, data: data)

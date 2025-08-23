@@ -12,7 +12,7 @@ class FeedViewModel: ObservableObject   {
     @Published var posts = [FetchedPost]()
     @Published var allPosts = [FetchedPost]()
     @Published var isEyeRedditAvailable: Bool = false
-    var currentSubreddit: String = "i/All"
+    @Published var currentSubreddit: String = "i/All"
     let service = PostService()
     
     private init()  {
@@ -22,6 +22,7 @@ class FeedViewModel: ObservableObject   {
     
     func setSubreddit(subreddit: String)    {
         self.currentSubreddit = subreddit
+        self.filterBySubreddit()
     }
     
     func refreshPosts() {
