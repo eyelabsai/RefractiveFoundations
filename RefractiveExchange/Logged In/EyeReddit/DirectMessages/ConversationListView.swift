@@ -13,6 +13,8 @@ struct ConversationListView: View {
     @ObservedObject var firebaseManager = FirebaseManager.shared
     @State private var showingNewMessageSheet = false
     @State private var searchText = ""
+    @State private var showingUserProfile = false
+    @State private var selectedUser: User?
     
     var filteredConversations: [ConversationPreview] {
         if searchText.isEmpty {
@@ -48,6 +50,15 @@ struct ConversationListView: View {
             }
             .sheet(isPresented: $showingNewMessageSheet) {
                 NewMessageView(dmService: dmService)
+            }
+            .sheet(isPresented: $showingUserProfile) {
+                if let user = selectedUser {
+                    PublicProfileView(
+                        username: user.exchangeUsername,
+                        userId: user.uid,
+                        data: GetData()
+                    )
+                }
             }
         }
         .navigationViewStyle(StackNavigationViewStyle()) // Force single column layout
@@ -99,7 +110,13 @@ struct ConversationListView: View {
                             otherUser: conversationPreview.otherUser,
                             displayName: conversationPreview.displayName
                         )) {
-                            ConversationRowView(conversationPreview: conversationPreview)
+                            ConversationRowView(
+                                conversationPreview: conversationPreview,
+                                onUserAvatarTapped: { user in
+                                    selectedUser = user
+                                    showingUserProfile = true
+                                }
+                            )
                         }
                         .buttonStyle(PlainButtonStyle())
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -203,28 +220,36 @@ struct ConversationListView: View {
 // MARK: - Conversation Row View
 struct ConversationRowView: View {
     let conversationPreview: ConversationPreview
+    let onUserAvatarTapped: (User) -> Void
     
     var body: some View {
         HStack(spacing: 12) {
-            // Avatar
-            Circle()
-                .fill(Color.blue.opacity(0.2))
-                .overlay(
-                    Group {
-                        if let avatarUrl = conversationPreview.displayAvatar,
-                           !avatarUrl.isEmpty {
-                            // Future: AsyncImage for avatar URLs
-                            Image(systemName: "person.fill")
-                                .foregroundColor(.blue)
-                                .font(.system(size: 20))
-                        } else {
-                            Image(systemName: "person.fill")
-                                .foregroundColor(.blue)
-                                .font(.system(size: 20))
+            // Avatar - Clickable
+            Button(action: {
+                if let otherUser = conversationPreview.otherUser {
+                    onUserAvatarTapped(otherUser)
+                }
+            }) {
+                Circle()
+                    .fill(Color.blue.opacity(0.2))
+                    .overlay(
+                        Group {
+                            if let avatarUrl = conversationPreview.displayAvatar,
+                               !avatarUrl.isEmpty {
+                                // Future: AsyncImage for avatar URLs
+                                Image(systemName: "person.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.system(size: 20))
+                            } else {
+                                Image(systemName: "person.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.system(size: 20))
+                            }
                         }
-                    }
-                )
-                .frame(width: 50, height: 50)
+                    )
+                    .frame(width: 50, height: 50)
+            }
+            .buttonStyle(PlainButtonStyle())
             
             // Content
             VStack(alignment: .leading, spacing: 4) {

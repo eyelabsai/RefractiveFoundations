@@ -21,6 +21,7 @@ struct ChatView: View {
     @State private var isLoading = true
     @State private var isSending = false
     @State private var actualConversationId: String = ""
+    @State private var showingUserProfile = false
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -34,6 +35,33 @@ struct ChatView: View {
         .navigationTitle(displayName)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(false)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if let otherUser = otherUser {
+                    Button(action: {
+                        showingUserProfile = true
+                    }) {
+                        Circle()
+                            .fill(Color.blue.opacity(0.2))
+                            .overlay(
+                                Image(systemName: "person.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.system(size: 14))
+                            )
+                            .frame(width: 32, height: 32)
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showingUserProfile) {
+            if let user = otherUser {
+                PublicProfileView(
+                    username: user.exchangeUsername,
+                    userId: user.uid,
+                    data: GetData()
+                )
+            }
+        }
         .onAppear {
             print("📱 ChatView appeared with conversationId: '\(conversationId)'")
             if !conversationId.isEmpty {
@@ -63,7 +91,10 @@ struct ChatView: View {
                             MessageBubbleView(
                                 message: message,
                                 isFromCurrentUser: message.senderId == firebaseManager.currentUser?.uid,
-                                otherUserDisplayName: displayName
+                                otherUserDisplayName: displayName,
+                                onOtherUserTapped: {
+                                    showingUserProfile = true
+                                }
                             )
                             .id(message.id)
                         }
@@ -258,6 +289,7 @@ struct MessageBubbleView: View {
     let message: DirectMessage
     let isFromCurrentUser: Bool
     let otherUserDisplayName: String
+    let onOtherUserTapped: (() -> Void)?
     
     private var formattedTime: String {
         let formatter = DateFormatter()
@@ -302,13 +334,18 @@ struct MessageBubbleView: View {
             } else {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(message.text)
-                            .font(.system(size: 16))
-                            .foregroundColor(.primary)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color(.systemGray5))
-                            .cornerRadius(18, corners: [.topLeft, .topRight, .bottomRight])
+                        Button(action: {
+                            onOtherUserTapped?()
+                        }) {
+                            Text(message.text)
+                                .font(.system(size: 16))
+                                .foregroundColor(.primary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(Color(.systemGray5))
+                                .cornerRadius(18, corners: [.topLeft, .topRight, .bottomRight])
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                     
                     Text(formattedTime)
