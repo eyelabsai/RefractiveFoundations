@@ -28,6 +28,7 @@ struct NotificationPreferences: Codable {
     // Specific post/conversation mutes
     var mutedPosts: [String] // Array of post IDs
     var mutedConversations: [String] // Array of conversation IDs
+    var mutedGroupChats: [String] // Array of group chat IDs
     var mutedUsers: [String] // Array of user IDs to mute
     
     init(userId: String) {
@@ -42,6 +43,7 @@ struct NotificationPreferences: Codable {
         
         self.mutedPosts = []
         self.mutedConversations = []
+        self.mutedGroupChats = []
         self.mutedUsers = []
     }
 }
@@ -62,6 +64,9 @@ struct PushNotificationSettings: Codable {
     // Direct messages
     var directMessages: Bool
     
+    // Group messages
+    var groupMessages: Bool
+    
     // Social notifications
     var mentions: Bool // Future: @username mentions
     var follows: Bool  // Future: user following
@@ -77,6 +82,7 @@ struct PushNotificationSettings: Codable {
         self.commentLikes = true
         self.commentReplies = true
         self.directMessages = true
+        self.groupMessages = true
         self.mentions = true
         self.follows = true
         self.quietHours = QuietHoursSettings()
@@ -93,6 +99,7 @@ struct InAppNotificationSettings: Codable {
     var commentLikes: Bool
     var commentReplies: Bool
     var directMessages: Bool
+    var groupMessages: Bool
     var mentions: Bool
     var follows: Bool
     
@@ -104,6 +111,7 @@ struct InAppNotificationSettings: Codable {
         self.commentLikes = true
         self.commentReplies = true
         self.directMessages = true
+        self.groupMessages = true
         self.mentions = true
         self.follows = true
     }
@@ -239,6 +247,9 @@ class NotificationPreferencesManager: ObservableObject {
         case .directMessage:
             if let push = pushEnabled { prefs.pushNotifications.directMessages = push }
             if let inApp = inAppEnabled { prefs.inAppNotifications.directMessages = inApp }
+        case .groupMessage:
+            if let push = pushEnabled { prefs.pushNotifications.groupMessages = push }
+            if let inApp = inAppEnabled { prefs.inAppNotifications.groupMessages = inApp }
         case .milestone:
             if let push = pushEnabled { prefs.pushNotifications.postMilestones = push }
             if let inApp = inAppEnabled { prefs.inAppNotifications.postMilestones = inApp }
@@ -299,7 +310,7 @@ class NotificationPreferencesManager: ObservableObject {
     
     // MARK: - Check Functions
     
-    func shouldSendNotification(type: NotificationType, pushNotification: Bool = true, postId: String? = nil, conversationId: String? = nil, senderId: String? = nil) -> Bool {
+    func shouldSendNotification(type: NotificationType, pushNotification: Bool = true, postId: String? = nil, conversationId: String? = nil, groupChatId: String? = nil, senderId: String? = nil) -> Bool {
         guard let prefs = preferences else { return true } // Default to true if no preferences
         
         // Global toggle
@@ -313,6 +324,9 @@ class NotificationPreferencesManager: ObservableObject {
         
         // Check if conversation is muted
         if let conversationId = conversationId, prefs.mutedConversations.contains(conversationId) { return false }
+        
+        // Check if group chat is muted
+        if let groupChatId = groupChatId, prefs.mutedGroupChats.contains(groupChatId) { return false }
         
         // Check quiet hours for push notifications
         if pushNotification && prefs.pushNotifications.quietHours.enabled {
@@ -334,6 +348,8 @@ class NotificationPreferencesManager: ObservableObject {
             return pushNotification ? prefs.pushNotifications.commentReplies : prefs.inAppNotifications.commentReplies
         case .directMessage:
             return pushNotification ? prefs.pushNotifications.directMessages : prefs.inAppNotifications.directMessages
+        case .groupMessage:
+            return pushNotification ? prefs.pushNotifications.groupMessages : prefs.inAppNotifications.groupMessages
         case .milestone:
             return pushNotification ? prefs.pushNotifications.postMilestones : prefs.inAppNotifications.postMilestones
         case .mention:

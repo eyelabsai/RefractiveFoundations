@@ -268,6 +268,33 @@ class NotificationService: ObservableObject {
         }
     }
     
+    func createGroupMessageNotification(senderId: String, recipientId: String, groupChatId: String, groupChatName: String, messageText: String) {
+        guard senderId != recipientId else { return } // Don't notify self
+        
+        fetchUserDetails(userId: senderId) { user in
+            let senderName = user != nil ? "\(user!.firstName) \(user!.lastName)" : "Someone"
+            
+            let metadata = NotificationMetadata(
+                groupChatId: groupChatId,
+                senderDisplayName: senderName,
+                senderAvatarUrl: user?.avatarUrl,
+                groupChatName: groupChatName
+            )
+            
+            let notification = AppNotification(
+                recipientId: recipientId,
+                senderId: senderId,
+                type: .groupMessage,
+                title: "New Group Message",
+                message: "\(senderName) sent a message in \(groupChatName)",
+                isActionable: true,
+                metadata: metadata
+            )
+            
+            self.saveNotification(notification)
+        }
+    }
+    
     private func checkPostLikeMilestone(postId: String, postAuthorId: String, postTitle: String) {
         getPostLikeCount(postId: postId) { likeCount in
             let milestones = [5, 10, 25, 50, 100, 200, 500, 1000]
@@ -374,6 +401,7 @@ class NotificationService: ObservableObject {
             pushNotification: false,
             postId: notification.metadata?.postId,
             conversationId: notification.metadata?.conversationId,
+            groupChatId: notification.metadata?.groupChatId,
             senderId: notification.senderId
         )
         
@@ -383,6 +411,7 @@ class NotificationService: ObservableObject {
             pushNotification: true,
             postId: notification.metadata?.postId,
             conversationId: notification.metadata?.conversationId,
+            groupChatId: notification.metadata?.groupChatId,
             senderId: notification.senderId
         )
         

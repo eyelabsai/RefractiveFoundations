@@ -274,7 +274,8 @@ struct NotificationView: View {
         case .comments:
             return notificationService.notificationCounts.unreadByType[.postComment] ?? 0
         case .messages:
-            return notificationService.notificationCounts.unreadByType[.directMessage] ?? 0
+            return (notificationService.notificationCounts.unreadByType[.directMessage] ?? 0) + 
+                   (notificationService.notificationCounts.unreadByType[.groupMessage] ?? 0)
         }
     }
     
@@ -296,6 +297,12 @@ struct NotificationView: View {
                 // Navigate to conversation
                 print("🔗 Navigate to conversation: \(conversationId)")
                 // TODO: Implement conversation navigation
+            }
+        case .groupMessage:
+            if let groupChatId = notification.metadata?.groupChatId {
+                // Navigate to group chat
+                print("🔗 Navigate to group chat: \(groupChatId)")
+                // TODO: Implement group chat navigation
             }
         case .mention, .follow:
             // Handle other types as needed

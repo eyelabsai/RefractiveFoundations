@@ -404,6 +404,8 @@ struct NotificationTypeRow: View {
             return isPush ? prefs.pushNotifications.commentReplies : prefs.inAppNotifications.commentReplies
         case .directMessage:
             return isPush ? prefs.pushNotifications.directMessages : prefs.inAppNotifications.directMessages
+        case .groupMessage:
+            return isPush ? prefs.pushNotifications.groupMessages : prefs.inAppNotifications.groupMessages
         case .milestone:
             return isPush ? prefs.pushNotifications.postMilestones : prefs.inAppNotifications.postMilestones
         case .mention:

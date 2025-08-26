@@ -440,6 +440,20 @@ class GroupChatService: ObservableObject {
                         completion(.failure(error))
                     } else {
                         print("✅ Group message sent successfully")
+                        
+                        // Create notifications for all members except sender
+                        for memberId in groupChat.allMemberIds {
+                            if memberId != senderId {
+                                NotificationService.shared.createGroupMessageNotification(
+                                    senderId: senderId,
+                                    recipientId: memberId,
+                                    groupChatId: groupChatId,
+                                    groupChatName: groupChat.name,
+                                    messageText: text
+                                )
+                            }
+                        }
+                        
                         completion(.success(()))
                     }
                 }

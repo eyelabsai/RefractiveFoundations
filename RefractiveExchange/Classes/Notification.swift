@@ -41,6 +41,7 @@ enum NotificationType: String, Codable, CaseIterable {
     case commentLike = "comment_like"
     case commentReply = "comment_reply"
     case directMessage = "direct_message"
+    case groupMessage = "group_message"
     case milestone = "milestone" // e.g., "Your post reached 10 likes!"
     case mention = "mention" // Future: @username mentions
     case follow = "follow" // Future: user following
@@ -53,6 +54,8 @@ enum NotificationType: String, Codable, CaseIterable {
             return "bubble.left.fill"
         case .directMessage:
             return "paperplane.fill"
+        case .groupMessage:
+            return "person.3.fill"
         case .milestone:
             return "star.fill"
         case .mention:
@@ -70,6 +73,8 @@ enum NotificationType: String, Codable, CaseIterable {
             return "blue"
         case .directMessage:
             return "purple"
+        case .groupMessage:
+            return "teal"
         case .milestone:
             return "orange"
         case .mention:
@@ -85,23 +90,27 @@ struct NotificationMetadata: Codable {
     var postId: String?
     var commentId: String?
     var conversationId: String?
+    var groupChatId: String?
     var likeCount: Int?
     var commentCount: Int?
     var senderDisplayName: String?
     var senderAvatarUrl: String?
     var postTitle: String?
     var commentText: String?
+    var groupChatName: String?
     
-    init(postId: String? = nil, commentId: String? = nil, conversationId: String? = nil, likeCount: Int? = nil, commentCount: Int? = nil, senderDisplayName: String? = nil, senderAvatarUrl: String? = nil, postTitle: String? = nil, commentText: String? = nil) {
+    init(postId: String? = nil, commentId: String? = nil, conversationId: String? = nil, groupChatId: String? = nil, likeCount: Int? = nil, commentCount: Int? = nil, senderDisplayName: String? = nil, senderAvatarUrl: String? = nil, postTitle: String? = nil, commentText: String? = nil, groupChatName: String? = nil) {
         self.postId = postId
         self.commentId = commentId
         self.conversationId = conversationId
+        self.groupChatId = groupChatId
         self.likeCount = likeCount
         self.commentCount = commentCount
         self.senderDisplayName = senderDisplayName
         self.senderAvatarUrl = senderAvatarUrl
         self.postTitle = postTitle
         self.commentText = commentText
+        self.groupChatName = groupChatName
     }
 }
 
