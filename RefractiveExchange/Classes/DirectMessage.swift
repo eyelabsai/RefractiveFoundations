@@ -34,7 +34,9 @@ struct DirectMessage: Codable, Identifiable {
 enum MessageType: String, Codable, CaseIterable {
     case text = "text"
     case image = "image"
-    // Future: video, file, etc.
+    case file = "file"
+    case system = "system"
+    // Future: video, etc.
 }
 
 // MARK: - Conversation Model

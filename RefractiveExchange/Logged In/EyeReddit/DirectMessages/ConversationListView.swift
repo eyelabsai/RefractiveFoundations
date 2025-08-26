@@ -10,8 +10,10 @@ import Firebase
 
 struct ConversationListView: View {
     @ObservedObject var dmService = DirectMessageService.shared
+    @ObservedObject var groupChatService = GroupChatService.shared
     @ObservedObject var firebaseManager = FirebaseManager.shared
     @State private var showingNewMessageSheet = false
+    @State private var showingNewGroupSheet = false
     @State private var searchText = ""
     @State private var showingUserProfile = false
     @State private var selectedUser: User?
@@ -44,9 +46,19 @@ struct ConversationListView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    showingNewMessageSheet = true
-                }) {
+                Menu {
+                    Button(action: {
+                        showingNewMessageSheet = true
+                    }) {
+                        Label("New Message", systemImage: "message")
+                    }
+                    
+                    Button(action: {
+                        showingNewGroupSheet = true
+                    }) {
+                        Label("New Group", systemImage: "person.3")
+                    }
+                } label: {
                     Image(systemName: "square.and.pencil")
                         .font(.system(size: 18, weight: .medium))
                 }
@@ -57,6 +69,9 @@ struct ConversationListView: View {
                 .onDisappear {
                     selectedUser = nil // Clear selected user when sheet disappears
                 }
+        }
+        .sheet(isPresented: $showingNewGroupSheet) {
+            CreateGroupChatView()
         }
         .sheet(isPresented: $showingUserProfile) {
             if let user = selectedUser {
@@ -74,6 +89,7 @@ struct ConversationListView: View {
         }
         .onDisappear {
             dmService.stopListeningToConversations()
+            groupChatService.stopListeningToGroupChats()
             userSearchTimer?.invalidate()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
@@ -109,15 +125,38 @@ struct ConversationListView: View {
     // MARK: - Conversations List
     private var conversationsList: some View {
         Group {
-            if dmService.isLoadingConversations || isSearchingUsers {
+            if (dmService.isLoadingConversations || groupChatService.isLoadingGroupChats) || isSearchingUsers {
                 loadingView
-            } else if filteredConversations.isEmpty && userSearchResults.isEmpty {
+            } else if filteredConversations.isEmpty && groupChatService.groupChats.isEmpty && userSearchResults.isEmpty {
                 emptyStateView
             } else {
                 List {
+                    // Show group chats and conversations in one simple list
+                    ForEach(groupChatService.groupChats, id: \.id) { groupPreview in
+                        NavigationLink(destination: GroupChatView(
+                            groupChatId: groupPreview.id,
+                            groupName: groupPreview.displayName
+                        )) {
+                            GroupChatRowView(groupPreview: groupPreview)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            if groupPreview.groupChat.isOwner(firebaseManager.currentUser?.uid ?? "") {
+                                Button(role: .destructive) {
+                                    deleteGroupChat(groupPreview)
+                                } label: {
+                                    Label("Delete Group", systemImage: "trash")
+                                }
+                            } else {
+                                Button("Leave") {
+                                    leaveGroupChat(groupPreview)
+                                }
+                                .tint(.orange)
+                            }
+                        }
+                    }
+                    
                     // Show existing conversations
-                    if !filteredConversations.isEmpty {
-                        Section("Conversations") {
                     ForEach(filteredConversations) { conversationPreview in
                         NavigationLink(destination: ChatView(
                             conversationId: conversationPreview.id,
@@ -138,8 +177,6 @@ struct ConversationListView: View {
                                 deleteConversation(conversationPreview)
                             } label: {
                                 Label("Delete", systemImage: "trash")
-                                    }
-                                }
                             }
                         }
                     }
@@ -225,6 +262,7 @@ struct ConversationListView: View {
         }
         
         dmService.startListeningToConversations(for: currentUserId)
+        groupChatService.startListeningToGroupChats(for: currentUserId)
     }
     
     private func deleteConversation(_ conversationPreview: ConversationPreview) {
@@ -241,6 +279,48 @@ struct ConversationListView: View {
                     print("✅ Conversation deleted successfully")
                 } else {
                     print("❌ Failed to delete conversation")
+                    // TODO: Show error alert to user
+                }
+            }
+        }
+    }
+    
+    private func deleteGroupChat(_ groupPreview: GroupChatPreview) {
+        guard let currentUserId = firebaseManager.currentUser?.uid else {
+            print("❌ No current user found")
+            return
+        }
+        
+        print("🗑️ Deleting group chat \(groupPreview.id)")
+        
+        groupChatService.deleteGroupChat(groupChatId: groupPreview.id, deletedBy: currentUserId) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success():
+                    print("✅ Group chat deleted successfully")
+                case .failure(let error):
+                    print("❌ Failed to delete group chat: \(error.localizedDescription)")
+                    // TODO: Show error alert to user
+                }
+            }
+        }
+    }
+    
+    private func leaveGroupChat(_ groupPreview: GroupChatPreview) {
+        guard let currentUserId = firebaseManager.currentUser?.uid else {
+            print("❌ No current user found")
+            return
+        }
+        
+        print("🚪 Leaving group chat \(groupPreview.id)")
+        
+        groupChatService.leaveGroup(groupChatId: groupPreview.id, userId: currentUserId) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success():
+                    print("✅ Left group chat successfully")
+                case .failure(let error):
+                    print("❌ Failed to leave group chat: \(error.localizedDescription)")
                     // TODO: Show error alert to user
                 }
             }
@@ -377,6 +457,82 @@ struct ConversationListView: View {
         // Set the selected user and show the new message sheet
         selectedUser = user
         showingNewMessageSheet = true
+    }
+}
+
+// MARK: - Group Chat Row View
+struct GroupChatRowView: View {
+    let groupPreview: GroupChatPreview
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            // Group Avatar
+            Circle()
+                .fill(Color.green.opacity(0.2))
+                .overlay(
+                    Image(systemName: "person.3.fill")
+                        .foregroundColor(.green)
+                        .font(.system(size: 20))
+                )
+                .frame(width: 50, height: 50)
+            
+            // Content
+            VStack(alignment: .leading, spacing: 4) {
+                // Group name and timestamp
+                HStack {
+                    Text(groupPreview.displayName)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    
+                    Spacer()
+                    
+                    Text(groupPreview.timeAgo)
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                }
+                
+                // Last message and member count
+                HStack {
+                    Text(groupPreview.lastMessagePreview)
+                        .font(.system(size: 15))
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                    
+                    Spacer()
+                    
+                    // Member count indicator
+                    HStack(spacing: 4) {
+                        Image(systemName: "person.2.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                        
+                        Text("\(groupPreview.memberCount)")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            
+            // Unread count badge
+            if groupPreview.unreadCount > 0 {
+                VStack {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 20, height: 20)
+                        .overlay(
+                            Text("\(groupPreview.unreadCount)")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.white)
+                        )
+                    
+                    Spacer()
+                }
+            }
+        }
+        .padding(.vertical, 8)
+        .contentShape(Rectangle())
     }
 }
 
@@ -965,6 +1121,1386 @@ struct NewMessageView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Group Chat View
+struct GroupChatView: View {
+    let groupChatId: String
+    let groupName: String
+    
+    @ObservedObject private var groupChatService = GroupChatService.shared
+    @ObservedObject private var firebaseManager = FirebaseManager.shared
+    @State private var messages: [GroupMessage] = []
+    @State private var messageText = ""
+    @State private var messageListener: ListenerRegistration?
+    @State private var isLoading = true
+    @State private var isSending = false
+    @State private var showingGroupInfo = false
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Messages list
+            messagesScrollView
+            
+            // Message input
+            messageInputView
+        }
+        .navigationTitle(groupName)
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(false)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    showingGroupInfo = true
+                }) {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 18))
+                }
+            }
+        }
+        .sheet(isPresented: $showingGroupInfo) {
+            GroupInfoView(groupChatId: groupChatId)
+        }
+        .onAppear {
+            startListeningToMessages()
+            markMessagesAsRead()
+        }
+        .onDisappear {
+            stopListening()
+        }
+    }
+    
+    // MARK: - Messages Scroll View
+    private var messagesScrollView: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 8) {
+                    if isLoading {
+                        loadingView
+                    } else if messages.isEmpty {
+                        emptyStateView
+                    } else {
+                        ForEach(messages) { message in
+                            GroupMessageBubbleView(
+                                message: message,
+                                isFromCurrentUser: message.senderId == firebaseManager.currentUser?.uid
+                            )
+                            .id(message.id)
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+            }
+            .background(Color(.systemGroupedBackground))
+            .onChange(of: messages.count) { _ in
+                // Auto-scroll to bottom when new messages arrive
+                if let lastMessage = messages.last {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Loading View
+    private var loadingView: some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .scaleEffect(1.2)
+            
+            Text("Loading messages...")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, minHeight: 200)
+    }
+    
+    // MARK: - Empty State View
+    private var emptyStateView: some View {
+        VStack(spacing: 16) {
+            Circle()
+                .fill(Color.green.opacity(0.2))
+                .overlay(
+                    Image(systemName: "person.3.fill")
+                        .foregroundColor(.green)
+                        .font(.system(size: 32))
+                )
+                .frame(width: 80, height: 80)
+            
+            VStack(spacing: 8) {
+                Text("Welcome to \(groupName)!")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary)
+                
+                Text("Start the conversation with your group")
+                    .font(.system(size: 16))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 300)
+        .padding(.top, 50)
+    }
+    
+    // MARK: - Message Input View
+    private var messageInputView: some View {
+        VStack(spacing: 0) {
+            Divider()
+            
+            HStack(alignment: .bottom, spacing: 12) {
+                TextField("Type a message...", text: $messageText, axis: .vertical)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(22)
+                    .lineLimit(1...6)
+                    .onSubmit {
+                        sendMessage()
+                    }
+                
+                Button(action: sendMessage) {
+                    if isSending {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                            .frame(width: 32, height: 32)
+                    } else {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .gray : .green)
+                    }
+                }
+                .disabled(messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color(.systemBackground))
+        }
+    }
+    
+    // MARK: - Helper Methods
+    private func startListeningToMessages() {
+        guard !groupChatId.isEmpty else {
+            print("❌ No group chat ID provided")
+            return
+        }
+        
+        messageListener = groupChatService.listenToGroupMessages(groupChatId: groupChatId) { fetchedMessages in
+            DispatchQueue.main.async {
+                self.messages = fetchedMessages
+                self.isLoading = false
+                
+                if !fetchedMessages.isEmpty {
+                    self.markMessagesAsRead()
+                }
+            }
+        }
+    }
+    
+    private func stopListening() {
+        messageListener?.remove()
+        messageListener = nil
+    }
+    
+    private func sendMessage() {
+        guard let currentUserId = firebaseManager.currentUser?.uid,
+              !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return
+        }
+        
+        let trimmedMessage = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
+        isSending = true
+        
+        groupChatService.sendGroupMessage(
+            groupChatId: groupChatId,
+            text: trimmedMessage,
+            senderId: currentUserId
+        ) { result in
+            DispatchQueue.main.async {
+                self.isSending = false
+                
+                switch result {
+                case .success:
+                    self.messageText = ""
+                case .failure(let error):
+                    print("❌ Error sending group message: \(error)")
+                    // TODO: Show error alert
+                }
+            }
+        }
+    }
+    
+    private func markMessagesAsRead() {
+        guard let currentUserId = firebaseManager.currentUser?.uid else { return }
+        
+        groupChatService.markGroupMessagesAsRead(
+            groupChatId: groupChatId,
+            userId: currentUserId
+        ) { success in
+            if success {
+                print("✅ Group messages marked as read")
+            }
+        }
+    }
+}
+
+// MARK: - Group Message Bubble View
+struct GroupMessageBubbleView: View {
+    let message: GroupMessage
+    let isFromCurrentUser: Bool
+    
+    private var formattedTime: String {
+        let formatter = DateFormatter()
+        let now = Date()
+        let messageDate = message.timestamp.dateValue()
+        
+        if Calendar.current.isDate(messageDate, inSameDayAs: now) {
+            formatter.dateFormat = "h:mm a"
+        } else {
+            formatter.dateFormat = "MMM d, h:mm a"
+        }
+        
+        return formatter.string(from: messageDate)
+    }
+    
+    var body: some View {
+        if message.isSystemMessage {
+            // System message
+            HStack {
+                Spacer()
+                Text(message.text)
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(12)
+                Spacer()
+            }
+            .padding(.vertical, 4)
+        } else {
+            // Regular message
+            HStack {
+                if isFromCurrentUser {
+                    Spacer(minLength: 50)
+                    
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text(message.text)
+                            .font(.system(size: 16))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color.green)
+                            .cornerRadius(18, corners: [.topLeft, .topRight, .bottomLeft])
+                        
+                        Text(formattedTime)
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .padding(.trailing, 4)
+                    }
+                } else {
+                    VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(message.senderName)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.green)
+                                .padding(.leading, 4)
+                            
+                            Text(message.text)
+                                .font(.system(size: 16))
+                                .foregroundColor(.primary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(Color(.systemGray5))
+                                .cornerRadius(18, corners: [.topLeft, .topRight, .bottomRight])
+                        }
+                        
+                        Text(formattedTime)
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .padding(.leading, 4)
+                    }
+                    
+                    Spacer(minLength: 50)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Create Group Chat View
+struct CreateGroupChatView: View {
+    @Environment(\.dismiss) var dismiss
+    @ObservedObject private var groupChatService = GroupChatService.shared
+    @ObservedObject private var firebaseManager = FirebaseManager.shared
+    
+    @State private var groupName = ""
+    @State private var groupDescription = ""
+    @State private var selectedMembers: [User] = []
+    @State private var isCreating = false
+    @State private var showingUserPicker = false
+    @State private var isPrivate = true
+    @State private var maxMembers = 50
+    @State private var allUsersCache: [User] = []
+    @State private var searchText = ""
+    
+    private var filteredUsers: [User] {
+        if searchText.isEmpty {
+            return allUsersCache.filter { user in
+                user.uid != firebaseManager.currentUser?.uid && 
+                !selectedMembers.contains { $0.uid == user.uid }
+            }
+        } else {
+            let searchLower = searchText.lowercased()
+            return allUsersCache.filter { user in
+                let fullName = "\(user.firstName) \(user.lastName)".lowercased()
+                let username = user.exchangeUsername.lowercased()
+                
+                return (fullName.contains(searchLower) || username.contains(searchLower)) &&
+                       user.uid != firebaseManager.currentUser?.uid && 
+                       !selectedMembers.contains { $0.uid == user.uid }
+            }
+        }
+    }
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Group Details") {
+                    TextField("Group name", text: $groupName)
+                        .textFieldStyle(PlainTextFieldStyle())
+                    
+                    TextField("Description (optional)", text: $groupDescription, axis: .vertical)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .lineLimit(3...6)
+                }
+                
+                Section("Privacy & Settings") {
+                    Toggle("Private Group", isOn: $isPrivate)
+                    
+                    HStack {
+                        Text("Max Members")
+                        Spacer()
+                        Picker("Max Members", selection: $maxMembers) {
+                            Text("10").tag(10)
+                            Text("25").tag(25)
+                            Text("50").tag(50)
+                            Text("100").tag(100)
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                    }
+                }
+                
+                Section("Members (\(selectedMembers.count))") {
+                    if selectedMembers.isEmpty {
+                        Text("No members selected")
+                            .foregroundColor(.secondary)
+                            .italic()
+                    } else {
+                        ForEach(selectedMembers) { member in
+                            HStack {
+                                Circle()
+                                    .fill(Color.blue.opacity(0.2))
+                                    .overlay(
+                                        Image(systemName: "person.fill")
+                                            .foregroundColor(.blue)
+                                            .font(.system(size: 14))
+                                    )
+                                    .frame(width: 32, height: 32)
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("\(member.firstName) \(member.lastName)")
+                                        .font(.system(size: 16, weight: .medium))
+                                    
+                                    Text(member.specialty)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Button("Remove") {
+                                    selectedMembers.removeAll { $0.uid == member.uid }
+                                }
+                                .font(.system(size: 14))
+                                .foregroundColor(.red)
+                            }
+                        }
+                    }
+                    
+                    Button("Add Members") {
+                        showingUserPicker = true
+                    }
+                    .foregroundColor(.blue)
+                }
+            }
+            .navigationTitle("New Group")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Create") {
+                        createGroup()
+                    }
+                    .disabled(groupName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isCreating)
+                    .fontWeight(.semibold)
+                }
+            }
+            .sheet(isPresented: $showingUserPicker) {
+                userPickerView
+            }
+            .onAppear {
+                fetchUsers()
+            }
+        }
+    }
+    
+    private var userPickerView: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                // Search bar
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                    
+                    TextField("Search users...", text: $searchText)
+                        .textFieldStyle(PlainTextFieldStyle())
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                
+                // Users list
+                List {
+                    ForEach(filteredUsers) { user in
+                        Button(action: {
+                            if !selectedMembers.contains(where: { $0.uid == user.uid }) {
+                                selectedMembers.append(user)
+                            }
+                        }) {
+                            HStack {
+                                Circle()
+                                    .fill(Color.green.opacity(0.2))
+                                    .overlay(
+                                        Image(systemName: "person.fill")
+                                            .foregroundColor(.green)
+                                            .font(.system(size: 16))
+                                    )
+                                    .frame(width: 40, height: 40)
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("\(user.firstName) \(user.lastName)")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(.primary)
+                                    
+                                    Text(user.specialty)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                if selectedMembers.contains(where: { $0.uid == user.uid }) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                } else {
+                                    Image(systemName: "plus.circle")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .listStyle(PlainListStyle())
+            }
+            .navigationTitle("Add Members")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        showingUserPicker = false
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+    
+    private func fetchUsers() {
+        Firestore.firestore().collection("users")
+            .getDocuments { snapshot, error in
+                DispatchQueue.main.async {
+                    if let documents = snapshot?.documents {
+                        self.allUsersCache = documents.compactMap { try? $0.data(as: User.self) }
+                    }
+                }
+            }
+    }
+    
+    private func createGroup() {
+        let trimmedName = groupName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { return }
+        
+        isCreating = true
+        
+        let memberIds = selectedMembers.map { $0.uid }
+        
+        groupChatService.createGroupChat(
+            name: trimmedName,
+            description: groupDescription.isEmpty ? nil : groupDescription,
+            memberIds: memberIds,
+            isPrivate: isPrivate,
+            maxMembers: maxMembers
+        ) { result in
+            DispatchQueue.main.async {
+                self.isCreating = false
+                
+                switch result {
+                case .success(let groupId):
+                    print("✅ Group created with ID: \(groupId)")
+                    self.dismiss()
+                case .failure(let error):
+                    print("❌ Error creating group: \(error)")
+                    // TODO: Show error alert
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Group Info View
+struct GroupInfoView: View {
+    let groupChatId: String
+    
+    @ObservedObject private var groupChatService = GroupChatService.shared
+    @ObservedObject private var firebaseManager = FirebaseManager.shared
+    @State private var groupChat: GroupChat?
+    @State private var memberDetails: [User] = []
+    @State private var ownerDetails: User?
+    @State private var isLoading = true
+    @State private var showingAddMembers = false
+    @State private var showingLeaveConfirmation = false
+    @State private var showingDeleteConfirmation = false
+    @State private var allUsersCache: [User] = []
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationView {
+            Group {
+                if isLoading {
+                    ProgressView("Loading group info...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let groupChat = groupChat {
+                    groupInfoContent(groupChat: groupChat)
+                } else {
+                    Text("Group not found")
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            }
+            .navigationTitle("Group Info")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(false)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showingAddMembers) {
+            AddMembersView(groupChatId: groupChatId, currentMembers: memberDetails)
+        }
+        .alert("Leave Group", isPresented: $showingLeaveConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Leave", role: .destructive) {
+                leaveGroup()
+            }
+        } message: {
+            Text("Are you sure you want to leave this group? You won't be able to see future messages.")
+        }
+        .alert("Delete Group", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                deleteGroup()
+            }
+        } message: {
+            Text("Are you sure you want to delete this group? This action cannot be undone.")
+        }
+        .onAppear {
+            loadGroupInfo()
+        }
+    }
+    
+    private func groupInfoContent(groupChat: GroupChat) -> some View {
+        List {
+            // Group Header Section
+            Section {
+                VStack(spacing: 16) {
+                    // Group Avatar
+                    Circle()
+                        .fill(Color.green.opacity(0.2))
+                        .overlay(
+                            Image(systemName: "person.3.fill")
+                                .foregroundColor(.green)
+                                .font(.system(size: 32))
+                        )
+                        .frame(width: 80, height: 80)
+                    
+                    VStack(spacing: 4) {
+                        Text(groupChat.name)
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        if let description = groupChat.description, !description.isEmpty {
+                            Text(description)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                        
+                        Text("\(groupChat.allMemberIds.count) members")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+            }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
+            
+            // Members Section - Always show all members
+            Section("Members (\(groupChat.allMemberIds.count))") {
+                ForEach(groupChat.allMemberIds, id: \.self) { memberId in
+                    HStack(spacing: 12) {
+                        Circle()
+                            .fill((memberId == groupChat.ownerId ? Color.blue : Color.gray).opacity(0.2))
+                            .overlay(
+                                Image(systemName: memberId == groupChat.ownerId ? "crown.fill" : "person.fill")
+                                    .foregroundColor(memberId == groupChat.ownerId ? .blue : .gray)
+                                    .font(.system(size: 16))
+                            )
+                            .frame(width: 40, height: 40)
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                // Try to get user details, fallback to member ID if not available
+                                if let user = getUserDetails(for: memberId) {
+                                    Text("\(user.firstName) \(user.lastName)")
+                                        .font(.system(size: 16, weight: .medium))
+                                } else {
+                                    Text("Loading user...")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                if memberId == firebaseManager.currentUser?.uid {
+                                    Text("(You)")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            
+                            // Show role and specialty
+                            if let user = getUserDetails(for: memberId) {
+                                Text((memberId == groupChat.ownerId ? "Owner • " : "") + user.specialty)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                            } else {
+                                Text(memberId == groupChat.ownerId ? "Owner" : "Member")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        
+                        Spacer()
+                        
+                        // Show admin badge if applicable
+                        if groupChat.adminIds.contains(memberId) {
+                            Text("Admin")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.green)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 2)
+                                .background(Color.green.opacity(0.1))
+                                .clipShape(Capsule())
+                        }
+                        
+                        // Show remove option if current user can manage and this isn't the owner
+                        if groupChat.canManage(firebaseManager.currentUser?.uid ?? "") && 
+                           !groupChat.isOwner(memberId) &&
+                           memberId != firebaseManager.currentUser?.uid {
+                            Button(action: {
+                                removeMemberById(memberId)
+                            }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.system(size: 20))
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                
+                // Add Members Button (if user can manage and group isn't full)
+                if groupChat.canManage(firebaseManager.currentUser?.uid ?? "") && !groupChat.isAtCapacity {
+                    Button(action: {
+                        showingAddMembers = true
+                    }) {
+                        HStack(spacing: 12) {
+                            Circle()
+                                .fill(Color.blue.opacity(0.2))
+                                .overlay(
+                                    Image(systemName: "plus")
+                                        .foregroundColor(.blue)
+                                        .font(.system(size: 16, weight: .bold))
+                                )
+                                .frame(width: 40, height: 40)
+                            
+                            Text("Add Members")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.blue)
+                            
+                            Spacer()
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+            }
+            
+            // Group Settings Section
+            Section("Group Settings") {
+                HStack {
+                    Image(systemName: "lock.fill")
+                        .foregroundColor(.gray)
+                        .frame(width: 20)
+                    
+                    Text("Privacy")
+                    
+                    Spacer()
+                    
+                    Text(groupChat.isPrivate ? "Private" : "Public")
+                        .foregroundColor(.secondary)
+                }
+                
+                HStack {
+                    Image(systemName: "person.badge.plus")
+                        .foregroundColor(.gray)
+                        .frame(width: 20)
+                    
+                    Text("Max Members")
+                    
+                    Spacer()
+                    
+                    Text("\(groupChat.maxMembers)")
+                        .foregroundColor(.secondary)
+                }
+                
+                HStack {
+                    Image(systemName: "calendar")
+                        .foregroundColor(.gray)
+                        .frame(width: 20)
+                    
+                    Text("Created")
+                    
+                    Spacer()
+                    
+                    Text(formatDate(groupChat.createdAt.dateValue()))
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            // Actions Section
+            Section {
+                if groupChat.isOwner(firebaseManager.currentUser?.uid ?? "") {
+                    Button(action: {
+                        showingDeleteConfirmation = true
+                    }) {
+                        HStack {
+                            Image(systemName: "trash")
+                                .frame(width: 20)
+                            Text("Delete Group")
+                        }
+                        .foregroundColor(.red)
+                    }
+                } else {
+                    Button(action: {
+                        showingLeaveConfirmation = true
+                    }) {
+                        HStack {
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                                .frame(width: 20)
+                            Text("Leave Group")
+                        }
+                        .foregroundColor(.orange)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func loadGroupInfo() {
+        guard let group = groupChatService.groupChats.first(where: { $0.id == groupChatId })?.groupChat else {
+            isLoading = false
+            return
+        }
+        
+        self.groupChat = group
+        
+        // Fetch owner details
+        fetchUserDetails(uid: group.ownerId) { user in
+            DispatchQueue.main.async {
+                self.ownerDetails = user
+            }
+        }
+        
+        // Fetch member details (excluding owner to avoid duplication)
+        let memberUids = group.memberIds.filter { $0 != group.ownerId }
+        fetchMultipleUserDetails(uids: memberUids) { users in
+            DispatchQueue.main.async {
+                self.memberDetails = users
+                self.isLoading = false
+            }
+        }
+    }
+    
+    private func fetchUserDetails(uid: String, completion: @escaping (User?) -> Void) {
+        let db = Firestore.firestore()
+        db.collection("users").document(uid).getDocument { snapshot, error in
+            if let error = error {
+                print("❌ Error fetching user details: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+            
+            guard let document = snapshot, document.exists, let data = document.data() else {
+                print("❌ User document does not exist for UID: \(uid)")
+                completion(nil)
+                return
+            }
+            
+            do {
+                let user = try document.data(as: User.self)
+                completion(user)
+            } catch {
+                print("❌ Error decoding user \(uid): \(error)")
+                // Try manual decoding as fallback
+                if let firstName = data["firstName"] as? String,
+                   let lastName = data["lastName"] as? String,
+                   let specialty = data["specialty"] as? String,
+                   let email = data["email"] as? String {
+                    let fallbackUser = User(
+                        credential: data["credential"] as? String ?? "",
+                        email: email,
+                        firstName: firstName,
+                        lastName: lastName,
+                        position: data["position"] as? String ?? "",
+                        specialty: specialty,
+                        state: data["state"] as? String ?? "",
+                        suffix: data["suffix"] as? String ?? "",
+                        uid: uid,
+                        exchangeUsername: data["exchangeUsername"] as? String ?? ""
+                    )
+                    print("✅ Using fallback decoding for user \(firstName) \(lastName)")
+                    completion(fallbackUser)
+                } else {
+                    print("❌ Fallback decoding failed for user \(uid)")
+                    completion(nil)
+                }
+            }
+        }
+    }
+    
+    private func fetchMultipleUserDetails(uids: [String], completion: @escaping ([User]) -> Void) {
+        guard !uids.isEmpty else {
+            completion([])
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let group = DispatchGroup()
+        var users: [User] = []
+        
+        for uid in uids {
+            group.enter()
+            
+            db.collection("users").document(uid).getDocument { snapshot, error in
+                defer { group.leave() }
+                
+                if let error = error {
+                    print("❌ Error fetching user details for \(uid): \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = snapshot?.data() else { return }
+                
+                do {
+                    let user = try snapshot?.data(as: User.self)
+                    if let user = user {
+                        users.append(user)
+                    }
+                } catch {
+                    print("❌ Error decoding user \(uid): \(error)")
+                    // Try manual decoding as fallback
+                    if let firstName = data["firstName"] as? String,
+                       let lastName = data["lastName"] as? String,
+                       let specialty = data["specialty"] as? String,
+                       let email = data["email"] as? String {
+                        let fallbackUser = User(
+                            credential: data["credential"] as? String ?? "",
+                            email: email,
+                            firstName: firstName,
+                            lastName: lastName,
+                            position: data["position"] as? String ?? "",
+                            specialty: specialty,
+                            state: data["state"] as? String ?? "",
+                            suffix: data["suffix"] as? String ?? "",
+                            uid: uid,
+                            exchangeUsername: data["exchangeUsername"] as? String ?? ""
+                        )
+                        print("✅ Using fallback decoding for user \(firstName) \(lastName)")
+                        users.append(fallbackUser)
+                    } else {
+                        print("❌ Fallback decoding failed for user \(uid)")
+                    }
+                }
+            }
+        }
+        
+        group.notify(queue: .main) {
+            completion(users.sorted { $0.firstName < $1.firstName })
+        }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
+    }
+    
+    private func getUserDetails(for uid: String) -> User? {
+        // First check if it's the owner
+        if uid == groupChat?.ownerId {
+            return ownerDetails
+        }
+        // Then check in member details
+        return memberDetails.first { $0.uid == uid }
+    }
+    
+    private func removeMemberById(_ memberId: String) {
+        guard let currentUserId = firebaseManager.currentUser?.uid,
+              let groupId = groupChat?.id else { return }
+        
+        groupChatService.removeMember(
+            groupChatId: groupId,
+            memberId: memberId,
+            removedBy: currentUserId
+        ) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    // Update local group chat data immediately for UI responsiveness
+                    if var updatedGroupChat = self.groupChat {
+                        updatedGroupChat.memberIds.removeAll { $0 == memberId }
+                        updatedGroupChat.adminIds.removeAll { $0 == memberId }
+                        self.groupChat = updatedGroupChat
+                    }
+                    // Also remove from member details
+                    self.memberDetails.removeAll { $0.uid == memberId }
+                    print("✅ Member removed successfully")
+                case .failure(let error):
+                    print("❌ Error removing member: \(error)")
+                    // TODO: Show error alert
+                }
+            }
+        }
+    }
+    
+    private func removeMember(_ member: User) {
+        guard let currentUserId = firebaseManager.currentUser?.uid,
+              let groupId = groupChat?.id else { return }
+        
+        groupChatService.removeMember(
+            groupChatId: groupId,
+            memberId: member.uid,
+            removedBy: currentUserId
+        ) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    // Remove from local list immediately for UI responsiveness
+                    self.memberDetails.removeAll { $0.uid == member.uid }
+                    print("✅ Member removed successfully")
+                case .failure(let error):
+                    print("❌ Error removing member: \(error)")
+                    // TODO: Show error alert
+                }
+            }
+        }
+    }
+    
+    private func leaveGroup() {
+        guard let currentUserId = firebaseManager.currentUser?.uid,
+              let groupId = groupChat?.id else { return }
+        
+        groupChatService.leaveGroup(
+            groupChatId: groupId,
+            userId: currentUserId
+        ) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    print("✅ Left group successfully")
+                    self.dismiss()
+                case .failure(let error):
+                    print("❌ Error leaving group: \(error)")
+                    // TODO: Show error alert
+                }
+            }
+        }
+    }
+    
+    private func deleteGroup() {
+        guard let currentUserId = firebaseManager.currentUser?.uid,
+              let groupId = groupChat?.id else { return }
+        
+        groupChatService.deleteGroupChat(
+            groupChatId: groupId,
+            deletedBy: currentUserId
+        ) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    print("✅ Group deleted successfully")
+                    self.dismiss()
+                case .failure(let error):
+                    print("❌ Error deleting group: \(error)")
+                    // TODO: Show error alert
+                }
+            }
+        }
+    }
+    
+    private func deleteGroupFromInfo(_ groupChat: GroupChat) {
+        guard let currentUserId = firebaseManager.currentUser?.uid,
+              let groupId = groupChat.id else {
+            print("❌ No current user or group ID found")
+            return
+        }
+        
+        print("🗑️ Deleting group chat \(groupId) from info view")
+        
+        groupChatService.deleteGroupChat(groupChatId: groupId, deletedBy: currentUserId) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success():
+                    print("✅ Group chat deleted successfully")
+                    self.dismiss()
+                case .failure(let error):
+                    print("❌ Failed to delete group chat: \(error.localizedDescription)")
+                    // TODO: Show error alert to user
+                }
+            }
+        }
+    }
+    
+    private func leaveGroupFromInfo(_ groupChat: GroupChat) {
+        guard let currentUserId = firebaseManager.currentUser?.uid,
+              let groupId = groupChat.id else {
+            print("❌ No current user or group ID found")
+            return
+        }
+        
+        print("🚪 Leaving group chat \(groupId) from info view")
+        
+        groupChatService.leaveGroup(groupChatId: groupId, userId: currentUserId) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success():
+                    print("✅ Left group chat successfully")
+                    self.dismiss()
+                case .failure(let error):
+                    print("❌ Failed to leave group chat: \(error.localizedDescription)")
+                    // TODO: Show error alert to user
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Add Members View
+struct AddMembersView: View {
+    let groupChatId: String
+    let currentMembers: [User]
+    
+    @Environment(\.dismiss) var dismiss
+    @ObservedObject private var groupChatService = GroupChatService.shared
+    @ObservedObject private var firebaseManager = FirebaseManager.shared
+    
+    @State private var allUsers: [User] = []
+    @State private var selectedUsers: Set<String> = []
+    @State private var searchText = ""
+    @State private var isLoading = true
+    @State private var isAddingMembers = false
+    
+    private var availableUsers: [User] {
+        let currentMemberIds = Set(currentMembers.map { $0.uid })
+        let currentUserId = firebaseManager.currentUser?.uid ?? ""
+        
+        let filteredUsers = allUsers.filter { user in
+            !currentMemberIds.contains(user.uid) && user.uid != currentUserId
+        }
+        
+        if searchText.isEmpty {
+            return filteredUsers
+        } else {
+            let searchLower = searchText.lowercased()
+            return filteredUsers.filter { user in
+                let fullName = "\(user.firstName) \(user.lastName)".lowercased()
+                let username = user.exchangeUsername.lowercased()
+                return fullName.contains(searchLower) || username.contains(searchLower)
+            }
+        }
+    }
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                if isLoading {
+                    ProgressView("Loading users...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    // Search bar
+                    UserSearchBar(text: $searchText, placeholder: "Search users...")
+                        .padding(.horizontal)
+                    
+                    // Selected users preview
+                    if !selectedUsers.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(Array(selectedUsers), id: \.self) { userId in
+                                    if let user = allUsers.first(where: { $0.uid == userId }) {
+                                        SelectedUserChip(user: user) {
+                                            selectedUsers.remove(userId)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        .padding(.vertical, 8)
+                    }
+                    
+                    // Available users list
+                    List(availableUsers, id: \.uid) { user in
+                        UserSelectionRow(
+                            user: user,
+                            isSelected: selectedUsers.contains(user.uid)
+                        ) {
+                            if selectedUsers.contains(user.uid) {
+                                selectedUsers.remove(user.uid)
+                            } else {
+                                selectedUsers.insert(user.uid)
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Add Members")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Add") {
+                        addSelectedMembers()
+                    }
+                    .disabled(selectedUsers.isEmpty || isAddingMembers)
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+        .onAppear {
+            loadUsers()
+        }
+    }
+    
+    private func loadUsers() {
+        Firestore.firestore().collection("users")
+            .getDocuments { snapshot, error in
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    
+                    if let error = error {
+                        print("❌ Error loading users: \(error)")
+                        return
+                    }
+                    
+                    if let documents = snapshot?.documents {
+                        self.allUsers = documents.compactMap { document in
+                            try? document.data(as: User.self)
+                        }
+                    }
+                }
+            }
+    }
+    
+    private func addSelectedMembers() {
+        guard !selectedUsers.isEmpty,
+              let currentUserId = firebaseManager.currentUser?.uid else { return }
+        
+        isAddingMembers = true
+        let group = DispatchGroup()
+        var errors: [Error] = []
+        
+        for userId in selectedUsers {
+            group.enter()
+            
+            groupChatService.addMember(
+                groupChatId: groupChatId,
+                memberId: userId,
+                addedBy: currentUserId
+            ) { result in
+                if case .failure(let error) = result {
+                    errors.append(error)
+                }
+                group.leave()
+            }
+        }
+        
+        group.notify(queue: .main) {
+            self.isAddingMembers = false
+            
+            if errors.isEmpty {
+                print("✅ All members added successfully")
+                self.dismiss()
+            } else {
+                print("❌ Some errors occurred while adding members: \(errors)")
+                // TODO: Show partial success/error alert
+                if errors.count < selectedUsers.count {
+                    // Some succeeded, still dismiss but maybe show warning
+                    self.dismiss()
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Supporting Views for Add Members
+struct SelectedUserChip: View {
+    let user: User
+    let onRemove: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 6) {
+            Text("\(user.firstName) \(user.lastName)")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.white)
+            
+            Button(action: onRemove) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 16))
+                    .foregroundColor(.white.opacity(0.8))
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(Color.blue)
+        .clipShape(Capsule())
+    }
+}
+
+struct UserSelectionRow: View {
+    let user: User
+    let isSelected: Bool
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                Circle()
+                    .fill(Color.gray.opacity(0.2))
+                    .overlay(
+                        Image(systemName: "person.fill")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 16))
+                    )
+                    .frame(width: 40, height: 40)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(user.firstName) \(user.lastName)")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.primary)
+                    
+                    Text(user.specialty)
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.blue)
+                } else {
+                    Image(systemName: "circle")
+                        .font(.system(size: 20))
+                        .foregroundColor(.gray.opacity(0.5))
+                }
+            }
+            .padding(.vertical, 4)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct UserSearchBar: View {
+    @Binding var text: String
+    let placeholder: String
+    
+    var body: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+            
+            TextField(placeholder, text: $text)
+                .textFieldStyle(PlainTextFieldStyle())
+            
+            if !text.isEmpty {
+                Button(action: {
+                    text = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
 

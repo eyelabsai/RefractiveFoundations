@@ -2,18 +2,90 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is document owner
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Users collection - users can read all, but only edit their own
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Posts collection
+    match /posts/{postId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    
+    // Comments collection
+    match /comments/{commentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    
+    // Conversations collection (DMs)
+    match /conversations/{conversationId} {
+      allow read, write: if isAuthenticated() && 
+        request.auth.uid in resource.data.participants;
+    }
+    
+    // Direct Messages collection
+    match /directMessages/{messageId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Group Chats collection
+    match /groupChats/{groupId} {
+      // Allow reading for collection queries - filtering will happen in the service
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+        request.auth.uid == request.resource.data.ownerId;
+      allow update: if isAuthenticated() && 
+        (request.auth.uid == resource.data.ownerId || 
+         request.auth.uid in resource.data.adminIds);
+      allow delete: if isAuthenticated() && 
+        request.auth.uid == resource.data.ownerId;
+    }
+    
+    // Group Messages collection
+    match /groupMessages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+        request.auth.uid == request.resource.data.senderId;
+      allow update, delete: if isAuthenticated() && 
+        request.auth.uid == resource.data.senderId;
+    }
+    
+    // Group Invites collection (for future use)
+    match /groupInvites/{inviteId} {
+      allow read: if isAuthenticated() && 
+        (request.auth.uid == resource.data.inviterId || 
+         request.auth.uid == resource.data.inviteeId);
+      allow create: if isAuthenticated() && 
+        request.auth.uid == request.resource.data.inviterId;
+      allow update: if isAuthenticated() && 
+        request.auth.uid == resource.data.inviteeId;
+      allow delete: if isAuthenticated() && 
+        (request.auth.uid == resource.data.inviterId || 
+         request.auth.uid == resource.data.inviteeId);
+    }
+    
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Default fallback for any other collections
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2025, 8, 23);
+      allow read, write: if isAuthenticated();
     }
   }
 }
