@@ -10,8 +10,6 @@ import Firebase
 import FirebaseFirestore
 import FirebaseAuth
 
-// Note: NotificationService import will be added once the module is properly integrated
-
 struct PostDetailView: View {
     let post: FetchedPost
     @ObservedObject var data: GetData
@@ -294,6 +292,12 @@ struct PostDetailView: View {
                 }
             }
             
+            // Post videos if available
+            if let videoURLs = viewModel.post.videoURLs, !videoURLs.isEmpty {
+                VideoCarouselView(videoURLs: videoURLs.compactMap { URL(string: $0) })
+                    .padding(.vertical, 8)
+            }
+            
             // Vote and action buttons - Reddit style
             HStack(spacing: 0) {
                 // Voting container
@@ -571,6 +575,7 @@ struct PostDetailView: View {
         downvotes: ["user3"],
         subreddit: "r/SampleSubreddit",
         imageURLs: nil,
+        videoURLs: nil,
         didLike: false,
         didDislike: false,
         author: "SampleUser",

@@ -11,8 +11,6 @@ import FirebaseFirestore
 import FirebaseAuth
 import Combine
 
-// Note: AdminService and NotificationService imports will be added once the modules are properly integrated
-
 class DirectMessageService: ObservableObject {
     static let shared = DirectMessageService()
     

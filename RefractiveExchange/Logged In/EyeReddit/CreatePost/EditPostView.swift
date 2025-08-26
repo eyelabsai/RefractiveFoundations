@@ -157,6 +157,7 @@ struct EditPostView: View {
         downvotes: [],
         subreddit: "i/SampleSubreddit",
         imageURLs: nil,
+        videoURLs: nil,
         didLike: false,
         didDislike: false,
         author: "TestUser",

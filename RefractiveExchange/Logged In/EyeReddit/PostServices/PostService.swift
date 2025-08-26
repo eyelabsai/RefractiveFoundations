@@ -11,7 +11,7 @@ import FirebaseFirestore
 import FirebaseAuth
 import FirebaseStorage
 
-// Note: AdminService and NotificationService imports will be added once the modules are properly integrated
+
 
 struct PostService  {
     func upvote(_ post: FetchedPost, completion: @escaping(Bool) -> Void) {
@@ -158,6 +158,7 @@ struct PostService  {
                         downvotes: storedPost.downvotes ?? [],
                         subreddit: storedPost.subreddit,
                         imageURLs: storedPost.imageURLs,
+                        videoURLs: storedPost.videoURLs,
                         didLike: storedPost.didLike,
                         didDislike: storedPost.didDislike ?? false,
                         author: authorName,
@@ -228,6 +229,7 @@ struct PostService  {
                         downvotes: storedPost.downvotes ?? [],
                         subreddit: storedPost.subreddit,
                         imageURLs: storedPost.imageURLs,
+                        videoURLs: storedPost.videoURLs,
                         didLike: storedPost.didLike,
                         didDislike: storedPost.didDislike ?? false,
                         author: authorName,

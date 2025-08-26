@@ -32,6 +32,7 @@ struct CreatePostView: View {
     // let subredditsWithoutAll = ["i/Anterior Segment, Cataract, & Cornea", "i/Glaucoma", "i/Retina", "i/Neuro-Opthamology", "i/Pediatric Opthamology", "i/Ocular Oncology", "i/Oculoplastic Surgery", "i/Uveitis", "i/Residents & Fellows", "i/Medical Students", "i/Company Representatives"]
 
     @State var postImageData: [Data] = [] // Changed to array for multiple images
+    @State var postVideoURLs: [URL] = [] // Array for multiple videos
     @State private var isLoading = false
     @ObservedObject var data: GetData
     @Environment(\.dismiss) var dismiss
@@ -41,6 +42,7 @@ struct CreatePostView: View {
     @Binding var tabBarIndex: Int
     
     @State private var selectedImages: [UIImage] = [] // Changed to array for multiple images
+    @State private var selectedVideoURLs: [URL] = [] // Array for selected videos
     @State private var showErrorToast: Bool = false
     @State private var showSuccessToast: Bool = false
     @State private var showSubforumPrompt: Bool = false
@@ -220,9 +222,23 @@ struct CreatePostView: View {
             
             Divider()
             
-            // Multi-image picker section
-            VStack(alignment: .leading, spacing: 12) {
-                MultiImagePicker(selectedImages: $selectedImages, maxImageCount: 5)
+            // Media picker section
+            VStack(alignment: .leading, spacing: 16) {
+                // Multi-image picker section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Images")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.primary)
+                    MultiImagePicker(selectedImages: $selectedImages, maxImageCount: 5)
+                }
+                
+                // Multi-video picker section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Videos")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.primary)
+                    MultiVideoPicker(selectedVideoURLs: $selectedVideoURLs, maxVideoCount: 3)
+                }
             }
             .padding(.horizontal, 20)
             
@@ -268,6 +284,9 @@ struct CreatePostView: View {
             }
         }
         
+        // Prepare video URLs
+        postVideoURLs = selectedVideoURLs
+        
         // Clean up text field
         let finalText = text
         
@@ -281,6 +300,7 @@ struct CreatePostView: View {
             subredditList: subredditsWithoutAll,
             selectedSubredditIndex: selectedSubredditIndex,
             postImageData: postImageData,
+            postVideoURLs: postVideoURLs,
             linkPreview: linkPreview
         ) { success in
             DispatchQueue.main.async {
@@ -295,6 +315,8 @@ struct CreatePostView: View {
                     self.text = ""
                     self.selectedImages = []
                     self.postImageData = []
+                    self.selectedVideoURLs = []
+                    self.postVideoURLs = []
                     self.selectedSubredditIndex = 0
                     self.linkPreview = nil
                     self.detectedLinks = []

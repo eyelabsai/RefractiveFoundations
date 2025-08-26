@@ -786,6 +786,7 @@ class PublicProfileViewModel: ObservableObject {
                         downvotes: storedPost.downvotes ?? [],
                         subreddit: storedPost.subreddit,
                         imageURLs: storedPost.imageURLs,
+                        videoURLs: storedPost.videoURLs,
                         didLike: storedPost.didLike,
                         didDislike: storedPost.didDislike ?? false,
                         author: authorName,

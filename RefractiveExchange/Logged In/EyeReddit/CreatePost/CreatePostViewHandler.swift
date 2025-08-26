@@ -14,7 +14,7 @@ import FirebaseAuth
 
 class CreatePostViewHandler {
     
-    static func createPost(data: GetData, title: String, text: String, subredditList: [String],selectedSubredditIndex: Int, postImageData: [Data], linkPreview: LinkPreviewData? = nil, completion: @escaping (Bool) -> Void) {
+    static func createPost(data: GetData, title: String, text: String, subredditList: [String],selectedSubredditIndex: Int, postImageData: [Data], postVideoURLs: [URL] = [], linkPreview: LinkPreviewData? = nil, completion: @escaping (Bool) -> Void) {
         
         // Get current user UID safely
         guard let currentUID = Auth.auth().currentUser?.uid else {
@@ -23,25 +23,44 @@ class CreatePostViewHandler {
             return
         }
         
-        if !postImageData.isEmpty {
-            print("🔄 Starting multiple image uploads...")
-            print("📊 Number of images to upload: \(postImageData.count)")
-            
-            uploadMultipleImages(imageDataArray: postImageData, currentUID: currentUID) { imageURLs in
-                if let imageURLs = imageURLs, !imageURLs.isEmpty {
-                    print("✅ All images uploaded successfully")
-                    let post = StoredPost(title: title, text: text, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], subreddit: subredditList[selectedSubredditIndex], imageURLs: imageURLs, didLike: false, didDislike: false, uid: currentUID, linkPreview: linkPreview)
-                    uploadFirebase(post: post, completion: completion)
-                } else {
-                    print("❌ Failed to upload images")
-                    DispatchQueue.main.async {
-                        completion(false)
-                    }
-                }
+        // Handle media uploads (images and videos)
+        let hasImages = !postImageData.isEmpty
+        let hasVideos = !postVideoURLs.isEmpty
+        
+        if hasImages || hasVideos {
+            uploadMediaFiles(imageDataArray: postImageData, videoURLs: postVideoURLs, currentUID: currentUID) { imageURLs, videoURLs in
+                let post = StoredPost(
+                    title: title,
+                    text: text,
+                    timestamp: Timestamp(date: Date()),
+                    upvotes: [],
+                    downvotes: [],
+                    subreddit: subredditList[selectedSubredditIndex],
+                    imageURLs: imageURLs,
+                    videoURLs: videoURLs,
+                    didLike: false,
+                    didDislike: false,
+                    uid: currentUID,
+                    linkPreview: linkPreview
+                )
+                uploadFirebase(post: post, completion: completion)
             }
         } else {
-            // No images to upload
-            let post = StoredPost(title: title, text: text, timestamp: Timestamp(date: Date()), upvotes: [], downvotes: [], subreddit: subredditList[selectedSubredditIndex], imageURLs: nil, didLike: false, didDislike: false, uid: currentUID, linkPreview: linkPreview)
+            // No media to upload
+            let post = StoredPost(
+                title: title,
+                text: text,
+                timestamp: Timestamp(date: Date()),
+                upvotes: [],
+                downvotes: [],
+                subreddit: subredditList[selectedSubredditIndex],
+                imageURLs: nil,
+                videoURLs: nil,
+                didLike: false,
+                didDislike: false,
+                uid: currentUID,
+                linkPreview: linkPreview
+            )
             uploadFirebase(post: post, completion: completion)
         }
     }
@@ -113,6 +132,134 @@ class CreatePostViewHandler {
         
         dispatchGroup.notify(queue: .main) {
             if hasError || uploadedURLs.count != imageDataArray.count {
+                completion(nil)
+            } else {
+                completion(uploadedURLs)
+            }
+        }
+    }
+    
+    // MARK: - Combined Media Upload Function
+    private static func uploadMediaFiles(imageDataArray: [Data], videoURLs: [URL], currentUID: String, completion: @escaping ([String]?, [String]?) -> Void) {
+        let dispatchGroup = DispatchGroup()
+        var uploadedImageURLs: [String] = []
+        var uploadedVideoURLs: [String] = []
+        var hasError = false
+        
+        // Upload images
+        if !imageDataArray.isEmpty {
+            dispatchGroup.enter()
+            uploadMultipleImages(imageDataArray: imageDataArray, currentUID: currentUID) { imageURLs in
+                if let imageURLs = imageURLs {
+                    uploadedImageURLs = imageURLs
+                } else {
+                    hasError = true
+                }
+                dispatchGroup.leave()
+            }
+        }
+        
+        // Upload videos
+        if !videoURLs.isEmpty {
+            dispatchGroup.enter()
+            uploadMultipleVideos(videoURLs: videoURLs, currentUID: currentUID) { videoURLs in
+                if let videoURLs = videoURLs {
+                    uploadedVideoURLs = videoURLs
+                } else {
+                    hasError = true
+                }
+                dispatchGroup.leave()
+            }
+        }
+        
+        dispatchGroup.notify(queue: .main) {
+            if hasError {
+                completion(nil, nil)
+            } else {
+                completion(uploadedImageURLs.isEmpty ? nil : uploadedImageURLs,
+                          uploadedVideoURLs.isEmpty ? nil : uploadedVideoURLs)
+            }
+        }
+    }
+    
+    // MARK: - Video Upload Functions
+    private static func uploadMultipleVideos(videoURLs: [URL], currentUID: String, completion: @escaping ([String]?) -> Void) {
+        let dispatchGroup = DispatchGroup()
+        var uploadedURLs: [String] = []
+        var hasError = false
+        
+        print("🔄 Starting multiple video uploads...")
+        print("📊 Number of videos to upload: \(videoURLs.count)")
+        
+        for (index, videoURL) in videoURLs.enumerated() {
+            dispatchGroup.enter()
+            
+            // Read video data
+            do {
+                let videoData = try Data(contentsOf: videoURL)
+                
+                guard videoData.count > 0 else {
+                    print("❌ Error: Video data is empty for video \(index)")
+                    hasError = true
+                    dispatchGroup.leave()
+                    continue
+                }
+                
+                print("📊 Video \(index) data size: \(videoData.count) bytes")
+                
+                // Create unique video reference ID
+                let videoReferenceID = "post_\(currentUID)_\(Int(Date().timeIntervalSince1970))_\(index).mp4"
+                let storageRef = Storage.storage().reference()
+                let videoRef = storageRef.child("Post_Videos/\(videoReferenceID)")
+                
+                print("📁 Upload path: Post_Videos/\(videoReferenceID)")
+                
+                // Setup metadata for video
+                let metadata = StorageMetadata()
+                metadata.contentType = "video/mp4"
+                
+                videoRef.putData(videoData, metadata: metadata) { (metadata, error) in
+                    if let error = error {
+                        print("❌ Error uploading video \(index): \(error.localizedDescription)")
+                        hasError = true
+                        dispatchGroup.leave()
+                        return
+                    }
+                    
+                    guard metadata != nil else {
+                        print("❌ Upload failed for video \(index): No metadata received")
+                        hasError = true
+                        dispatchGroup.leave()
+                        return
+                    }
+                    
+                    print("✅ Video \(index) uploaded successfully")
+                    
+                    // Get download URL
+                    videoRef.downloadURL { (url, error) in
+                        if let error = error {
+                            print("❌ Error fetching download URL for video \(index): \(error.localizedDescription)")
+                            hasError = true
+                        } else if let url = url {
+                            print("✅ Video \(index) URL obtained: \(url.absoluteString)")
+                            uploadedURLs.append(url.absoluteString)
+                        } else {
+                            print("❌ Failed to get download URL for video \(index)")
+                            hasError = true
+                        }
+                        
+                        dispatchGroup.leave()
+                    }
+                }
+            } catch {
+                print("❌ Error reading video data for video \(index): \(error.localizedDescription)")
+                hasError = true
+                dispatchGroup.leave()
+            }
+        }
+        
+        dispatchGroup.notify(queue: .main) {
+            if hasError || uploadedURLs.count != videoURLs.count {
                 completion(nil)
             } else {
                 completion(uploadedURLs)

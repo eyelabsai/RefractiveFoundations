@@ -329,6 +329,7 @@ struct PostRow: View {
             postTitle
             postTextContent
             postImages
+            postVideos
             postLinkPreview
         }
     }
@@ -393,6 +394,14 @@ struct PostRow: View {
         Group {
             if let imageURLs = self.viewModel.post.imageURLs, !imageURLs.isEmpty {
                 imageCarousel(urls: imageURLs)
+            }
+        }
+    }
+    
+    private var postVideos: some View {
+        Group {
+            if let videoURLs = self.viewModel.post.videoURLs, !videoURLs.isEmpty {
+                VideoCarouselView(videoURLs: videoURLs.compactMap { URL(string: $0) })
             }
         }
     }

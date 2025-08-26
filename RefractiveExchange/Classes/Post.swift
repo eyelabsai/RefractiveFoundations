@@ -17,6 +17,7 @@ struct StoredPost: Codable, Identifiable  {
     var downvotes: [String]?
     let subreddit: String
     let imageURLs: [String]? // Changed from imageURL: String? to support multiple images
+    let videoURLs: [String]? // Added support for multiple videos
     var didLike: Bool = false
     var didDislike: Bool = false
     var uid: String
@@ -36,6 +37,7 @@ struct FetchedPost: Codable, Identifiable, Hashable  {
     var downvotes: [String]?
     let subreddit: String
     let imageURLs: [String]? // Changed from imageURL: String? to support multiple images
+    let videoURLs: [String]? // Added support for multiple videos
     var didLike: Bool = false
     var didDislike: Bool = false
     var author: String
