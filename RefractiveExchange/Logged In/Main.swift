@@ -29,7 +29,9 @@ struct Main: View {
                 case .notifications:
                     NotificationView()
                 case .messages:
-                    ConversationListView()
+                    NavigationStack {
+                        ConversationListView()
+                    }
                 case .newPost:
                     CreatePostView(data: data, tabBarIndex: Binding(
                         get: { currentTab == .eyeReddit ? 0 : 1 },

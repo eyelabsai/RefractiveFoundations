@@ -48,3 +48,4 @@ console.log('📋 Script ready! To send the Monday reminder:');
 console.log('1. Uncomment the last line in this file');
 console.log('2. Run: node send_monday_reminder.js');
 console.log('3. Or just call the function directly from Firebase console');
+
