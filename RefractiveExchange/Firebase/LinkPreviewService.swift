@@ -33,8 +33,15 @@ class LinkPreviewService: ObservableObject {
         var urls: [String] = []
         matches?.forEach { match in
             if let range = Range(match.range, in: text) {
-                let urlString = String(text[range])
+                var urlString = String(text[range])
                 print("🔗 LinkPreviewService: Checking URL: '\(urlString)'")
+                
+                // Add https:// if no scheme is present
+                if !urlString.hasPrefix("http://") && !urlString.hasPrefix("https://") {
+                    urlString = "https://\(urlString)"
+                    print("🔧 LinkPreviewService: Added https scheme: \(urlString)")
+                }
+                
                 if isValidURL(urlString) {
                     print("✅ LinkPreviewService: Valid URL: \(urlString)")
                     urls.append(urlString)

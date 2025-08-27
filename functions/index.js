@@ -374,6 +374,75 @@ function generateTempPassword(length = 12) {
   return "RefractiveFoundations";
 }
 
+// Cloud Function to send push-only notifications (for DMs and Group Messages)
+exports.sendPushOnlyNotification = functions.firestore
+    .document("pushOnlyNotifications/{notificationId}")
+    .onCreate(async (snap, context) => {
+      try {
+        const notification = snap.data();
+
+        // Get the recipient's FCM token
+        const userDoc = await admin.firestore()
+            .collection("users")
+            .doc(notification.recipientId)
+            .get();
+
+        if (!userDoc.exists) {
+          console.log("User document not found:", notification.recipientId);
+          return;
+        }
+
+        const userData = userDoc.data();
+        const fcmToken = userData.fcmToken;
+
+        if (!fcmToken) {
+          console.log("No FCM token for user:", notification.recipientId);
+          return;
+        }
+
+        // Create the push notification payload (FCM v1 API format)
+        const payload = {
+          notification: {
+            title: notification.title,
+            body: notification.message,
+          },
+          data: {
+            notificationId: context.params.notificationId,
+            type: notification.type,
+            ...(notification.metadata && notification.metadata.conversationId &&
+                {conversationId: notification.metadata.conversationId}),
+            ...(notification.metadata && notification.metadata.groupChatId &&
+                {groupChatId: notification.metadata.groupChatId}),
+          },
+          apns: {
+            payload: {
+              aps: {
+                badge: 1,
+                sound: "default",
+              },
+            },
+          },
+          android: {
+            notification: {
+              sound: "default",
+              clickAction: "FLUTTER_NOTIFICATION_CLICK",
+            },
+          },
+          token: fcmToken,
+        };
+
+        // Send the notification
+        const response = await admin.messaging().send(payload);
+        console.log("Push-only notification sent successfully:", response);
+
+        // Delete the temporary notification document after processing
+        await snap.ref.delete();
+        console.log("Temporary push-only notification document deleted");
+      } catch (error) {
+        console.error("Error sending push-only notification:", error);
+      }
+    });
+
 // Import and export the fix function
 const {fixUserProfiles} = require("./fixUserProfiles");
 exports.fixUserProfiles = fixUserProfiles;

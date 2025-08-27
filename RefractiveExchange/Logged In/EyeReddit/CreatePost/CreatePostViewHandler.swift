@@ -272,6 +272,15 @@ class CreatePostViewHandler {
             let docRef = try Firestore.firestore().collection("posts").addDocument(from: post)
             print("✅ Post successfully uploaded to Firebase with ID: \(docRef.documentID)")
             print("📝 Post details: Title: '\(post.title)', Subreddit: '\(post.subreddit)', UID: '\(post.uid)'")
+            
+            // Create new post notification for all users
+            NotificationService.shared.createNewPostNotification(
+                postId: docRef.documentID,
+                postAuthorId: post.uid,
+                postTitle: post.title,
+                postSubreddit: post.subreddit
+            )
+            
             completion(true)
         } catch let error {
             print("❌ Error uploading post to Firebase: \(error.localizedDescription)")

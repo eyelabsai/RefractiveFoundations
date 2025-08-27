@@ -58,16 +58,28 @@ class NotificationService: ObservableObject {
         
         messageCountListener?.cancel()
         
-        messageCountListener = DirectMessageService.shared.$conversations
-            .sink { [weak self] conversations in
-                let totalUnread = conversations.reduce(0) { total, conversation in
-                    total + conversation.unreadCount
-                }
-                
-                DispatchQueue.main.async {
-                    self?.unreadMessageCount = totalUnread
-                }
+        // Combine both DM and group chat unread counts
+        messageCountListener = Publishers.CombineLatest(
+            DirectMessageService.shared.$conversations,
+            GroupChatService.shared.$groupChats
+        )
+        .sink { [weak self] conversations, groupChats in
+            // Calculate DM unread count
+            let dmUnread = conversations.reduce(0) { total, conversation in
+                total + conversation.unreadCount
             }
+            
+            // Calculate group chat unread count for current user
+            let groupUnread = groupChats.reduce(0) { total, groupPreview in
+                total + groupPreview.unreadCount
+            }
+            
+            let totalUnread = dmUnread + groupUnread
+            
+            DispatchQueue.main.async {
+                self?.unreadMessageCount = totalUnread
+            }
+        }
     }
     
     private func processNotificationSnapshot(_ snapshot: QuerySnapshot?, currentUserId: String) {
@@ -245,6 +257,12 @@ class NotificationService: ObservableObject {
     func createDirectMessageNotification(senderId: String, recipientId: String, conversationId: String, messageText: String) {
         guard senderId != recipientId else { return } // Don't notify self
         
+        // For DMs, we don't create in-app notifications (Instagram-style)
+        // DM notifications are handled purely through:
+        // 1. Push notifications (handled by Cloud Functions)
+        // 2. Unread counts in conversations (handled by DirectMessageService)
+        // 3. Badge count on DM icon (handled by unreadMessageCount in NotificationService)
+        
         fetchUserDetails(userId: senderId) { user in
             let senderName = user != nil ? "\(user!.firstName) \(user!.lastName)" : "Someone"
             
@@ -264,12 +282,20 @@ class NotificationService: ObservableObject {
                 metadata: metadata
             )
             
-            self.saveNotification(notification)
+            // Only send push notification (handled by Cloud Functions when notification is saved)
+            // But don't save to in-app notifications collection
+            self.sendPushNotificationOnly(notification)
         }
     }
     
     func createGroupMessageNotification(senderId: String, recipientId: String, groupChatId: String, groupChatName: String, messageText: String) {
         guard senderId != recipientId else { return } // Don't notify self
+        
+        // For Group Messages, we don't create in-app notifications (Instagram-style)
+        // Group message notifications are handled purely through:
+        // 1. Push notifications (handled by Cloud Functions)
+        // 2. Unread counts in group chats (handled by GroupChatService)
+        // 3. Badge count on DM icon (handled by unreadMessageCount in NotificationService)
         
         fetchUserDetails(userId: senderId) { user in
             let senderName = user != nil ? "\(user!.firstName) \(user!.lastName)" : "Someone"
@@ -291,7 +317,47 @@ class NotificationService: ObservableObject {
                 metadata: metadata
             )
             
-            self.saveNotification(notification)
+            // Only send push notification (handled by Cloud Functions when notification is saved)
+            // But don't save to in-app notifications collection
+            self.sendPushNotificationOnly(notification)
+        }
+    }
+    
+    func createNewPostNotification(postId: String, postAuthorId: String, postTitle: String, postSubreddit: String) {
+        // Get all users except the post author to send notifications
+        getAllUsersExcept(userId: postAuthorId) { userIds in
+            guard !userIds.isEmpty else {
+                print("📭 No users to notify about new post")
+                return
+            }
+            
+            self.fetchUserDetails(userId: postAuthorId) { authorUser in
+                let authorName = authorUser != nil ? "\(authorUser!.firstName) \(authorUser!.lastName)" : "Someone"
+                
+                let metadata = NotificationMetadata(
+                    postId: postId,
+                    senderDisplayName: authorName,
+                    senderAvatarUrl: authorUser?.avatarUrl,
+                    postTitle: postTitle
+                )
+                
+                // Create notifications for all users
+                for userId in userIds {
+                    let notification = AppNotification(
+                        recipientId: userId,
+                        senderId: postAuthorId,
+                        type: .newPost,
+                        title: "New Post",
+                        message: "\(authorName) shared a new post: \(postTitle)",
+                        isActionable: true,
+                        metadata: metadata
+                    )
+                    
+                    self.saveNotification(notification)
+                }
+                
+                print("✅ Sent new post notifications to \(userIds.count) users")
+            }
         }
     }
     
@@ -429,9 +495,20 @@ class NotificationService: ObservableObject {
         }
     }
     
-    // REMOVED: sendPushNotificationForAppNotification
-    // Push notifications are now handled by Cloud Functions when notification is saved to Firestore
-    // This removes the duplicate/broken client-side push notification logic
+    // MARK: - Push Notification Only (for DMs/Group Messages)
+    
+    private func sendPushNotificationOnly(_ notification: AppNotification) {
+        // For DMs and Group Messages, we want push notifications but not in-app notifications
+        // We save to a temporary collection that Cloud Functions can process
+        // but won't show up in the user's notification list
+        
+        do {
+            _ = try Firestore.firestore().collection("pushOnlyNotifications").addDocument(from: notification)
+            print("✅ Push-only notification sent for processing by Cloud Functions")
+        } catch {
+            print("❌ Error saving push-only notification: \(error)")
+        }
+    }
     
     private func fetchUserDetails(userId: String, completion: @escaping (User?) -> Void) {
         Firestore.firestore().collection("users").document(userId).getDocument { document, error in
@@ -472,6 +549,28 @@ class NotificationService: ObservableObject {
             
             let upvotes = document.data()?["upvotes"] as? [String] ?? []
             completion(upvotes.count)
+        }
+    }
+    
+    private func getAllUsersExcept(userId: String, completion: @escaping ([String]) -> Void) {
+        Firestore.firestore().collection("users").getDocuments { snapshot, error in
+            if let error = error {
+                print("❌ Error fetching users for new post notification: \(error)")
+                completion([])
+                return
+            }
+            
+            guard let documents = snapshot?.documents else {
+                completion([])
+                return
+            }
+            
+            let userIds = documents.compactMap { document in
+                let documentId = document.documentID
+                return documentId != userId ? documentId : nil
+            }
+            
+            completion(userIds)
         }
     }
     

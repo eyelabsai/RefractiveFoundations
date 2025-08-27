@@ -45,6 +45,7 @@ enum NotificationType: String, Codable, CaseIterable {
     case milestone = "milestone" // e.g., "Your post reached 10 likes!"
     case mention = "mention" // Future: @username mentions
     case follow = "follow" // Future: user following
+    case newPost = "new_post" // When a new post is created
     
     var iconName: String {
         switch self {
@@ -62,6 +63,8 @@ enum NotificationType: String, Codable, CaseIterable {
             return "at"
         case .follow:
             return "person.badge.plus"
+        case .newPost:
+            return "plus.circle.fill"
         }
     }
     
@@ -81,6 +84,8 @@ enum NotificationType: String, Codable, CaseIterable {
             return "green"
         case .follow:
             return "indigo"
+        case .newPost:
+            return "cyan"
         }
     }
 }
@@ -177,5 +182,23 @@ struct NotificationCounts: Codable {
     init(totalUnread: Int, unreadByType: [NotificationType: Int]) {
         self.totalUnread = totalUnread
         self.unreadByType = unreadByType
+    }
+    
+    // MARK: - Computed Properties for Separated Counts
+    
+    /// Post-related notifications only (excludes DMs and group messages)
+    var postNotificationsUnread: Int {
+        let messageTypes: [NotificationType] = [.directMessage, .groupMessage]
+        let postUnread = unreadByType.filter { !messageTypes.contains($0.key) }
+                                     .values
+                                     .reduce(0, +)
+        return postUnread
+    }
+    
+    /// Message notifications only (DMs and group messages)
+    var messageNotificationsUnread: Int {
+        let dmCount = unreadByType[.directMessage] ?? 0
+        let groupCount = unreadByType[.groupMessage] ?? 0
+        return dmCount + groupCount
     }
 }

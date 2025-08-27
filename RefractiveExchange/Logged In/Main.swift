@@ -60,12 +60,15 @@ struct Main: View {
             setupPushNotifications()
         }
         .onChange(of: firebaseManager.currentUser?.uid) { newUID in
-            // When user changes, cleanup old notifications and start new ones
+            // When user changes, cleanup old services and start new ones
             if let newUserID = newUID {
                 print("🔄 User changed to \(newUserID)")
                 notificationService.stopListening()
+                DirectMessageService.shared.stopListeningToConversations()
+                GroupChatService.shared.stopListeningToGroupChats()
+                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    notificationService.startListening(for: newUserID)
+                    self.startNotificationListening()
                 }
             }
         }
@@ -100,10 +103,10 @@ struct Main: View {
             
             Spacer()
             
-            // Notification button with badge
+                        // Notification button with badge (post notifications only)
             Button {
                 withAnimation {
-                    currentTab = .notifications
+currentTab = .notifications
                 }
             } label: {
                 ZStack {
@@ -111,8 +114,8 @@ struct Main: View {
                         .imageScale(.medium)
                         .foregroundColor(.primary)
                     
-                    if notificationService.notificationCounts.totalUnread > 0 {
-                        Text("\(notificationService.notificationCounts.totalUnread)")
+                    if notificationService.notificationCounts.postNotificationsUnread > 0 {
+                        Text("\(notificationService.notificationCounts.postNotificationsUnread)")
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.white)
                             .padding(.horizontal, 5)
@@ -125,7 +128,7 @@ struct Main: View {
             }
             .padding(.trailing, 5)
             
-            // DM button (Instagram-style message) with badge
+            // DM button (Instagram-style message) with badge (DMs + group messages)
             Button {
                 withAnimation {
                     currentTab = .messages
@@ -244,7 +247,13 @@ struct Main: View {
     
     private func startNotificationListening() {
         guard let currentUserId = firebaseManager.currentUser?.uid else { return }
+        
+        // Start notification service
         notificationService.startListening(for: currentUserId)
+        
+        // Start message services for unread count tracking
+        DirectMessageService.shared.startListeningToConversations(for: currentUserId)
+        GroupChatService.shared.startListeningToGroupChats(for: currentUserId)
     }
     
     private func setupPushNotifications() {

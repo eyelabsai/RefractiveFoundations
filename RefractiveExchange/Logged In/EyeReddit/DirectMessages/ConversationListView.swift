@@ -83,22 +83,20 @@ struct ConversationListView: View {
             }
         }
         .onAppear {
-            startListening()
+            // Services are already started in Main.swift, no need to restart them here
             // Preload user cache for faster search
             fetchAndCacheUsers { _ in }
         }
         .onDisappear {
-            dmService.stopListeningToConversations()
-            groupChatService.stopListeningToGroupChats()
+            // Don't stop DM/group chat listeners here - they should continue running 
+            // in the background for unread count tracking and notifications
             userSearchTimer?.invalidate()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-            // Refresh conversations when app comes to foreground
-            startListening()
+            // Services are managed in Main.swift - no need to restart here
         }
         .onReceive(NotificationCenter.default.publisher(for: .conversationUpdated)) { _ in
-            // Refresh conversations when a new message is sent
-            startListening()
+            // Services are already listening - no need to restart
         }
     }
     

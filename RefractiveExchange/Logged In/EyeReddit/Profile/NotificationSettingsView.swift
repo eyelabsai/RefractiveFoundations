@@ -134,6 +134,17 @@ struct NotificationSettingsView: View {
                 Divider().padding(.leading, 56)
                 
                 NotificationTypeRow(
+                    title: "New Posts",
+                    subtitle: "When someone creates a new post",
+                    icon: "plus.circle.fill",
+                    iconColor: .cyan,
+                    type: .newPost,
+                    isPush: true
+                )
+                
+                Divider().padding(.leading, 56)
+                
+                NotificationTypeRow(
                     title: "Comment Likes",
                     subtitle: "When someone likes your comment",
                     icon: "heart.circle.fill",
@@ -209,6 +220,17 @@ struct NotificationSettingsView: View {
                             icon: "heart.text.square.fill",
                             iconColor: .red,
                             type: .postLike,
+                            isPush: false
+                        )
+                        
+                        Divider().padding(.leading, 56)
+                        
+                        NotificationTypeRow(
+                            title: "New Posts",
+                            subtitle: "When someone creates a new post",
+                            icon: "plus.circle.fill",
+                            iconColor: .cyan,
+                            type: .newPost,
                             isPush: false
                         )
                         
@@ -398,6 +420,8 @@ struct NotificationTypeRow: View {
             return isPush ? prefs.pushNotifications.postLikes : prefs.inAppNotifications.postLikes
         case .postComment:
             return isPush ? prefs.pushNotifications.postComments : prefs.inAppNotifications.postComments
+        case .newPost:
+            return isPush ? prefs.pushNotifications.newPosts : prefs.inAppNotifications.newPosts
         case .commentLike:
             return isPush ? prefs.pushNotifications.commentLikes : prefs.inAppNotifications.commentLikes
         case .commentReply:

@@ -56,6 +56,7 @@ struct PushNotificationSettings: Codable {
     var postLikes: Bool
     var postComments: Bool
     var postMilestones: Bool
+    var newPosts: Bool
     
     // Comment-related notifications  
     var commentLikes: Bool
@@ -79,6 +80,7 @@ struct PushNotificationSettings: Codable {
         self.postLikes = true
         self.postComments = true
         self.postMilestones = true
+        self.newPosts = true
         self.commentLikes = true
         self.commentReplies = true
         self.directMessages = true
@@ -96,6 +98,7 @@ struct InAppNotificationSettings: Codable {
     var postLikes: Bool
     var postComments: Bool
     var postMilestones: Bool
+    var newPosts: Bool
     var commentLikes: Bool
     var commentReplies: Bool
     var directMessages: Bool
@@ -108,6 +111,7 @@ struct InAppNotificationSettings: Codable {
         self.postLikes = true
         self.postComments = true
         self.postMilestones = true
+        self.newPosts = true
         self.commentLikes = true
         self.commentReplies = true
         self.directMessages = true
@@ -238,6 +242,9 @@ class NotificationPreferencesManager: ObservableObject {
         case .postComment:
             if let push = pushEnabled { prefs.pushNotifications.postComments = push }
             if let inApp = inAppEnabled { prefs.inAppNotifications.postComments = inApp }
+        case .newPost:
+            if let push = pushEnabled { prefs.pushNotifications.newPosts = push }
+            if let inApp = inAppEnabled { prefs.inAppNotifications.newPosts = inApp }
         case .commentLike:
             if let push = pushEnabled { prefs.pushNotifications.commentLikes = push }
             if let inApp = inAppEnabled { prefs.inAppNotifications.commentLikes = inApp }
@@ -342,6 +349,8 @@ class NotificationPreferencesManager: ObservableObject {
             return pushNotification ? prefs.pushNotifications.postLikes : prefs.inAppNotifications.postLikes
         case .postComment:
             return pushNotification ? prefs.pushNotifications.postComments : prefs.inAppNotifications.postComments
+        case .newPost:
+            return pushNotification ? prefs.pushNotifications.newPosts : prefs.inAppNotifications.newPosts
         case .commentLike:
             return pushNotification ? prefs.pushNotifications.commentLikes : prefs.inAppNotifications.commentLikes
         case .commentReply:

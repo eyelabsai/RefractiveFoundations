@@ -22,19 +22,22 @@ struct NotificationView: View {
     @ObservedObject var data = GetData()
     
     var filteredNotifications: [NotificationPreview] {
+        // Filter out DM and group message notifications (Instagram-style)
+        let nonMessageNotifications = notificationService.notifications.filter { 
+            $0.notification.type != .directMessage && $0.notification.type != .groupMessage 
+        }
+        
         switch selectedFilter {
         case .all:
-            return notificationService.notifications
+            return nonMessageNotifications
         case .unread:
-            return notificationService.notifications.filter { !$0.notification.isRead }
+            return nonMessageNotifications.filter { !$0.notification.isRead }
         case .likes:
-            return notificationService.notifications.filter { 
+            return nonMessageNotifications.filter { 
                 $0.notification.type == .postLike || $0.notification.type == .commentLike 
             }
         case .comments:
-            return notificationService.notifications.filter { $0.notification.type == .postComment }
-        case .messages:
-            return notificationService.notifications.filter { $0.notification.type == .directMessage }
+            return nonMessageNotifications.filter { $0.notification.type == .postComment }
         }
     }
     
@@ -240,8 +243,6 @@ struct NotificationView: View {
             return "No likes yet"
         case .comments:
             return "No comments yet"
-        case .messages:
-            return "No message notifications"
         }
     }
     
@@ -255,8 +256,6 @@ struct NotificationView: View {
             return "When people like your posts or comments, you'll see them here"
         case .comments:
             return "When people comment on your posts, you'll see them here"
-        case .messages:
-            return "Message notifications appear here when you're not in the conversation"
         }
     }
     
@@ -273,9 +272,6 @@ struct NotificationView: View {
                    (notificationService.notificationCounts.unreadByType[.commentLike] ?? 0)
         case .comments:
             return notificationService.notificationCounts.unreadByType[.postComment] ?? 0
-        case .messages:
-            return (notificationService.notificationCounts.unreadByType[.directMessage] ?? 0) + 
-                   (notificationService.notificationCounts.unreadByType[.groupMessage] ?? 0)
         }
     }
     
@@ -283,7 +279,7 @@ struct NotificationView: View {
         let notification = notificationPreview.notification
         
         switch notification.type {
-        case .postLike, .postComment, .milestone:
+        case .postLike, .postComment, .milestone, .newPost:
             if let postId = notification.metadata?.postId {
                 navigateToPost(postId: postId)
             }
@@ -512,7 +508,6 @@ enum NotificationFilter: CaseIterable {
     case unread
     case likes
     case comments
-    case messages
     
     var title: String {
         switch self {
@@ -520,7 +515,6 @@ enum NotificationFilter: CaseIterable {
         case .unread: return "Unread"
         case .likes: return "Likes"
         case .comments: return "Comments"
-        case .messages: return "Messages"
         }
     }
 }

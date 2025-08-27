@@ -96,6 +96,9 @@ struct CreatePostView: View {
                         .foregroundColor(.primary)
                         .padding(.horizontal, 15)
                         .background(Color(.systemBackground))
+                        .onChange(of: title) { _ in
+                            detectLinksInText(text)
+                        }
                     Divider()
                         .padding(.horizontal, 15)
                     
@@ -389,7 +392,9 @@ struct CreatePostView: View {
     
     // MARK: - Link Detection
     private func detectLinksInText(_ text: String) {
-        let urls = linkPreviewService.extractURLs(from: text)
+        // Combine title and text to search for URLs
+        let combinedText = "\(title) \(text)"
+        let urls = linkPreviewService.extractURLs(from: combinedText)
         
         if let firstURL = urls.first, firstURL != detectedLinks.first {
             print("🔗 New link detected, generating preview...")

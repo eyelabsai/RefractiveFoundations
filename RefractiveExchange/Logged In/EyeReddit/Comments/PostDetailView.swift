@@ -23,8 +23,11 @@ struct PostDetailView: View {
     @State private var selectedUserProfile: UserProfile?
     @State private var showDeleteAlert = false
     @State private var showEditView = false
+    @State private var generatedLinkPreview: LinkPreviewData? = nil
+    @State private var isGeneratingPreview = false
     
     let saveService = SaveService.shared
+    @ObservedObject private var linkPreviewService = LinkPreviewService.shared
     
     init(post: FetchedPost, data: GetData) {
         self.post = post
@@ -72,6 +75,7 @@ struct PostDetailView: View {
         .onAppear {
             commentModel.fetchComments()
             checkIfPostIsSaved()
+            detectAndGenerateLinkPreview()
         }
         .fullScreenCover(item: $selectedUserProfile) { userProfile in
             PublicProfileView(
@@ -296,6 +300,28 @@ struct PostDetailView: View {
             if let videoURLs = viewModel.post.videoURLs, !videoURLs.isEmpty {
                 VideoCarouselView(videoURLs: videoURLs.compactMap { URL(string: $0) })
                     .padding(.vertical, 8)
+            }
+            
+            // Link preview
+            if let linkPreview = viewModel.post.linkPreview ?? generatedLinkPreview {
+                LinkPreviewView(linkPreview: linkPreview) {
+                    if let url = URL(string: linkPreview.url) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                .padding(.vertical, 8)
+            } else if isGeneratingPreview {
+                // Show loading state for link preview generation
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .scaleEffect(0.7)
+                    
+                    Text("Generating link preview...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 8)
             }
             
             // Vote and action buttons - Reddit style
@@ -561,6 +587,37 @@ struct PostDetailView: View {
         saveService.toggleSavePost(postId) { saved in
             DispatchQueue.main.async {
                 self.isSaved = saved
+            }
+        }
+    }
+    
+    // MARK: - Link Preview Generation
+    
+    private func detectAndGenerateLinkPreview() {
+        // Skip if post already has a link preview
+        guard viewModel.post.linkPreview == nil else { return }
+        
+        // Combine title and text to search for URLs
+        let textToSearch = "\(viewModel.post.title) \(viewModel.post.text)"
+        
+        // Extract URLs from the text
+        let urls = linkPreviewService.extractURLs(from: textToSearch)
+        
+        // Generate preview for the first URL found
+        if let firstURL = urls.first {
+            print("🔗 Generating link preview for post detail: \(firstURL)")
+            isGeneratingPreview = true
+            
+            linkPreviewService.generateLinkPreview(for: firstURL) { preview in
+                DispatchQueue.main.async {
+                    isGeneratingPreview = false
+                    if let preview = preview {
+                        print("✅ Generated link preview for detail view: \(preview.title ?? "No title")")
+                        generatedLinkPreview = preview
+                    } else {
+                        print("❌ Failed to generate link preview for detail view: \(firstURL)")
+                    }
+                }
             }
         }
     }

@@ -22,9 +22,12 @@ struct PostRow: View {
     @State private var showPinAlert = false
     @State private var showUnpinAlert = false
     @State private var isPostMuted = false
+    @State private var generatedLinkPreview: LinkPreviewData? = nil
+    @State private var isGeneratingPreview = false
     
     let saveService = SaveService.shared
     @ObservedObject var adminService = AdminService.shared
+    @ObservedObject private var linkPreviewService = LinkPreviewService.shared
     
     init(post: FetchedPost, onCommentTapped: (() -> Void)? = nil, onPostTapped: (() -> Void)? = nil, onUsernameTapped: ((String, String) -> Void)? = nil, onSubredditTapped: ((String) -> Void)? = nil) {
         self.viewModel = PostRowModel(post: post)
@@ -64,6 +67,7 @@ struct PostRow: View {
         .padding(.vertical, 4)
         .onAppear {
             checkIfPostIsSaved()
+            detectAndGenerateLinkPreview()
         }
     }
     
@@ -525,13 +529,26 @@ struct PostRow: View {
     
     private var postLinkPreview: some View {
         Group {
-            if let linkPreview = viewModel.post.linkPreview {
+            if let linkPreview = viewModel.post.linkPreview ?? generatedLinkPreview {
                 CompactLinkPreviewView(linkPreview: linkPreview) {
                     if let url = URL(string: linkPreview.url) {
                         UIApplication.shared.open(url)
                     }
                 }
                 .padding(.top, 8)
+            } else if isGeneratingPreview {
+                // Show loading state for link preview generation
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .scaleEffect(0.7)
+                    
+                    Text("Generating link preview...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.top, 8)
+                .padding(.bottom, 4)
             }
         }
     }
@@ -752,5 +769,36 @@ struct PostRow: View {
         
         NotificationPreferencesManager.shared.unmutePost(postId)
         isPostMuted = false
+    }
+    
+    // MARK: - Link Preview Generation
+    
+    private func detectAndGenerateLinkPreview() {
+        // Skip if post already has a link preview
+        guard viewModel.post.linkPreview == nil else { return }
+        
+        // Combine title and text to search for URLs
+        let textToSearch = "\(viewModel.post.title) \(viewModel.post.text)"
+        
+        // Extract URLs from the text
+        let urls = linkPreviewService.extractURLs(from: textToSearch)
+        
+        // Generate preview for the first URL found
+        if let firstURL = urls.first {
+            print("🔗 Generating link preview for post: \(firstURL)")
+            isGeneratingPreview = true
+            
+            linkPreviewService.generateLinkPreview(for: firstURL) { preview in
+                DispatchQueue.main.async {
+                    isGeneratingPreview = false
+                    if let preview = preview {
+                        print("✅ Generated link preview: \(preview.title ?? "No title")")
+                        generatedLinkPreview = preview
+                    } else {
+                        print("❌ Failed to generate link preview for: \(firstURL)")
+                    }
+                }
+            }
+        }
     }
 }
