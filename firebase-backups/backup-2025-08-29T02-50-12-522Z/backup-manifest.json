@@ -1,0 +1,13 @@
+{
+  "backupInfo": {
+    "timestamp": "2025-08-29T02-50-12-522Z",
+    "totalCollections": 8,
+    "backupVersion": "1.0"
+  },
+  "instructions": {
+    "restore": "Use restore-firebase.js to restore from this backup",
+    "manual": "Import JSON files manually through Firebase Console if needed"
+  },
+  "backupPath": "firebase-backups/backup-2025-08-29T02-50-12-522Z",
+  "createdAt": "2025-08-29T02:50:13.795Z"
+}

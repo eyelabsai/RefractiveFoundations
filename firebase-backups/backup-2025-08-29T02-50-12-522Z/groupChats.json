@@ -1,0 +1,628 @@
+[
+  {
+    "id": "4D17qUBe6i7gByNce5HC",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756171939,
+        "_nanoseconds": 221989000
+      },
+      "isPrivate": true,
+      "lastMessage": "",
+      "lastMessageTimestamp": {
+        "_seconds": 1756171939,
+        "_nanoseconds": 221995000
+      },
+      "maxMembers": 50,
+      "memberIds": [
+        "0PyhueZivvOtaDifT4CtQ5JaRel2",
+        "5FykdF5xj9T3Bt07tqNk89XGMC32"
+      ],
+      "name": "Trial",
+      "ownerId": "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+      "unreadCounts": {
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 0,
+        "5FykdF5xj9T3Bt07tqNk89XGMC32": 0,
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 0
+      },
+      "deletedAt": {
+        "_seconds": 1756195241,
+        "_nanoseconds": 963965000
+      },
+      "isActive": false,
+      "deletedBy": "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+    },
+    "timestamp": "2025-08-29T02:50:13.707Z"
+  },
+  {
+    "id": "DrpDLx52zNb7oIjj63x0",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756168815,
+        "_nanoseconds": 16731000
+      },
+      "isPrivate": true,
+      "lastMessage": "",
+      "lastMessageTimestamp": {
+        "_seconds": 1756168815,
+        "_nanoseconds": 16788000
+      },
+      "maxMembers": 50,
+      "memberIds": [
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2",
+        "QI3NUkk4wIg0jmIHlX0e8ofN1O33"
+      ],
+      "name": "Trial",
+      "ownerId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "unreadCounts": {
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2": 0,
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0,
+        "QI3NUkk4wIg0jmIHlX0e8ofN1O33": 0
+      },
+      "deletedAt": {
+        "_seconds": 1756170485,
+        "_nanoseconds": 226768000
+      },
+      "isActive": false,
+      "deletedBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+    },
+    "timestamp": "2025-08-29T02:50:13.707Z"
+  },
+  {
+    "id": "FgheDTMZRsCWUp07ELFJ",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756224647,
+        "_nanoseconds": 192133000
+      },
+      "isPrivate": true,
+      "maxMembers": 50,
+      "memberIds": [
+        "5FykdF5xj9T3Bt07tqNk89XGMC32",
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+      ],
+      "name": "Test123",
+      "ownerId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "lastMessage": "Test",
+      "lastMessageTimestamp": {
+        "_seconds": 1756224650,
+        "_nanoseconds": 895000
+      },
+      "lastMessageSenderId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "unreadCounts": {
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0,
+        "5FykdF5xj9T3Bt07tqNk89XGMC32": 1,
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 0
+      },
+      "deletedAt": {
+        "_seconds": 1756224722,
+        "_nanoseconds": 447936000
+      },
+      "isActive": false,
+      "deletedBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "NlUkEmtgBfx4uqYsokwj",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756216268,
+        "_nanoseconds": 512076000
+      },
+      "isPrivate": true,
+      "maxMembers": 50,
+      "memberIds": [
+        "0PyhueZivvOtaDifT4CtQ5JaRel2",
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2"
+      ],
+      "name": "Test group",
+      "ownerId": "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+      "unreadCounts": {
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 0,
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2": 1,
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 1
+      },
+      "lastMessage": "Does this work",
+      "lastMessageTimestamp": {
+        "_seconds": 1756216274,
+        "_nanoseconds": 574799000
+      },
+      "lastMessageSenderId": "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+      "deletedAt": {
+        "_seconds": 1756224693,
+        "_nanoseconds": 707358000
+      },
+      "isActive": false,
+      "deletedBy": "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "PMIpA6I7iwj8iHfq6GKG",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756170117,
+        "_nanoseconds": 777897000
+      },
+      "isPrivate": true,
+      "lastMessage": "",
+      "lastMessageTimestamp": {
+        "_seconds": 1756170117,
+        "_nanoseconds": 777924000
+      },
+      "maxMembers": 50,
+      "memberIds": [
+        "0PyhueZivvOtaDifT4CtQ5JaRel2",
+        "5FykdF5xj9T3Bt07tqNk89XGMC32"
+      ],
+      "name": "Trial1",
+      "ownerId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "unreadCounts": {
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 0,
+        "5FykdF5xj9T3Bt07tqNk89XGMC32": 0,
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0
+      },
+      "deletedAt": {
+        "_seconds": 1756170486,
+        "_nanoseconds": 428704000
+      },
+      "isActive": false,
+      "deletedBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "RJ2AqerkliBVH4lccSNF",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756169965,
+        "_nanoseconds": 370890000
+      },
+      "isPrivate": true,
+      "lastMessage": "",
+      "lastMessageTimestamp": {
+        "_seconds": 1756169965,
+        "_nanoseconds": 370916000
+      },
+      "maxMembers": 50,
+      "memberIds": [
+        "0PyhueZivvOtaDifT4CtQ5JaRel2",
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2"
+      ],
+      "name": "Trial1",
+      "ownerId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "unreadCounts": {
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 0,
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2": 0,
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0
+      },
+      "deletedAt": {
+        "_seconds": 1756170479,
+        "_nanoseconds": 74862000
+      },
+      "isActive": false,
+      "deletedBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "RxWSB8TThcxBFSKzxfxZ",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756221371,
+        "_nanoseconds": 134799000
+      },
+      "isPrivate": true,
+      "maxMembers": 50,
+      "memberIds": [
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+        "0PyhueZivvOtaDifT4CtQ5JaRel2"
+      ],
+      "name": "Test123",
+      "ownerId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "lastMessageSenderId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "lastMessage": "Hello",
+      "lastMessageTimestamp": {
+        "_seconds": 1756222089,
+        "_nanoseconds": 148499000
+      },
+      "unreadCounts": {
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0,
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 2,
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 0
+      },
+      "deletedAt": {
+        "_seconds": 1756224526,
+        "_nanoseconds": 652916000
+      },
+      "isActive": false,
+      "deletedBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "ZDM1p7JuRUdPxfZDtU90",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756224737,
+        "_nanoseconds": 719552000
+      },
+      "isPrivate": true,
+      "maxMembers": 50,
+      "name": "Test1234",
+      "ownerId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "lastMessage": "Yes but no notifications",
+      "lastMessageTimestamp": {
+        "_seconds": 1756225003,
+        "_nanoseconds": 171639000
+      },
+      "lastMessageSenderId": "5FykdF5xj9T3Bt07tqNk89XGMC32",
+      "unreadCounts": {
+        "5FykdF5xj9T3Bt07tqNk89XGMC32": 0,
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0
+      },
+      "memberIds": [
+        "5FykdF5xj9T3Bt07tqNk89XGMC32"
+      ],
+      "deletedAt": {
+        "_seconds": 1756313673,
+        "_nanoseconds": 436560000
+      },
+      "isActive": false,
+      "deletedBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "ZsT4hwnwKoCxp5bpO79f",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756171906,
+        "_nanoseconds": 704960000
+      },
+      "isPrivate": true,
+      "lastMessage": "",
+      "lastMessageTimestamp": {
+        "_seconds": 1756171906,
+        "_nanoseconds": 704988000
+      },
+      "maxMembers": 50,
+      "name": "Trial1",
+      "ownerId": "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+      "unreadCounts": {
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 0
+      },
+      "memberIds": [],
+      "deletedAt": {
+        "_seconds": 1756171921,
+        "_nanoseconds": 601348000
+      },
+      "isActive": false,
+      "deletedBy": "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "aVTCQ5qmZyCr9ZtCnf0w",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756170498,
+        "_nanoseconds": 270524000
+      },
+      "isPrivate": true,
+      "lastMessage": "",
+      "lastMessageTimestamp": {
+        "_seconds": 1756170498,
+        "_nanoseconds": 270531000
+      },
+      "maxMembers": 50,
+      "memberIds": [
+        "0PyhueZivvOtaDifT4CtQ5JaRel2",
+        "5FykdF5xj9T3Bt07tqNk89XGMC32"
+      ],
+      "name": "MG",
+      "ownerId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "unreadCounts": {
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 0,
+        "5FykdF5xj9T3Bt07tqNk89XGMC32": 0,
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0
+      },
+      "deletedAt": {
+        "_seconds": 1756170535,
+        "_nanoseconds": 709748000
+      },
+      "isActive": false,
+      "deletedBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "bHtPk7wCHaR54uGqioZU",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756220912,
+        "_nanoseconds": 641625000
+      },
+      "isPrivate": true,
+      "maxMembers": 50,
+      "memberIds": [
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2"
+      ],
+      "name": "Test123",
+      "ownerId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "unreadCounts": {
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0,
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2": 1,
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 1
+      },
+      "lastMessage": "Hi",
+      "lastMessageTimestamp": {
+        "_seconds": 1756220915,
+        "_nanoseconds": 611537000
+      },
+      "lastMessageSenderId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "deletedAt": {
+        "_seconds": 1756221356,
+        "_nanoseconds": 275984000
+      },
+      "isActive": false,
+      "deletedBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "fAV4lNWkrGPvMG8XsSWI",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756169849,
+        "_nanoseconds": 848706000
+      },
+      "isPrivate": true,
+      "lastMessage": "",
+      "lastMessageTimestamp": {
+        "_seconds": 1756169849,
+        "_nanoseconds": 848739000
+      },
+      "maxMembers": 50,
+      "memberIds": [
+        "0PyhueZivvOtaDifT4CtQ5JaRel2",
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2"
+      ],
+      "name": "Trial",
+      "ownerId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "unreadCounts": {
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 0,
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2": 0,
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0
+      },
+      "deletedAt": {
+        "_seconds": 1756170480,
+        "_nanoseconds": 91114000
+      },
+      "isActive": false,
+      "deletedBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "iDZzfF9OnXGvDgzzNmVe",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756171568,
+        "_nanoseconds": 364120000
+      },
+      "isPrivate": true,
+      "lastMessage": "",
+      "lastMessageTimestamp": {
+        "_seconds": 1756171568,
+        "_nanoseconds": 364161000
+      },
+      "maxMembers": 50,
+      "memberIds": [
+        "0PyhueZivvOtaDifT4CtQ5JaRel2",
+        "5FykdF5xj9T3Bt07tqNk89XGMC32"
+      ],
+      "name": "Trial1",
+      "ownerId": "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+      "unreadCounts": {
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 0,
+        "5FykdF5xj9T3Bt07tqNk89XGMC32": 0,
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 0
+      },
+      "deletedAt": {
+        "_seconds": 1756171590,
+        "_nanoseconds": 196141000
+      },
+      "isActive": false,
+      "deletedBy": "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "mrs6BqeXDsZf1qytFSB1",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756216528,
+        "_nanoseconds": 654919000
+      },
+      "isPrivate": true,
+      "maxMembers": 50,
+      "name": "Group test",
+      "ownerId": "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+      "lastMessage": "Hi",
+      "lastMessageTimestamp": {
+        "_seconds": 1756220882,
+        "_nanoseconds": 48002000
+      },
+      "lastMessageSenderId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "unreadCounts": {
+        "ejHN3BbDkHchQawtO2dLs2ast4r2": 2,
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 1
+      },
+      "memberIds": [
+        "ejHN3BbDkHchQawtO2dLs2ast4r2"
+      ],
+      "deletedAt": {
+        "_seconds": 1756220942,
+        "_nanoseconds": 306127000
+      },
+      "isActive": false,
+      "deletedBy": "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "pAwxPsiZ2flHeXCBJaXR",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756170468,
+        "_nanoseconds": 475018000
+      },
+      "isPrivate": true,
+      "lastMessage": "",
+      "lastMessageTimestamp": {
+        "_seconds": 1756170468,
+        "_nanoseconds": 475036000
+      },
+      "maxMembers": 50,
+      "memberIds": [
+        "0PyhueZivvOtaDifT4CtQ5JaRel2",
+        "5FykdF5xj9T3Bt07tqNk89XGMC32"
+      ],
+      "name": "Trial 1",
+      "ownerId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "unreadCounts": {
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 0,
+        "5FykdF5xj9T3Bt07tqNk89XGMC32": 0,
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0
+      },
+      "deletedAt": {
+        "_seconds": 1756170487,
+        "_nanoseconds": 567551000
+      },
+      "isActive": false,
+      "deletedBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "syrAz67mULiBXdvtALXb",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756169103,
+        "_nanoseconds": 831670000
+      },
+      "isPrivate": true,
+      "lastMessage": "",
+      "lastMessageTimestamp": {
+        "_seconds": 1756169103,
+        "_nanoseconds": 831680000
+      },
+      "maxMembers": 10,
+      "memberIds": [
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2",
+        "0PyhueZivvOtaDifT4CtQ5JaRel2"
+      ],
+      "name": "Trial",
+      "ownerId": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "unreadCounts": {
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 0,
+        "CBhHYPy99dQqAqGHY2hzEf98ERq2": 0,
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0
+      },
+      "deletedAt": {
+        "_seconds": 1756170481,
+        "_nanoseconds": 477570000
+      },
+      "isActive": false,
+      "deletedBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "tbve6eqal5o3kLOfqW9n",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756171203,
+        "_nanoseconds": 170197000
+      },
+      "isPrivate": true,
+      "maxMembers": 50,
+      "memberIds": [
+        "0PyhueZivvOtaDifT4CtQ5JaRel2",
+        "5FykdF5xj9T3Bt07tqNk89XGMC32"
+      ],
+      "name": "Test123",
+      "ownerId": "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+      "unreadCounts": {
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 0,
+        "5FykdF5xj9T3Bt07tqNk89XGMC32": 1,
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 1
+      },
+      "lastMessage": "Hi",
+      "lastMessageTimestamp": {
+        "_seconds": 1756171205,
+        "_nanoseconds": 810070000
+      },
+      "lastMessageSenderId": "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+      "deletedAt": {
+        "_seconds": 1756171525,
+        "_nanoseconds": 262940000
+      },
+      "isActive": false,
+      "deletedBy": "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  },
+  {
+    "id": "vuOREZmSPQXbKUmpKH1z",
+    "data": {
+      "adminIds": [],
+      "createdAt": {
+        "_seconds": 1756171772,
+        "_nanoseconds": 317597000
+      },
+      "isPrivate": true,
+      "lastMessage": "",
+      "lastMessageTimestamp": {
+        "_seconds": 1756171772,
+        "_nanoseconds": 317649000
+      },
+      "maxMembers": 50,
+      "name": "Trial1",
+      "ownerId": "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+      "unreadCounts": {
+        "0PyhueZivvOtaDifT4CtQ5JaRel2": 0,
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 0
+      },
+      "memberIds": [
+        "0PyhueZivvOtaDifT4CtQ5JaRel2"
+      ],
+      "deletedAt": {
+        "_seconds": 1756171827,
+        "_nanoseconds": 680626000
+      },
+      "isActive": false,
+      "deletedBy": "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+    },
+    "timestamp": "2025-08-29T02:50:13.708Z"
+  }
+]

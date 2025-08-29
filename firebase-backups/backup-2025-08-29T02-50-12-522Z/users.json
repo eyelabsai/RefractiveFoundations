@@ -1,0 +1,1917 @@
+[
+  {
+    "id": "0PyhueZivvOtaDifT4CtQ5JaRel2",
+    "data": {
+      "cases": [],
+      "credential": "",
+      "dateJoined": {
+        "_seconds": 1754621892,
+        "_nanoseconds": 182043000
+      },
+      "email": "gv@gmail.com",
+      "exchangeUsername": "gv123",
+      "favoriteLenses": [],
+      "firstName": "G",
+      "lastName": "V",
+      "position": "",
+      "practiceLocation": "",
+      "practiceName": "",
+      "savedPosts": [],
+      "specialty": "Fellow",
+      "state": "",
+      "suffix": "",
+      "uid": "0PyhueZivvOtaDifT4CtQ5JaRel2",
+      "hasCompletedOnboarding": true
+    },
+    "timestamp": "2025-08-29T02:50:12.962Z"
+  },
+  {
+    "id": "0k6qvkqkUtaBLZgsGVrHYsZGHAO2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "lisa.wilson@example.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Wilson Eye Institute",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Lisa",
+      "lastName": "Wilson",
+      "uid": "0k6qvkqkUtaBLZgsGVrHYsZGHAO2",
+      "dateJoined": {
+        "_seconds": 1756127547,
+        "_nanoseconds": 449000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.962Z"
+  },
+  {
+    "id": "1m4ZxIkCZ1bRqvGQbMjf3IHyXy52",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "wblee@mac.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Eye Consultants of Atlanta",
+      "savedPosts": [],
+      "firstName": "Barry",
+      "lastName": "Lee",
+      "uid": "1m4ZxIkCZ1bRqvGQbMjf3IHyXy52",
+      "dateJoined": {
+        "_seconds": 1756161255,
+        "_nanoseconds": 559000000
+      },
+      "hasCompletedOnboarding": true
+    },
+    "timestamp": "2025-08-29T02:50:12.962Z"
+  },
+  {
+    "id": "2mnLKRcwFIUIvRHmMtlHFrhQk6U2",
+    "data": {
+      "cases": [],
+      "credential": "",
+      "dateJoined": {
+        "_seconds": 1754326999,
+        "_nanoseconds": 721560000
+      },
+      "email": "gvirdi@gmail.com",
+      "exchangeUsername": "gvirdi",
+      "favoriteLenses": [],
+      "firstName": "G",
+      "lastName": "V",
+      "position": "",
+      "practiceLocation": "",
+      "practiceName": "",
+      "savedPosts": [],
+      "specialty": "Fellow",
+      "state": "",
+      "suffix": "",
+      "uid": "2mnLKRcwFIUIvRHmMtlHFrhQk6U2",
+      "hasCompletedOnboarding": true,
+      "fcmToken": "frcq4x71U0oerRcFS4RxLq:APA91bERWURz8Kz90RbaFNZoaxH-dkDuBsujMwW5OA9RItUFH1V8s-X-XVI7wdYuHnnAY49HFC7ppEbP-jNpXJ08fSHhsmvEsmhjvQwd1oQ4sz-UunzSZRI",
+      "lastUpdated": {
+        "_seconds": 1755232782,
+        "_nanoseconds": 359112000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.962Z"
+  },
+  {
+    "id": "3BVYBhdmfgXa64LQ2ZFq4Dk2O5D3",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "lkugler@kuglervision.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Kugler Vision",
+      "savedPosts": [],
+      "firstName": "Lance",
+      "lastName": "Kugler",
+      "uid": "3BVYBhdmfgXa64LQ2ZFq4Dk2O5D3",
+      "dateJoined": {
+        "_seconds": 1756161257,
+        "_nanoseconds": 90000000
+      },
+      "fcmToken": "dX-JKS08o0xQn5TiG_N9mw:APA91bFzJUow_IZJALaeetFED70YJkSb1Vg0hPhBliBix-PzFTSxZCH7irZTRRCGxNeRNnukQv6p7ZUZFhEdhZ5Qikd4yphpwoEgWkTrQYfuFhv1OBYcufw",
+      "hasCompletedOnboarding": true,
+      "lastUpdated": {
+        "_seconds": 1756401309,
+        "_nanoseconds": 283128000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.962Z"
+  },
+  {
+    "id": "3XERne5zXAeuF45hejPbdrSRAg13",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "acosta@kuglervision.com",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "suffix": "",
+      "practiceName": "Kugler Vision",
+      "savedPosts": [],
+      "firstName": "Allen",
+      "lastName": "Costa",
+      "uid": "3XERne5zXAeuF45hejPbdrSRAg13",
+      "dateJoined": {
+        "_seconds": 1755556141,
+        "_nanoseconds": 505000000
+      },
+      "fcmToken": "cCFBI5kZc0lRrN6--mhU82:APA91bHRi2WVQ2Www8KyWivNG23r3JQjViV6xJI4CAHeR3U58PCLyaX3bgArBaz7pekbUoV8PpVzffYwyyv_eS0Wherwu1hGIdn3jIQz_p087GaL-H_FyT4",
+      "hasCompletedOnboarding": true,
+      "specialty": "Fellow",
+      "practiceLocation": "Omaha",
+      "lastUpdated": {
+        "_seconds": 1756311222,
+        "_nanoseconds": 93443000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.962Z"
+  },
+  {
+    "id": "3wh5Mcz72zYzxYIQRV06uvcgce43",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "a.shetty@newsomeye.net",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "suffix": "",
+      "practiceName": "Newsom Eye",
+      "savedPosts": [],
+      "firstName": "Akaanksh",
+      "lastName": "Shetty",
+      "uid": "3wh5Mcz72zYzxYIQRV06uvcgce43",
+      "dateJoined": {
+        "_seconds": 1755556143,
+        "_nanoseconds": 437000000
+      },
+      "fcmToken": "eKnUKl0BckbcuwgHdCDVSL:APA91bGbGjIOSt1U1MSezITTyrbihJl_wLrYDrVW0IKJ52guA4bxqibpUzvhyZdgya3lGf7DzpRbBL0yuthNczY2UgPSeGOBks9uZNkg-mTd2i0AIowXGuM",
+      "hasCompletedOnboarding": true,
+      "specialty": "Fellow",
+      "lastUpdated": {
+        "_seconds": 1756311229,
+        "_nanoseconds": 189955000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.962Z"
+  },
+  {
+    "id": "5FykdF5xj9T3Bt07tqNk89XGMC32",
+    "data": {
+      "cases": [],
+      "credential": "",
+      "dateJoined": {
+        "_seconds": 1754596468,
+        "_nanoseconds": 212079000
+      },
+      "email": "matthewhirabayashi@gmail.com",
+      "exchangeUsername": "",
+      "favoriteLenses": [],
+      "position": "",
+      "savedPosts": [],
+      "state": "",
+      "suffix": "",
+      "uid": "5FykdF5xj9T3Bt07tqNk89XGMC32",
+      "hasCompletedOnboarding": true,
+      "firstName": "Matthew",
+      "lastName": "Hirabayashi",
+      "specialty": "Refractive Surgeon",
+      "practiceName": "",
+      "practiceLocation": "",
+      "fcmToken": "dvI-d_jwik5JiYwcKrncvp:APA91bEahe-2Ao7elU8grik8H_oZ9QtetXORs3mB-s9ZYlju482tWBhekKdQulJOZDBHaWMF6jJVYzVqMAyJunyRJzXUAbx-i9vxgYTJJVwB0y4RVGKHl_8",
+      "lastUpdated": {
+        "_seconds": 1756398189,
+        "_nanoseconds": 131958000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.962Z"
+  },
+  {
+    "id": "5dTro7NJVHbag5MzNdbVUNP8yJt2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "karolinnemaia@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "MUSC",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Karolinne",
+      "lastName": "Rocha",
+      "uid": "5dTro7NJVHbag5MzNdbVUNP8yJt2",
+      "dateJoined": {
+        "_seconds": 1756161257,
+        "_nanoseconds": 744000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.962Z"
+  },
+  {
+    "id": "7EHQRPFZlGbTvVkwyNJGPw5qHQB3",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "melki@bostonvision.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Boston Vision",
+      "savedPosts": [],
+      "firstName": "Samir",
+      "lastName": "Melki",
+      "uid": "7EHQRPFZlGbTvVkwyNJGPw5qHQB3",
+      "dateJoined": {
+        "_seconds": 1756073220,
+        "_nanoseconds": 65000000
+      },
+      "hasCompletedOnboarding": true,
+      "fcmToken": "cagaSdCWLkTTg4D6jIOlt7:APA91bETu-AVoGBMxpqin8v36MWyOArKqk1crLj5jNwdTYy4oRkqggg13W4Qo3l5-6-BWpPfTbI32b3xx55Y-tRX4KUM_oCSlB1cNSl3OrtlMIRcCshNsE4",
+      "lastUpdated": {
+        "_seconds": 1756311222,
+        "_nanoseconds": 793328000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.962Z"
+  },
+  {
+    "id": "8BtGZGYYg6XcrA6F5Y1gUPzSaRq1",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "matthew.gregory592@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Hoopes Vision",
+      "savedPosts": [],
+      "firstName": "Matthew",
+      "lastName": "Gregory",
+      "uid": "8BtGZGYYg6XcrA6F5Y1gUPzSaRq1",
+      "dateJoined": {
+        "_seconds": 1755556141,
+        "_nanoseconds": 17000000
+      },
+      "fcmToken": "c2s67ZG0wELKvAT-oVlEVB:APA91bFnjwkVTYQ2eKMEijGY6_ve3Iy6Bcdu8HbMmUaEElNIXXZ5urOyBLlwU3ldEIh8JQgF8-dWZvv4JCQyjWPTevBqHdFrBxz-mdb0KZr56mIjgeo2HeU",
+      "hasCompletedOnboarding": true,
+      "lastUpdated": {
+        "_seconds": 1756406480,
+        "_nanoseconds": 299106000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.962Z"
+  },
+  {
+    "id": "9G91z2U8zCfZGmEDcA71kDklWRJ2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "dkoch@bcm.edu",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Baylor",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Douglas",
+      "lastName": "Koch",
+      "uid": "9G91z2U8zCfZGmEDcA71kDklWRJ2",
+      "dateJoined": {
+        "_seconds": 1756161253,
+        "_nanoseconds": 268000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+    "data": {
+      "cases": [],
+      "credential": "",
+      "dateJoined": {
+        "_seconds": 1755959230,
+        "_nanoseconds": 968924000
+      },
+      "email": "gurpal.virdi@gmail.com",
+      "exchangeUsername": "",
+      "favoriteLenses": [],
+      "position": "",
+      "state": "",
+      "suffix": "",
+      "uid": "DV17W9np8BhGKu5erUz0Ue0KXXl2",
+      "hasCompletedOnboarding": true,
+      "role": "super_admin",
+      "permissions": [
+        "manage_users",
+        "ban_users",
+        "delete_users",
+        "view_user_details",
+        "delete_any_post",
+        "edit_any_post",
+        "pin_posts",
+        "lock_posts",
+        "delete_any_comment",
+        "edit_any_comment",
+        "view_reports",
+        "handle_reports",
+        "view_audit_log",
+        "manage_categories",
+        "system_settings",
+        "view_analytics"
+      ],
+      "isActive": true,
+      "firstName": "Gurpal",
+      "lastName": "Virdi",
+      "practiceName": "",
+      "practiceLocation": "",
+      "specialty": "Resident",
+      "avatarUrl": null,
+      "fcmToken": "dur8snFIGEGUuW3rTHu5Sr:APA91bG8u773V65hK7WOxXliH9wc1lH5GZUkf5IwAx30RK-fnqVl94rH2mgw8Je5kM1LALBQFO6wbGtSRmSpUJDWuQcTzpECSEmp5Al5RvjbYxlGvl9Gm8w",
+      "savedPosts": [
+        "FPmMWssWAchFoASde4BA",
+        "zt8zVmsX6ZRNQcbRXyYE"
+      ],
+      "lastUpdated": {
+        "_seconds": 1756398195,
+        "_nanoseconds": 127568000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "EhVdGWoGRmOYgcA8dccQpvHiHnK2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "walid.sabbah@bostonvision.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Boston Vision",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Walid",
+      "lastName": "Sabbah",
+      "uid": "EhVdGWoGRmOYgcA8dccQpvHiHnK2",
+      "dateJoined": {
+        "_seconds": 1755556137,
+        "_nanoseconds": 911000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "GJ0XbCpaxdb7FWkJfxeMxgCVjrP2",
+    "data": {
+      "cases": [],
+      "credential": "",
+      "dateJoined": {
+        "_seconds": 1755215321,
+        "_nanoseconds": 813724000
+      },
+      "email": "ab123@gmail.com",
+      "exchangeUsername": "ab123",
+      "favoriteLenses": [],
+      "firstName": "AB",
+      "lastName": "AB",
+      "position": "",
+      "practiceLocation": "",
+      "practiceName": "",
+      "savedPosts": [],
+      "specialty": "Fellow",
+      "state": "",
+      "suffix": "",
+      "uid": "GJ0XbCpaxdb7FWkJfxeMxgCVjrP2",
+      "hasCompletedOnboarding": true
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "GeQfz1XB1of75GI1muDVGpy0jex1",
+    "data": {
+      "specialty": "General Ophthalmology",
+      "lastName": "Donnenfeld",
+      "savedPosts": [],
+      "practiceName": "OCLI Vision",
+      "notificationPreferences": {
+        "directMessages": true,
+        "mentions": true,
+        "comments": true,
+        "posts": true
+      },
+      "suffix": "",
+      "exchangeUsername": "",
+      "hasCompletedOnboarding": false,
+      "credential": "",
+      "uid": "GeQfz1XB1of75GI1muDVGpy0jex1",
+      "practiceLocation": "",
+      "email": "ericdonnenfeld@gmail.com",
+      "state": "",
+      "avatarUrl": null,
+      "firstName": "Eric",
+      "favoriteLenses": [],
+      "position": "",
+      "dateJoined": {
+        "_seconds": 1756245527,
+        "_nanoseconds": 131000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "I40RrzCVtmh0sZMddCaxop3EaOj1",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "nataliagmorales1@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Vance Thompson Vision",
+      "savedPosts": [],
+      "firstName": "Natalia",
+      "lastName": "Morales",
+      "uid": "I40RrzCVtmh0sZMddCaxop3EaOj1",
+      "dateJoined": {
+        "_seconds": 1756127563,
+        "_nanoseconds": 981000000
+      },
+      "fcmToken": "fHPaqiZmDEvbr-uRfv3C_i:APA91bHPLPwaA2v7NbLrKDaQvbaqzpDV3_5vOnwxi8dlVSQXn_03vl0kNCsQSNsN3CNx-8VA4FUcZBUtwzrxBIrjI0MRjzqSBNnLkCd8tJ0t0ULE20lT0bA",
+      "hasCompletedOnboarding": true,
+      "lastUpdated": {
+        "_seconds": 1756401317,
+        "_nanoseconds": 99509000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "JTP4QcZZMzQ7JElBawLUCONuRLg1",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "hunter@newsomeye.net",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Newsom Eye",
+      "savedPosts": [],
+      "firstName": "Hunter",
+      "lastName": "Newsom",
+      "uid": "JTP4QcZZMzQ7JElBawLUCONuRLg1",
+      "dateJoined": {
+        "_seconds": 1756161258,
+        "_nanoseconds": 357000000
+      },
+      "fcmToken": "d4I6ki0IIkNSs60ncopDNo:APA91bHgiBQZX7uVLnh3EzyGcrsTR0F5dbCUu4RRndaVf0vLyHkyKtV5_s9mMS_3AfPnNzje0U3bq6U06Jk0lBdtcakVo5UQU2XQZPoTV1z0XRSBGVViHWE",
+      "hasCompletedOnboarding": true,
+      "lastUpdated": {
+        "_seconds": 1756169388,
+        "_nanoseconds": 380093000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "KAPR1v0CAhg39eaRCJpoCuY0eTf1",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "jihyaelee@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Parkhurst NuVision",
+      "savedPosts": [],
+      "firstName": "Ji",
+      "lastName": "Hyae Lee",
+      "uid": "KAPR1v0CAhg39eaRCJpoCuY0eTf1",
+      "dateJoined": {
+        "_seconds": 1755556143,
+        "_nanoseconds": 918000000
+      },
+      "hasCompletedOnboarding": true
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "KkLiEAiHQVh74wsO4vraTKpZysv2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "edackowski@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Berkely Eye",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Evan",
+      "lastName": "Dackowski",
+      "uid": "KkLiEAiHQVh74wsO4vraTKpZysv2",
+      "dateJoined": {
+        "_seconds": 1755556137,
+        "_nanoseconds": 444000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "KyhOIna4cAWEyUSehhNba8jSQV53",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "victorialy@bcm.edu",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Baylor",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Victoria",
+      "lastName": "Ly",
+      "uid": "KyhOIna4cAWEyUSehhNba8jSQV53",
+      "dateJoined": {
+        "_seconds": 1755556136,
+        "_nanoseconds": 452000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "NQSPbejWMNg9vbrC2UOIEsTAV6E2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "morgan.micheletti@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Berkeley Eye",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Morgan",
+      "lastName": "Micheletti",
+      "uid": "NQSPbejWMNg9vbrC2UOIEsTAV6E2",
+      "dateJoined": {
+        "_seconds": 1756161253,
+        "_nanoseconds": 873000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "NaghIt3AsPhKYiJ3iPduxdiElx52",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "jonathansolomonmd@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Solomon Eye",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Jonathan",
+      "lastName": "Solomon",
+      "uid": "NaghIt3AsPhKYiJ3iPduxdiElx52",
+      "dateJoined": {
+        "_seconds": 1756161258,
+        "_nanoseconds": 813000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "NcwGLwRHoJYnaGcJPoXwPhYOpdw1",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "chenhc18@gmail.com",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Williamson Eye Center",
+      "savedPosts": [],
+      "firstName": "Howard",
+      "lastName": "Chen",
+      "uid": "NcwGLwRHoJYnaGcJPoXwPhYOpdw1",
+      "dateJoined": {
+        "_seconds": 1755556145,
+        "_nanoseconds": 494000000
+      },
+      "hasCompletedOnboarding": true,
+      "practiceLocation": "Baton Rouge",
+      "lastUpdated": {
+        "_seconds": 1756311296,
+        "_nanoseconds": 887444000
+      },
+      "fcmToken": "emT6y3tVmk3grYH3mZaXzm:APA91bFS1RP9Uz7mHTym4fpKCmpuJSvTOW6-rhAv32oEAI0WaADmUgV8u3Q7279Rnpex-MaCpd94JnaMReVPjoUwbOY1yEnl_Yt9BdWbgD6KrnctkDDfvIs"
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "OnKz77U9akgsvcib9IIJyHF0gL63",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "michael.davis@example.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Davis Ophthalmology",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Michael",
+      "lastName": "Davis",
+      "uid": "OnKz77U9akgsvcib9IIJyHF0gL63",
+      "dateJoined": {
+        "_seconds": 1756127546,
+        "_nanoseconds": 928000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "Ovg282PJnCTWEGFPDASnBdAljQl1",
+    "data": {
+      "specialty": "General Ophthalmology",
+      "lastName": "Mueller",
+      "savedPosts": [],
+      "practiceName": "Mueller Vision",
+      "notificationPreferences": {
+        "directMessages": true,
+        "mentions": true,
+        "comments": true,
+        "posts": true
+      },
+      "suffix": "",
+      "exchangeUsername": "",
+      "hasCompletedOnboarding": false,
+      "credential": "",
+      "uid": "Ovg282PJnCTWEGFPDASnBdAljQl1",
+      "practiceLocation": "",
+      "email": "muellerbh2@gmail.com",
+      "state": "",
+      "avatarUrl": null,
+      "firstName": "Brett",
+      "favoriteLenses": [],
+      "position": "",
+      "dateJoined": {
+        "_seconds": 1756245525,
+        "_nanoseconds": 734000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "gv@google.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "Refractive Surgeon",
+      "suffix": "",
+      "practiceName": "Wellington Eye Clinic",
+      "savedPosts": [],
+      "firstName": "G",
+      "lastName": "V",
+      "uid": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "dateJoined": {
+        "_seconds": 1755979559,
+        "_nanoseconds": 378000000
+      },
+      "hasCompletedOnboarding": true,
+      "fcmToken": "eFGB5WGaQkxRg7MSy9aXbQ:APA91bFI2OUXHZ7Rdu_kkddtt5sJcmVIevqrV9uQ1HuTRVSwGSOJOcfVYAlRKFgdhEQOw2jrT-egnPmjNkOyiFdbNjLil8d8KRrZhXomXzQF2xA0FqHEnEA",
+      "lastUpdated": {
+        "_seconds": 1756435251,
+        "_nanoseconds": 146989000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "PuKHPW3o06TTJpSXlap2fmqMg5p2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "sarah.johnson@example.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Johnson Vision Clinic",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Sarah",
+      "lastName": "Johnson",
+      "uid": "PuKHPW3o06TTJpSXlap2fmqMg5p2",
+      "dateJoined": {
+        "_seconds": 1756127546,
+        "_nanoseconds": 427000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "QI3NUkk4wIg0jmIHlX0e8ofN1O33",
+    "data": {
+      "cases": [],
+      "credential": "",
+      "dateJoined": {
+        "_seconds": 1754111045,
+        "_nanoseconds": 903964000
+      },
+      "email": "aaron.waite@gmail.com",
+      "exchangeUsername": "aaron.waite",
+      "favoriteLenses": [],
+      "firstName": "Aaron",
+      "lastName": "Waite",
+      "position": "",
+      "practiceLocation": "Lehi",
+      "practiceName": "Waite Vision",
+      "savedPosts": [],
+      "specialty": "Refractive Surgeon",
+      "state": "",
+      "suffix": "",
+      "uid": "QI3NUkk4wIg0jmIHlX0e8ofN1O33",
+      "fcmToken": "ckPeIwlaokvbo_12oEgGOo:APA91bEx8y9k8UUPG-x-v7QuZsiKFbYcaVO8k7Bfty4Itcctxs0JAj5mXvznbFHVofj7H2IWo9xqod0fdtMt70hApp0W38j-wAEuR1fUvQc9G3Pfc6rT9Fw",
+      "hasCompletedOnboarding": true,
+      "lastUpdated": {
+        "_seconds": 1756355442,
+        "_nanoseconds": 745388000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "RyAabAeMsUV1oylscolz7tTFVHs2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "nataliamorales1@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Vance Thompson Vision",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Natalia",
+      "lastName": "Morales",
+      "uid": "RyAabAeMsUV1oylscolz7tTFVHs2",
+      "dateJoined": {
+        "_seconds": 1755556144,
+        "_nanoseconds": 900000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "T2zeUS0eaegClF7yCVjwSV64Sp22",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "christopherschiefer@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Eye Institute of West FL",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Christopher",
+      "lastName": "Schiefer",
+      "uid": "T2zeUS0eaegClF7yCVjwSV64Sp22",
+      "dateJoined": {
+        "_seconds": 1755556140,
+        "_nanoseconds": 442000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "TX41MD8AX7fpuSEM4dGzCrW5FPR2",
+    "data": {
+      "cases": [],
+      "credential": "",
+      "dateJoined": {
+        "_seconds": 1755205776,
+        "_nanoseconds": 540302000
+      },
+      "email": "gregory.parkhurst@gmail.com",
+      "exchangeUsername": "gregparkhurst",
+      "favoriteLenses": [],
+      "firstName": "Greg",
+      "lastName": "Parkhurst",
+      "position": "",
+      "practiceLocation": "san antonio",
+      "practiceName": "parkhurst nuvision",
+      "savedPosts": [],
+      "specialty": "Refractive Surgeon",
+      "state": "",
+      "suffix": "",
+      "uid": "TX41MD8AX7fpuSEM4dGzCrW5FPR2",
+      "hasCompletedOnboarding": true,
+      "fcmToken": "dWpfszfLTEXPoyJaOl0sTh:APA91bGWfbYM-BeSLQlsK5kyfYKPkS2fgE0JZNaXXraJwSUiOSg0dmWJNQk0BawRHfjhCkiuBv_HWAPIf8oEmsfvXxAzACs9_nD3j-NlhdvbPMteQAE5Tmg",
+      "lastUpdated": {
+        "_seconds": 1756136362,
+        "_nanoseconds": 368104000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "UOnkS6YyzdQIvQJHyJKYNsnmKwh1",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "robert.brown@example.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Brown Industries",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Robert",
+      "lastName": "Brown",
+      "uid": "UOnkS6YyzdQIvQJHyJKYNsnmKwh1",
+      "dateJoined": {
+        "_seconds": 1756127547,
+        "_nanoseconds": 917000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "WN44QV9Vu7ZgwDGW4tz76mRQ3yM2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "rjweinstock@yahoo.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Eye Institute of West FL",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Rob",
+      "lastName": "Weinstock",
+      "uid": "WN44QV9Vu7ZgwDGW4tz76mRQ3yM2",
+      "dateJoined": {
+        "_seconds": 1756161256,
+        "_nanoseconds": 124000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "XJY2cxQs0jMsk4wHcwLn0fEO8ge2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "victoriamoreiraf@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "MUSC",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Victoria",
+      "lastName": "Moreira",
+      "uid": "XJY2cxQs0jMsk4wHcwLn0fEO8ge2",
+      "dateJoined": {
+        "_seconds": 1755556141,
+        "_nanoseconds": 959000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "XZkFPGfrn1gNhNePKO2Jlo8HvTu1",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "sbilal-ahmed@uiowa.edu",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Cleveland Eye Clinic",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Bilal",
+      "lastName": "Ahmed",
+      "uid": "XZkFPGfrn1gNhNePKO2Jlo8HvTu1",
+      "dateJoined": {
+        "_seconds": 1755556139,
+        "_nanoseconds": 370000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "YJUUw6HLIzOd8rp6ViGOtJIYGZJ2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "n.swarup@newsomeye.net",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Newsom Eye",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Nikhil",
+      "lastName": "Swarup",
+      "uid": "YJUUw6HLIzOd8rp6ViGOtJIYGZJ2",
+      "dateJoined": {
+        "_seconds": 1755556142,
+        "_nanoseconds": 903000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "ZEC11qGuGzeZo265hTZnC0Be0iH2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "lrebenitsch@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Clear Sight LASIK & Lens",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Luke",
+      "lastName": "Rebentisch",
+      "uid": "ZEC11qGuGzeZo265hTZnC0Be0iH2",
+      "dateJoined": {
+        "_seconds": 1756161254,
+        "_nanoseconds": 546000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "aX1a7w9ZnIbIOqzMvSz1WSONxdk2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "suzannekirk6@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Cleveland Eye Clinic",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Suzanne",
+      "lastName": "Kirk",
+      "uid": "aX1a7w9ZnIbIOqzMvSz1WSONxdk2",
+      "dateJoined": {
+        "_seconds": 1755556138,
+        "_nanoseconds": 880000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "beHYC3BI5GNT8wByJbCZv2rhl6E2",
+    "data": {
+      "cases": [],
+      "credential": "",
+      "dateJoined": {
+        "_seconds": 1754520786,
+        "_nanoseconds": 164967000
+      },
+      "email": "test@gmail.com",
+      "exchangeUsername": "test",
+      "favoriteLenses": [],
+      "firstName": "Test",
+      "lastName": "test",
+      "position": "",
+      "practiceLocation": "",
+      "practiceName": "",
+      "savedPosts": [],
+      "specialty": "Resident",
+      "state": "",
+      "suffix": "",
+      "uid": "beHYC3BI5GNT8wByJbCZv2rhl6E2",
+      "hasCompletedOnboarding": true,
+      "fcmToken": "eFGB5WGaQkxRg7MSy9aXbQ:APA91bFI2OUXHZ7Rdu_kkddtt5sJcmVIevqrV9uQ1HuTRVSwGSOJOcfVYAlRKFgdhEQOw2jrT-egnPmjNkOyiFdbNjLil8d8KRrZhXomXzQF2xA0FqHEnEA",
+      "lastUpdated": {
+        "_seconds": 1756073167,
+        "_nanoseconds": 426612000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "gWg9EfQptOMyrlIkUuUaRCZWYVn2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "lukas.monte.mees@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Clear Sight LASIK & Lens",
+      "savedPosts": [],
+      "firstName": "Lukas",
+      "lastName": "Mees",
+      "uid": "gWg9EfQptOMyrlIkUuUaRCZWYVn2",
+      "dateJoined": {
+        "_seconds": 1755556138,
+        "_nanoseconds": 397000000
+      },
+      "fcmToken": "eQJsfyKftEEWiVjOt-pEjI:APA91bFopxi9oUR_5zhqkk3EW42Mtx_IRSKIkWTH1TBa7O_tmCksQV0hhEHuFrTF-SUhFIKX4mwyPjWiXFqZrtZREC8UTd8yDL6us_d6IUOahu9FrlC4LEk",
+      "hasCompletedOnboarding": true,
+      "lastUpdated": {
+        "_seconds": 1756398557,
+        "_nanoseconds": 285912000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "hhcPzxwL2kcTlu4VZp8RSyMQkbv1",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "cameronmcglone@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "MUSC",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Cameron",
+      "lastName": "McGlone",
+      "uid": "hhcPzxwL2kcTlu4VZp8RSyMQkbv1",
+      "dateJoined": {
+        "_seconds": 1755556142,
+        "_nanoseconds": 464000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "imuwRZcLSIT1tOxD3yLjZMX2pzx2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "benjamin.park@bcm.edu",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "suffix": "",
+      "practiceName": "Baylor",
+      "savedPosts": [],
+      "firstName": "Benjamin",
+      "lastName": "Park",
+      "uid": "imuwRZcLSIT1tOxD3yLjZMX2pzx2",
+      "dateJoined": {
+        "_seconds": 1755556136,
+        "_nanoseconds": 947000000
+      },
+      "hasCompletedOnboarding": true,
+      "specialty": "Fellow",
+      "practiceLocation": "Houston"
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "kgXxQuxJKqU6cc9Jv03cPyHHyDr2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "slaglegrant@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "suffix": "",
+      "practiceName": "Willis Knighton Eye Institute",
+      "savedPosts": [],
+      "firstName": "Grant",
+      "lastName": "Slagle",
+      "uid": "kgXxQuxJKqU6cc9Jv03cPyHHyDr2",
+      "dateJoined": {
+        "_seconds": 1755556145,
+        "_nanoseconds": 980000000
+      },
+      "hasCompletedOnboarding": true,
+      "specialty": "Fellow"
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "kwKGjNa0ETPpGBkxmO7oh7P9tzO2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "jtylerpannell@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Eye Consultants of Atlanta",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Tyler",
+      "lastName": "Pannell",
+      "uid": "kwKGjNa0ETPpGBkxmO7oh7P9tzO2",
+      "dateJoined": {
+        "_seconds": 1755556139,
+        "_nanoseconds": 823000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "lj4rgfRTowQfJtt6eXuls7FzG9g1",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "charlotte.buscombe@wellingtoneyeclinic.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "Fellow",
+      "suffix": "",
+      "practiceName": "Wellington Eye Clinic",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Charlotte",
+      "lastName": "Buscombe",
+      "uid": "lj4rgfRTowQfJtt6eXuls7FzG9g1",
+      "dateJoined": {
+        "_seconds": 1755960530,
+        "_nanoseconds": 350000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "pklGnU86fGO89L9c5dpRDWE9WPX2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "wychetcoleman@gmail.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Willis Knighton Eye Institute",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Wyche",
+      "lastName": "Coleman",
+      "uid": "pklGnU86fGO89L9c5dpRDWE9WPX2",
+      "dateJoined": {
+        "_seconds": 1756161260,
+        "_nanoseconds": 603000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "pvlyOQ2vWehInJFPVpvanXKckdv1",
+    "data": {
+      "cases": [],
+      "credential": "",
+      "dateJoined": {
+        "_seconds": 1755213245,
+        "_nanoseconds": 156476000
+      },
+      "email": "gv123@gmail.com",
+      "exchangeUsername": "gsv123",
+      "favoriteLenses": [],
+      "firstName": "G",
+      "lastName": "v",
+      "position": "",
+      "practiceLocation": "",
+      "practiceName": "",
+      "savedPosts": [],
+      "specialty": "Resident",
+      "state": "",
+      "suffix": "",
+      "uid": "pvlyOQ2vWehInJFPVpvanXKckdv1",
+      "hasCompletedOnboarding": true,
+      "lastUpdated": {
+        "_seconds": 1755230714,
+        "_nanoseconds": 490164000
+      },
+      "fcmToken": "da5e18tDEk1Js75T2Z0TAs:APA91bFNIEFZ9YYueyspdmf-leVZgLqel7de0PFH6BruWKkUamGzYfl2ZkYbBsQAvVrapCn2KxjqM_fHH8HCUHVei6p85RdKXFg7Lqa_iPJqfpL3YxZnH5Q"
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "qCQubOHYePSNw1mA8khgFsQKsX73",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "douglas.brown@som.umaryland.edu",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "suffix": "",
+      "savedPosts": [],
+      "firstName": "Doug",
+      "lastName": "Brown",
+      "uid": "qCQubOHYePSNw1mA8khgFsQKsX73",
+      "dateJoined": {
+        "_seconds": 1755556144,
+        "_nanoseconds": 454000000
+      },
+      "hasCompletedOnboarding": true,
+      "specialty": "Fellow",
+      "practiceName": "Solomon Eye / University of Maryland "
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "qe7sgAYyabY1u0PXRemt7Rb8IsW2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "john.berdahl@vancethompsonvision.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Vance Thompson Vision",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "John",
+      "lastName": "Berdahl",
+      "uid": "qe7sgAYyabY1u0PXRemt7Rb8IsW2",
+      "dateJoined": {
+        "_seconds": 1756161259,
+        "_nanoseconds": 727000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "tVR4hKWn7tM34vW1jxjftAY3v342",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "john.smith@example.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Smith Eye Center",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "John",
+      "lastName": "Smith",
+      "uid": "tVR4hKWn7tM34vW1jxjftAY3v342",
+      "dateJoined": {
+        "_seconds": 1756127545,
+        "_nanoseconds": 829000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "uFLr7z6CQ7XF8K24pgb55K1p2Qh2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "wwiley@midwestvision.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Cleveland Eye Clinic",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Bill",
+      "lastName": "Wiley",
+      "uid": "uFLr7z6CQ7XF8K24pgb55K1p2Qh2",
+      "dateJoined": {
+        "_seconds": 1756161255,
+        "_nanoseconds": 56000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "vyYFRFzcRrMuLJCopxr5UyTo7dn1",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "smian@med.umich.edu",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "University of Michigan",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Shahzad",
+      "lastName": "Mian",
+      "uid": "vyYFRFzcRrMuLJCopxr5UyTo7dn1",
+      "dateJoined": {
+        "_seconds": 1756161259,
+        "_nanoseconds": 278000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "wxqkqFVIIMaNgIJdEAoMM3kfdA03",
+    "data": {
+      "cases": [],
+      "credential": "",
+      "dateJoined": {
+        "_seconds": 1754602167,
+        "_nanoseconds": 178926000
+      },
+      "email": "cpickett2679@gmail.com",
+      "exchangeUsername": "CoryPickett",
+      "favoriteLenses": [],
+      "firstName": "Cory",
+      "lastName": "Pickett",
+      "position": "",
+      "practiceLocation": "",
+      "practiceName": "",
+      "savedPosts": [],
+      "specialty": "Optometrist/APP",
+      "state": "",
+      "suffix": "",
+      "uid": "wxqkqFVIIMaNgIJdEAoMM3kfdA03",
+      "hasCompletedOnboarding": true
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "zAA8HbqqlJfAv0LSzElDmK8NPBM2",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "cornea2020@me.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Hoopes Vision",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Majid",
+      "lastName": "Morshifar",
+      "uid": "zAA8HbqqlJfAv0LSzElDmK8NPBM2",
+      "dateJoined": {
+        "_seconds": 1756161256,
+        "_nanoseconds": 577000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "zJNyEYnfUiZahunH2T15OrpVP0Q2",
+    "data": {
+      "specialty": "General Ophthalmology",
+      "lastName": "Linaburg",
+      "savedPosts": [],
+      "practiceName": "OCLI Vision",
+      "notificationPreferences": {
+        "directMessages": true,
+        "mentions": true,
+        "comments": true,
+        "posts": true
+      },
+      "suffix": "",
+      "exchangeUsername": "",
+      "credential": "",
+      "uid": "zJNyEYnfUiZahunH2T15OrpVP0Q2",
+      "practiceLocation": "",
+      "email": "taylor.j.linaburg@gmail.com",
+      "state": "",
+      "avatarUrl": null,
+      "firstName": "Taylor",
+      "favoriteLenses": [],
+      "position": "",
+      "dateJoined": {
+        "_seconds": 1756245526,
+        "_nanoseconds": 418000000
+      },
+      "fcmToken": "eVOFwBi5wUrNl8_r5Iu7FU:APA91bGXhycXWtAdZATy5YqIOKPwKaeCDkyFeeofxxME1FN7RTagEm2NOfbkwduaMG3BWQAYtEtl5HCALjByta9vbLXqC16z19VgIiveKzvm8_firJaalOE",
+      "hasCompletedOnboarding": true,
+      "lastUpdated": {
+        "_seconds": 1756432422,
+        "_nanoseconds": 493781000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "zJfvduyxrldsyRFfCaFE9lX1uw82",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "blakewilliamson@weceye.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "General Ophthalmology",
+      "suffix": "",
+      "practiceName": "Williamson Eye Center",
+      "savedPosts": [],
+      "hasCompletedOnboarding": false,
+      "firstName": "Blake",
+      "lastName": "Williamson",
+      "uid": "zJfvduyxrldsyRFfCaFE9lX1uw82",
+      "dateJoined": {
+        "_seconds": 1756161260,
+        "_nanoseconds": 169000000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  },
+  {
+    "id": "zUqVPCq9NWNGkSQf7fkwut5fLN22",
+    "data": {
+      "exchangeUsername": "",
+      "state": "",
+      "email": "abc@wellingtoneyeclinic.com",
+      "practiceLocation": "",
+      "position": "",
+      "favoriteLenses": [],
+      "credential": "",
+      "notificationPreferences": {
+        "comments": true,
+        "directMessages": true,
+        "posts": true,
+        "mentions": true
+      },
+      "avatarUrl": null,
+      "specialty": "Refractive Surgeon",
+      "suffix": "",
+      "practiceName": "Wellington Eye Clinic",
+      "savedPosts": [],
+      "firstName": "Arthur",
+      "lastName": "Cummings",
+      "uid": "zUqVPCq9NWNGkSQf7fkwut5fLN22",
+      "dateJoined": {
+        "_seconds": 1755963973,
+        "_nanoseconds": 634000000
+      },
+      "fcmToken": "feIMZzHT1EhMpKVOZMGe2Z:APA91bFlTSM_khjVo0kxBi4JlAw609Vx3yaPuOMD9sTffibRwB3Q89pYVLRqew48VsGSygZNdy85JylN1UOavIMrfvWNHoFSoF5n7WxK-X-Dda9I_fnhEt0",
+      "hasCompletedOnboarding": true,
+      "lastUpdated": {
+        "_seconds": 1756139541,
+        "_nanoseconds": 425317000
+      }
+    },
+    "timestamp": "2025-08-29T02:50:12.963Z"
+  }
+]

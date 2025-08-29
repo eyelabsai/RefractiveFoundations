@@ -1,0 +1,81 @@
+[
+  {
+    "id": "f2sTinUgHJ3IrZg9oxo8",
+    "data": {
+      "createdAt": {
+        "_seconds": 1756219200,
+        "_nanoseconds": 821666000
+      },
+      "createdBy": "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+      "participants": [
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2",
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+      ],
+      "lastMessage": "Hi",
+      "lastMessageTimestamp": {
+        "_seconds": 1756311325,
+        "_nanoseconds": 995519000
+      },
+      "unreadCount": {
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 0,
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2": 0
+      },
+      "deletedFor": [
+        "P9IdxmlHphMJ5nqr856eW5h5lgF2"
+      ]
+    },
+    "timestamp": "2025-08-29T02:50:13.292Z"
+  },
+  {
+    "id": "iKNf8omD5MhPC3GkOylu",
+    "data": {
+      "createdAt": {
+        "_seconds": 1756217587,
+        "_nanoseconds": 382677000
+      },
+      "createdBy": "beHYC3BI5GNT8wByJbCZv2rhl6E2",
+      "participants": [
+        "beHYC3BI5GNT8wByJbCZv2rhl6E2",
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+      ],
+      "lastMessage": "Hey",
+      "lastMessageTimestamp": {
+        "_seconds": 1756219144,
+        "_nanoseconds": 278071000
+      },
+      "unreadCount": {
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 0,
+        "beHYC3BI5GNT8wByJbCZv2rhl6E2": 5
+      },
+      "deletedFor": [
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+      ]
+    },
+    "timestamp": "2025-08-29T02:50:13.292Z"
+  },
+  {
+    "id": "qXDIxXqiGwHJLwa7zk9e",
+    "data": {
+      "createdAt": {
+        "_seconds": 1756222936,
+        "_nanoseconds": 905249000
+      },
+      "createdBy": "5FykdF5xj9T3Bt07tqNk89XGMC32",
+      "participants": [
+        "5FykdF5xj9T3Bt07tqNk89XGMC32",
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2"
+      ],
+      "deletedFor": [],
+      "lastMessage": "I got it",
+      "lastMessageTimestamp": {
+        "_seconds": 1756398377,
+        "_nanoseconds": 951016000
+      },
+      "unreadCount": {
+        "5FykdF5xj9T3Bt07tqNk89XGMC32": 0,
+        "DV17W9np8BhGKu5erUz0Ue0KXXl2": 0
+      }
+    },
+    "timestamp": "2025-08-29T02:50:13.292Z"
+  }
+]
