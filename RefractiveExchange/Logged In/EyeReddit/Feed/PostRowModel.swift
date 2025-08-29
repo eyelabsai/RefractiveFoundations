@@ -19,18 +19,34 @@ class PostRowModel: ObservableObject    {
     @Published var disliked: Bool = false
     
     private var commentsListener: ListenerRegistration?
+    private var authStateListener: AuthStateDidChangeListenerHandle?
     
     let service = PostService()
     
     init(post: FetchedPost)    {
         self.post = post
+        
+        // Listen for auth state changes to update uid
+        authStateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            self?.uid = user?.uid
+            self?.checkLiked() // Recheck liked status when user changes
+        }
+        
         checkLiked()
         fetchComments(post)
     }
     
     func checkLiked()   {
-        self.liked = self.post.upvotes.contains(uid!)
-        self.disliked = self.post.downvotes?.contains(uid!) ?? false
+        guard let uid = uid else {
+            self.liked = false
+            self.disliked = false
+            self.post.didLike = false
+            self.post.didDislike = false
+            return
+        }
+        
+        self.liked = self.post.upvotes.contains(uid)
+        self.disliked = self.post.downvotes?.contains(uid) ?? false
         self.post.didLike = self.liked
         self.post.didDislike = self.disliked
     }
@@ -164,5 +180,10 @@ class PostRowModel: ObservableObject    {
     deinit {
         // Clean up the Firestore listener to prevent memory leaks
         commentsListener?.remove()
+        
+        // Clean up the auth state listener
+        if let authStateListener = authStateListener {
+            Auth.auth().removeStateDidChangeListener(authStateListener)
+        }
     }
 }

@@ -273,6 +273,28 @@ class CreatePostViewHandler {
             print("✅ Post successfully uploaded to Firebase with ID: \(docRef.documentID)")
             print("📝 Post details: Title: '\(post.title)', Subreddit: '\(post.subreddit)', UID: '\(post.uid)'")
             
+            // Parse mentions in the post text and create notifications
+            let mentionParser = MentionParser()
+            let fullPostText = "\(post.title) \(post.text)"
+            
+            mentionParser.parseMentions(in: fullPostText) { parsedMentions in
+                // Create mention notifications for each mentioned user
+                for userId in parsedMentions.userIds {
+                    NotificationService.shared.createMentionNotification(
+                        mentionerId: post.uid,
+                        mentionedUserId: userId,
+                        contentId: docRef.documentID,
+                        contentType: .post,
+                        contentText: fullPostText,
+                        postTitle: post.title
+                    )
+                }
+                
+                if !parsedMentions.userIds.isEmpty {
+                    print("✅ Created mention notifications for \(parsedMentions.userIds.count) users")
+                }
+            }
+            
             // Create new post notification for all users
             NotificationService.shared.createNewPostNotification(
                 postId: docRef.documentID,

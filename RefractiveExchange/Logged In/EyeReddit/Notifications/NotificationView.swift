@@ -38,6 +38,8 @@ struct NotificationView: View {
             }
         case .comments:
             return nonMessageNotifications.filter { $0.notification.type == .postComment }
+        case .mentions:
+            return nonMessageNotifications.filter { $0.notification.type == .mention }
         }
     }
     
@@ -243,6 +245,8 @@ struct NotificationView: View {
             return "No likes yet"
         case .comments:
             return "No comments yet"
+        case .mentions:
+            return "No mentions yet"
         }
     }
     
@@ -256,6 +260,8 @@ struct NotificationView: View {
             return "When people like your posts or comments, you'll see them here"
         case .comments:
             return "When people comment on your posts, you'll see them here"
+        case .mentions:
+            return "When people mention you with @username, you'll see them here"
         }
     }
     
@@ -272,6 +278,8 @@ struct NotificationView: View {
                    (notificationService.notificationCounts.unreadByType[.commentLike] ?? 0)
         case .comments:
             return notificationService.notificationCounts.unreadByType[.postComment] ?? 0
+        case .mentions:
+            return notificationService.notificationCounts.unreadByType[.mention] ?? 0
         }
     }
     
@@ -300,8 +308,18 @@ struct NotificationView: View {
                 print("🔗 Navigate to group chat: \(groupChatId)")
                 // TODO: Implement group chat navigation
             }
-        case .mention, .follow:
-            // Handle other types as needed
+        case .mention:
+            // Handle mention navigation based on whether it's from a post or comment
+            if let postId = notification.metadata?.postId {
+                // Mention in a post - navigate to the post
+                navigateToPost(postId: postId)
+            } else if let commentId = notification.metadata?.commentId, 
+                      let postId = notification.metadata?.postId {
+                // Mention in a comment - navigate to the post with comment highlighted
+                navigateToPost(postId: postId)
+            }
+        case .follow:
+            // Handle follow notifications as needed
             break
         }
     }
@@ -508,6 +526,7 @@ enum NotificationFilter: CaseIterable {
     case unread
     case likes
     case comments
+    case mentions
     
     var title: String {
         switch self {
@@ -515,6 +534,7 @@ enum NotificationFilter: CaseIterable {
         case .unread: return "Unread"
         case .likes: return "Likes"
         case .comments: return "Comments"
+        case .mentions: return "Mentions"
         }
     }
 }

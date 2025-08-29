@@ -372,7 +372,8 @@ struct PostRow: View {
                         text: truncatedText,
                         font: .system(size: 14),
                         color: .primary,
-                        multilineTextAlignment: .leading
+                        multilineTextAlignment: .leading,
+                        onMentionTapped: onUsernameTapped
                     )
                     
                     // Show "edited" indicator if post was edited

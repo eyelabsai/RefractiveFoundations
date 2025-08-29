@@ -50,6 +50,11 @@ struct CreatePostView: View {
     @State private var linkPreview: LinkPreviewData? = nil
     @State private var isLoadingLinkPreview: Bool = false
     
+    // Mention autocomplete states
+    @State private var showingUserSuggestions = false
+    @State private var userSuggestions: [User] = []
+    @State private var mentionParser = MentionParser()
+    
     @ObservedObject private var linkPreviewService = LinkPreviewService.shared
 
     
@@ -166,6 +171,7 @@ struct CreatePostView: View {
                     }
                     .onChange(of: text) { newValue in
                         detectLinksInText(newValue)
+                        checkForMentions(in: newValue)
                     }
                     
                     // Link Preview Section
@@ -198,7 +204,11 @@ struct CreatePostView: View {
                         .padding(.horizontal, 15)
                     }
                     
-
+                    // User suggestions for mentions
+                    if showingUserSuggestions && !userSuggestions.isEmpty {
+                        userSuggestionsView
+                    }
+                    
 
 
 
@@ -422,6 +432,111 @@ struct CreatePostView: View {
                 }
             }
         }
+    }
+    
+    // MARK: - User Suggestions View
+    private var userSuggestionsView: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(userSuggestions, id: \.id) { user in
+                Button(action: {
+                    insertMention(user: user)
+                }) {
+                    HStack {
+                        AsyncImage(url: URL(string: user.avatarUrl ?? "")) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Circle()
+                                .fill(Color.gray.opacity(0.3))
+                        }
+                        .frame(width: 32, height: 32)
+                        .clipShape(Circle())
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(user.firstName) \(user.lastName)")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.primary)
+                            
+                            Text("@\(!user.exchangeUsername.isEmpty ? user.exchangeUsername : "\(user.firstName)\(user.lastName)".replacingOccurrences(of: " ", with: "").lowercased())")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                if user.id != userSuggestions.last?.id {
+                    Divider()
+                }
+            }
+        }
+        .background(Color(.systemBackground))
+        .cornerRadius(8)
+        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .padding(.horizontal, 15)
+    }
+    
+    // MARK: - Mention Functions
+    private func checkForMentions(in text: String) {
+        // Find the last @ symbol and check if we're typing a username
+        guard let lastAtIndex = text.lastIndex(of: "@") else {
+            showingUserSuggestions = false
+            return
+        }
+        
+        let afterAtIndex = text.index(after: lastAtIndex)
+        guard afterAtIndex < text.endIndex else {
+            showingUserSuggestions = false
+            return
+        }
+        
+        let afterAt = text[afterAtIndex...]
+        
+        // Check if there's a space after the @ (if so, we're not in a mention anymore)
+        if afterAt.contains(" ") || afterAt.contains("\n") {
+            showingUserSuggestions = false
+            return
+        }
+        
+        let currentPrefix = String(afterAt)
+        
+        // Only search if we have at least 1 character after @
+        if currentPrefix.count >= 1 {
+            mentionParser.searchUsers(with: currentPrefix) { users in
+                DispatchQueue.main.async {
+                    self.userSuggestions = users
+                    self.showingUserSuggestions = !users.isEmpty
+                }
+            }
+        } else {
+            showingUserSuggestions = false
+        }
+    }
+    
+    private func insertMention(user: User) {
+        // Find the last @ and replace everything after it with the username
+        guard let lastAtIndex = text.lastIndex(of: "@") else { return }
+        
+        let beforeAt = text[..<lastAtIndex]
+        
+        // Use exchangeUsername if available, otherwise create one from first/last name
+        let username: String
+        if !user.exchangeUsername.isEmpty {
+            username = user.exchangeUsername
+        } else {
+            // Create username from first and last name (remove spaces, lowercase)
+            username = "\(user.firstName)\(user.lastName)".replacingOccurrences(of: " ", with: "").lowercased()
+        }
+        
+        let newText = beforeAt + "@\(username) "
+        
+        text = String(newText)
+        showingUserSuggestions = false
     }
 }
 

@@ -24,6 +24,7 @@ struct ProfileView: View {
     @State private var showingEditProfile = false
     @State private var showingDeleteAccountAlert = false
     @State private var showingChangePassword = false
+    @State private var selectedUserProfile: UserProfile?
     
     // Change Password fields
     @State private var currentPassword = ""
@@ -114,6 +115,13 @@ struct ProfileView: View {
                         newPassword = ""
                         confirmPassword = ""
                     }
+                )
+            }
+            .fullScreenCover(item: $selectedUserProfile) { userProfile in
+                PublicProfileView(
+                    username: userProfile.username,
+                    userId: userProfile.userId,
+                    data: data
                 )
             }
         }
@@ -311,7 +319,7 @@ struct ProfileView: View {
                                     // Navigate to post detail
                                 },
                                 onUsernameTapped: { username, userId in
-                                    // Navigate to user profile
+                                    selectedUserProfile = UserProfile(username: username, userId: userId)
                                 }
                             )
                         }
@@ -359,7 +367,7 @@ struct ProfileView: View {
                         CommentRow(
                             comment: comment,
                             onUsernameTapped: { username, userId in
-                                // Navigate to user profile
+                                selectedUserProfile = UserProfile(username: username, userId: userId)
                             }
                         )
                         .background(Color(.systemBackground))
@@ -418,7 +426,7 @@ struct ProfileView: View {
                                     // Navigate to post detail
                                 },
                                 onUsernameTapped: { username, userId in
-                                    // Navigate to user profile
+                                    selectedUserProfile = UserProfile(username: username, userId: userId)
                                 }
                             )
                         }

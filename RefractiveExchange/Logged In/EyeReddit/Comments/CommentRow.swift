@@ -105,7 +105,8 @@ struct CommentRow: View {
                             text: self.viewModel.comment.text,
                             font: .system(size: 14),
                             color: .primary,
-                            multilineTextAlignment: .leading
+                            multilineTextAlignment: .leading,
+                            onMentionTapped: onUsernameTapped
                         )
                         
                         // Show "edited" indicator if comment was edited

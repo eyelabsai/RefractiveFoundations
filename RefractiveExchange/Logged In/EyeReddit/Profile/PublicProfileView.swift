@@ -19,6 +19,7 @@ struct PublicProfileView: View {
     @State private var showingChatView = false
     @State private var otherUser: User?
     @State private var existingConversationId: String = ""
+    @State private var selectedUserProfile: UserProfile?
     
     var body: some View {
         NavigationStack {
@@ -73,6 +74,13 @@ struct PublicProfileView: View {
             if let user = user {
                 otherUser = user
             }
+        }
+        .fullScreenCover(item: $selectedUserProfile) { userProfile in
+            PublicProfileView(
+                username: userProfile.username,
+                userId: userProfile.userId,
+                data: data
+            )
         }
     }
     
@@ -299,9 +307,7 @@ struct PublicProfileView: View {
                                 // Navigate to post detail
                             },
                             onUsernameTapped: { username, userId in
-                                // Navigate to the tapped user's profile
-                                // For now, we'll just dismiss and show the new profile
-                                // In a more complex app, you might want to push to a new view
+                                selectedUserProfile = UserProfile(username: username, userId: userId)
                             }
                         )
                     }
@@ -358,9 +364,7 @@ struct PublicProfileView: View {
                         CommentRow(
                             comment: comment,
                             onUsernameTapped: { username, userId in
-                                // Navigate to the tapped user's profile
-                                // For now, we'll just dismiss and show the new profile
-                                // In a more complex app, you might want to push to a new view
+                                selectedUserProfile = UserProfile(username: username, userId: userId)
                             }
                         )
                         .padding(.horizontal, 16)

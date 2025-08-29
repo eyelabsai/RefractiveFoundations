@@ -11,6 +11,11 @@ import FirebaseFirestore
 import FirebaseAuth
 import Combine
 
+enum MentionContentType {
+    case post
+    case comment
+}
+
 class NotificationService: ObservableObject {
     static let shared = NotificationService()
     
@@ -357,6 +362,54 @@ class NotificationService: ObservableObject {
                 }
                 
                 print("✅ Sent new post notifications to \(userIds.count) users")
+            }
+        }
+    }
+    
+    func createMentionNotification(mentionerId: String, mentionedUserId: String, contentId: String, contentType: MentionContentType, contentText: String, postTitle: String? = nil, postId: String? = nil) {
+        guard mentionerId != mentionedUserId else { return } // Don't notify self
+        
+        fetchUserDetails(userId: mentionerId) { user in
+            let senderName = user != nil ? "\(user!.firstName) \(user!.lastName)" : "Someone"
+            
+            let (title, message) = self.generateMentionTitleAndMessage(
+                senderName: senderName,
+                contentType: contentType,
+                postTitle: postTitle
+            )
+            
+            let metadata = NotificationMetadata(
+                postId: contentType == .post ? contentId : postId,
+                commentId: contentType == .comment ? contentId : nil,
+                senderDisplayName: senderName,
+                senderAvatarUrl: user?.avatarUrl,
+                postTitle: postTitle,
+                commentText: contentType == .comment ? contentText : nil
+            )
+            
+            let notification = AppNotification(
+                recipientId: mentionedUserId,
+                senderId: mentionerId,
+                type: .mention,
+                title: title,
+                message: message,
+                isActionable: true,
+                metadata: metadata
+            )
+            
+            self.saveNotification(notification)
+        }
+    }
+    
+    private func generateMentionTitleAndMessage(senderName: String, contentType: MentionContentType, postTitle: String?) -> (String, String) {
+        switch contentType {
+        case .post:
+            return ("You were mentioned", "\(senderName) mentioned you in a post")
+        case .comment:
+            if let postTitle = postTitle {
+                return ("You were mentioned", "\(senderName) mentioned you in a comment on \"\(postTitle)\"")
+            } else {
+                return ("You were mentioned", "\(senderName) mentioned you in a comment")
             }
         }
     }
