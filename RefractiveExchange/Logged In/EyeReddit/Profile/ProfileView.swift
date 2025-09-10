@@ -8,6 +8,7 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseStorage
 
 struct ProfileView: View {
     @ObservedObject var data: GetData
@@ -1311,6 +1312,11 @@ struct EditProfileView: View {
     @State private var alertMessage = ""
     @State private var showingChangePassword = false
     
+    // Photo upload states
+    @State private var showingImagePicker = false
+    @State private var inputImage: UIImage?
+    @State private var isUploadingPhoto = false
+    
     // Change Password fields
     @State private var currentPassword = ""
     @State private var newPassword = ""
@@ -1330,20 +1336,46 @@ struct EditProfileView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     // Profile Photo Section
                     VStack(spacing: 16) {
-                        Circle()
-                            .fill(Color.blue.opacity(0.2))
-                            .overlay(
+                        ZStack {
+                            Circle()
+                                .fill(Color.blue.opacity(0.2))
+                                .frame(width: 100, height: 100)
+                            
+                            if let user = data.user, let avatarUrl = user.avatarUrl, let url = URL(string: avatarUrl) {
+                                AsyncImage(url: url) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 100, height: 100)
+                                        .clipShape(Circle())
+                                } placeholder: {
+                                    Image(systemName: "person.fill")
+                                        .foregroundColor(.blue)
+                                        .font(.system(size: 32))
+                                }
+                            } else {
                                 Image(systemName: "person.fill")
                                     .foregroundColor(.blue)
                                     .font(.system(size: 32))
-                            )
-                            .frame(width: 100, height: 100)
+                            }
+                            
+                            if isUploadingPhoto {
+                                Circle()
+                                    .fill(Color.black.opacity(0.3))
+                                    .frame(width: 100, height: 100)
+                                
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .scaleEffect(1.2)
+                            }
+                        }
                         
                         Button("Change Photo") {
-                            // TODO: Implement photo picker
+                            showingImagePicker = true
                         }
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.blue)
+                        .disabled(isUploadingPhoto)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 20)
@@ -1574,6 +1606,14 @@ struct EditProfileView: View {
                     }
                 )
             }
+            .sheet(isPresented: $showingImagePicker) {
+                ImagePicker(inputImage: $inputImage)
+            }
+            .onChange(of: inputImage) { newImage in
+                if let newImage = newImage {
+                    uploadProfilePhoto(newImage)
+                }
+            }
         }
     }
     
@@ -1621,6 +1661,94 @@ struct EditProfileView: View {
                 }
             }
         }
+    }
+    
+    private func uploadProfilePhoto(_ image: UIImage) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        isUploadingPhoto = true
+        
+        // Resize image for better performance and storage efficiency
+        let resizedImage = resizeImage(image: image, targetSize: CGSize(width: 800, height: 800)) ?? image
+        
+        guard let imageData = resizedImage.jpegData(compressionQuality: 0.7) else {
+            DispatchQueue.main.async {
+                self.isUploadingPhoto = false
+                self.alertMessage = "Failed to process image"
+                self.showAlert = true
+            }
+            return
+        }
+        
+        let storageRef = Storage.storage().reference()
+        let avatarRef = storageRef.child("avatar_images/\(uid).jpg")
+        
+        avatarRef.putData(imageData, metadata: nil) { metadata, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.isUploadingPhoto = false
+                    self.alertMessage = "Failed to upload photo: \(error.localizedDescription)"
+                    self.showAlert = true
+                }
+                return
+            }
+            
+            avatarRef.downloadURL { url, error in
+                DispatchQueue.main.async {
+                    self.isUploadingPhoto = false
+                    
+                    if let error = error {
+                        self.alertMessage = "Failed to get photo URL: \(error.localizedDescription)"
+                        self.showAlert = true
+                        return
+                    }
+                    
+                    guard let downloadURL = url else {
+                        self.alertMessage = "Failed to get photo URL"
+                        self.showAlert = true
+                        return
+                    }
+                    
+                    // Update user document with new avatar URL
+                    self.updateAvatarUrlInFirestore(downloadURL.absoluteString)
+                }
+            }
+        }
+    }
+    
+    private func updateAvatarUrlInFirestore(_ url: String) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        Firestore.firestore().collection("users").document(uid).updateData(["avatarUrl": url]) { error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.alertMessage = "Failed to update profile photo: \(error.localizedDescription)"
+                    self.showAlert = true
+                } else {
+                    // Update local data
+                    self.data.fetchUser()
+                    self.alertMessage = "Profile photo updated successfully!"
+                    self.showAlert = true
+                }
+            }
+        }
+    }
+    
+    private func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage? {
+        let size = image.size
+        
+        let widthRatio = targetSize.width / size.width
+        let heightRatio = targetSize.height / size.height
+        let ratio = min(widthRatio, heightRatio)
+        let newSize = CGSize(width: size.width * ratio, height: size.height * ratio)
+        let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
+        
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+        image.draw(in: rect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
     }
     
     private func deleteAccountFromSettings() {
